@@ -1,0 +1,90 @@
+#!/usr/bin/python3
+# EASY-INSTALL-ENTRY-SCRIPT: 'pyserial==3.5b0','console_scripts','pyserial-miniterm'
+import os
+import re
+import sys
+import anyio
+from anyio_serial import Serial
+
+import asyncclick as click
+
+from mf.term import Miniterm, key_description
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# default args can be used to override when calling main() from an other script
+# e.g to create a miniterm-my-device.py
+@click.command()
+@click.option("-e", "--echo", is_flag=True, help="enable local echo (default off)")
+@click.option("--encoding", type=str, help="set the encoding for the serial port (e.g. hexlify, Latin1, UTF-8), default: UTF-8)", default="utf-8")
+@click.option("-f", "--filter", type=str, multiple=True, help="add text transformation, default none")
+@click.option("--eol", type=click.Choice(['CR', 'LF', 'CRLF'], case_sensitive=False), help="end of line mode", default="LF")
+@click.option("--raw", is_flag=True, help="Do no apply any encodings/transformations")
+@click.option("--exit-char", type=int, help="Code of special character to exit, default 0x1D, ^]", default=0x1d)
+@click.option("--menu-char", type=int, help="Code of special character to control the terminal, default 0x14, ^T", default=0x14)
+@click.option("-q", "--quiet", is_flag=True, help="suppress non-error messages")
+@click.option("-r", "--reset", is_flag=True, help="Send reset sequence")
+@click.option("-g", "--go-ahead", help="Continuation signal")
+@click.option("-x", "--exec", type=click.Path(), help="run this file")
+@click.option("-l", "--log", type=click.Path(), help="log to this file")
+@click.option("-b", "--batch", is_flag=True, help="don't start a console")
+@click.option("--develop", is_flag=True, help="show Python traceback on error")
+@click.argument("port", nargs=-1)
+async def main(port, echo, encoding, filter, eol, raw, exit_char, menu_char, quiet, develop, reset, go_ahead, exec, batch, log):
+    """Command line tool, entry point"""
+
+    baud=115200
+    if menu_char == exit_char:
+        raise click.UsageError('--exit-char can not be the same as --menu-char')
+    if not 1<=len(port)<=2:
+        raise click.UsageError('You need to specify a port to use')
+    if len(port) > 1:
+        baud=int(port[1])
+    port=port[0]
+
+    if filter:
+        if "help" in filter:
+            print('Available filters:', file=sys.stderr)
+            print('\n'.join(
+                '{:<10} = {.__doc__}'.format(k, v)
+                for k, v in sorted(TRANSFORMATIONS.items())), file=sys.stderr)
+            sys.exit(1)
+        filters = filter
+    else:
+        filters = ['direct']
+
+
+    async with Serial(port, baud) as stream:
+        term = Miniterm(stream=stream, echo=echo, eol=eol.lower(), filters=filters, go_ahead=go_ahead, file=exec, batch=batch, logfile=log)
+        term.exit_character = chr(exit_char)
+        term.menu_character = chr(menu_char)
+        term.raw = raw
+        term.set_rx_encoding(encoding)
+        term.set_tx_encoding(encoding)
+        if reset:
+            stream.rts = True
+            stream.dtr = True
+            await anyio.sleep(0.1)
+            stream.rts = False
+
+        if not quiet:
+            print(f'--- Terminal: {term.name} ---', file=sys.stderr)
+            print('--- Quit: {} | Menu: {} | Help: {} + {} ---'.format(
+                key_description(term.exit_character),
+                key_description(term.menu_character),
+                key_description(term.menu_character),
+                key_description('\x08')), file=sys.stderr)
+
+        try:
+            await term.run()
+        except KeyboardInterrupt:
+            if not quiet:
+                print('\n--- exit ---\n',file=sys.stderr)
+        except Exception as exc:
+            if develop:
+                raise
+            print(f"\nError: {exc !r}", file=sys.stderr)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+if __name__ == '__main__':
+    main(_anyio_backend="trio")
