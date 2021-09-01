@@ -56,7 +56,7 @@ class Miniterm:
     line_buf:str = None
     goahead_buf:str = ""
     goahead_flag:anyio.Event = None
-    goahead_delay:float = 999
+    goahead_delay:float = 0.3
     layer:int = 0 # nested '#if…' statements
     console = None
     log = None
@@ -357,7 +357,7 @@ class Miniterm:
         """Filter lines read from a file.
         """
         line = line.strip()
-        if not line:
+        if line == "" or line == "\\" or line.startswith("\\ "):
             return
         if line.startswith("#include "):
             if self.layer:
@@ -404,9 +404,9 @@ class Miniterm:
 
         if self.layer:
             return
-        i = line.find('\\')
+        i = line.find('\\ ')
         if i > -1:
-            line = line[:i]
+            line = line[:i].strip()
         if not line:
             return
 
@@ -424,7 +424,7 @@ class Miniterm:
                 if not line:
                     continue
                 if self.go_ahead:
-                    await self.chat(line)
+                    await self.chat(line, timeout=True)
                 else:
                     await self.stream.send(self.tx_encoder.encode(line))
                 # sys.stderr.write('.')  # Progress indicator.

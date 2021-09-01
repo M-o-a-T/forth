@@ -24,13 +24,14 @@ from mf.term import Miniterm, key_description
 @click.option("--menu-char", type=int, help="Code of special character to control the terminal, default 0x14, ^T", default=0x14)
 @click.option("-q", "--quiet", is_flag=True, help="suppress non-error messages")
 @click.option("-r", "--reset", is_flag=True, help="Send reset sequence")
+@click.option("-R", "--inv-reset", is_flag=True, help="Is the reset wire inverted?")
 @click.option("-g", "--go-ahead", help="Continuation signal")
 @click.option("-x", "--exec", type=click.Path(), help="run this file")
 @click.option("-l", "--log", type=click.Path(), help="log to this file")
 @click.option("-b", "--batch", is_flag=True, help="don't start a console")
 @click.option("--develop", is_flag=True, help="show Python traceback on error")
 @click.argument("port", nargs=-1)
-async def main(port, echo, encoding, filter, eol, raw, exit_char, menu_char, quiet, develop, reset, go_ahead, exec, batch, log):
+async def main(port, echo, encoding, filter, eol, raw, exit_char, menu_char, quiet, develop, reset, go_ahead, exec, batch, log, inv_reset):
     """Command line tool, entry point"""
 
     baud=115200
@@ -61,11 +62,11 @@ async def main(port, echo, encoding, filter, eol, raw, exit_char, menu_char, qui
         term.raw = raw
         term.set_rx_encoding(encoding)
         term.set_tx_encoding(encoding)
+        stream.dtr = True
         if reset:
-            stream.rts = True
-            stream.dtr = True
+            stream.rts = not inv_reset
             await anyio.sleep(0.1)
-            stream.rts = False
+        stream.rts = bool(inv_reset)
 
         if not quiet:
             print(f'--- Terminal: {term.name} ---', file=sys.stderr)

@@ -1,31 +1,18 @@
-# 
-#ifndef defined
-: defined token ( -- addr ) find drop 0<> ; 
-#endif
-#ifdef dly
-#else
-: dly 3000000 0 do loop ;
+\ This is the master loader.
+\ 
+compiletoflash
+
+\ declare "#if defined X" instead of "#ifdef X" to avoid Forth errors.
+\ We will need that later because the real serial handler won't tolerate any errors.
+
+: defined   ( "token" -- flag ) token find drop 0<> ; 
+: undefined ( "token" -- flag ) token find drop 0=  ; 
+\ delay
+: !dly #100000 0 do loop immediate ;
+
+#if undefined init
+: init ;
 #endif
 
-#if defined foo not
-12345
-#else
-54321
-#endif
-.
-#ifndef defined
-4321
-#else
-1234
-#endif
-.
-#ifdef defined
-123
-#else
-321
-#endif
-.
-
-dly
-42 .
-
+#include vis
+\ #include lib/multitask.fs
