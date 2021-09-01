@@ -56,7 +56,7 @@ async def main(port, echo, encoding, filter, eol, raw, exit_char, menu_char, qui
 
 
     async with Serial(port, baud) as stream:
-        term = Miniterm(stream=stream, echo=echo, eol=eol.lower(), filters=filters, go_ahead=go_ahead, file=exec, batch=batch, logfile=log)
+        term = Miniterm(stream=stream, echo=echo, eol=eol.lower(), filters=filters, go_ahead=go_ahead, file=exec, batch=batch, logfile=log, develop=develop)
         term.exit_character = chr(exit_char)
         term.menu_character = chr(menu_char)
         term.raw = raw

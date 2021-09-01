@@ -62,7 +62,7 @@ class Miniterm:
     log = None
     _data = b""
 
-    def __init__(self, command=None, stream=None, name=None, echo=False, eol='lf', filters=(), go_ahead = None, file=None, batch=None, logfile=None):
+    def __init__(self, command=None, stream=None, name=None, echo=False, eol='lf', filters=(), go_ahead = None, file=None, batch=None, logfile=None, develop=False):
         if bool(command) == bool(stream):
             raise RuntimeError("Specify one of 'command' and 'stream'")
         self.command = command
@@ -80,6 +80,7 @@ class Miniterm:
         self.go_ahead = go_ahead
         self.file = file
         self.logfile = logfile
+        self.develop = develop
         if batch is None:
             batch = not sys.stdin.isatty()
         if not batch:
@@ -104,7 +105,13 @@ class Miniterm:
                 try:
                     if self.file:
                         await anyio.sleep(0.1)
-                        await self.send_file(self.file)
+                        try:
+                            await self.send_file(self.file)
+                        except Exception as e:
+                            if not self.develop:
+                                raise
+                            sys.stderr.write('\n--- ERROR: {} ---\n'.format(e))
+
                         self.file = None
                     if self.console is not None:
                         await self._closing.wait()
