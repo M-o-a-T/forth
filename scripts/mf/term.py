@@ -463,7 +463,9 @@ class Miniterm:
                     anyio.from_thread.run(self.send_file, filename)
                     sys.stderr.write('\n--- File {} sent ---\n'.format(filename))
                 except Exception as e:
-                    sys.stderr.write('\n--- ERROR on file {}: {} ---\n'.format(filename, e))
+                    if not self.develop:
+                        raise
+                    sys.stderr.write(f'\n--- ERROR on file {filename}: {e !r} ---\n')
 
     def change_filter(self):
         """change the i/o transformations"""
