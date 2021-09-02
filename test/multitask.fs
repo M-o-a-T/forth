@@ -3,6 +3,7 @@
 \  Lowpower mode
 \ --------------------------------------------------
 
+#if defined eint
 : up-alone? ( -- ? ) \ Checks if all other tasks are currently in idle state
   next-task @ \ Current task is in UP. Start with the next one.
   begin
@@ -27,12 +28,17 @@ task: lowpower-task
       pause
     again
 ;
+#endif
 
 \ --------------------------------------------------
 \  Examples
 \ --------------------------------------------------
 
-compiletoram eint multitask
+compiletoram
+#if defined eint
+  eint
+#endif
+  multitask
 
 0 variable seconds
 task: timetask
@@ -40,21 +46,28 @@ task: timetask
 : time& ( -- )
   timetask background
     begin
-      key? if boot-task wake then
       1 seconds +!
       seconds @ . cr
+      seconds @ 10 mod 0= if boot-task wake then
       stop
     again
 ;
 
-time& lowpower& tasks
+time&
+#if defined eint
+  lowpower&
+#endif
+  tasks
 
+#if defined irq-systick
 : tick ( -- ) timetask wake ;
 
  ' tick irq-systick !
- 16000000 $E000E014 ! \ How many ticks between interrupts ?
-        7 $E000E010 ! \ Enable the systick interrupt.
+ 8000000 $E000E014 ! \ How many ticks between interrupts ?
+       7 $E000E010 ! \ Enable the systick interrupt.
 
+#delay 12
 stop \ Idle the boot task
-
+#delay 1
  
+#endif
