@@ -4,7 +4,7 @@
 
 \ Configuration:
 
-64 cells constant stackspace \ stack elements for every task
+64 cells constant stackspace \ 64 stack elements for every task
 
 \ Internal stucture of task memory:
 \  0: Pointer to next task
@@ -44,11 +44,11 @@ boot-task variable up \ User Pointer
 : singletask ( -- ) [']  nop    hook-pause ! ;
 
 : task-in-list? ( task -- ? ) \ Checks if a task is currently inside of round-robin list (do not use in IRQ)
-  up @
+  next-task
   begin
     ( Task-Address )
     2dup = if 2drop true exit then
-    @ dup up @ = \ Stop when end of circular list is reached
+    @ dup next-task = \ Stop when end of circular list is reached
   until
   2drop false
 ;
