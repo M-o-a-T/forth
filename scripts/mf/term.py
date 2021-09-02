@@ -375,6 +375,7 @@ class Miniterm:
             return
         if line.startswith("#if "):
             if self.layer:
+                self.layer += 1
                 return
             res = await self.chat(f"{line[4:]} .", timeout=0.1)
             if not int(res.strip()):
