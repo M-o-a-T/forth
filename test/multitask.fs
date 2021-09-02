@@ -53,21 +53,32 @@ task: timetask
     again
 ;
 
+: \st singletask ;
+
 time&
 #if defined eint
   lowpower&
 #endif
   tasks
 
+\st \ we overrun the serial buffer otherwise
+
 #if defined irq-systick
+
 : tick ( -- ) timetask wake ;
 
  ' tick irq-systick !
- 8000000 $E000E014 ! \ How many ticks between interrupts ?
-       7 $E000E010 ! \ Enable the systick interrupt.
+ 800000 $E000E014 ! \ How many ticks between interrupts ? This is 1/10th second
+      7 $E000E010 ! \ Enable the systick interrupt.
 
-#delay 12
+multitask
+
+#delay 1.3
 stop \ Idle the boot task
 #delay 1
+\st
+0 $E000E010 ! \ Disable systick
  
 #endif
+multitask
+dud
