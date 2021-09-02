@@ -57,7 +57,8 @@ class Miniterm:
     goahead_buf:str = ""
     goahead_flag:anyio.Event = None
     goahead_delay:float = 0.3
-    layer:int = 0 # nested '#if…' statements
+    layer:int = 0 # skipped nested '#if…' statements
+    layer_:int = 0 # total nested '#if…' statements
     console = None
     log = None
     _data = b""
@@ -367,6 +368,7 @@ class Miniterm:
         if line == "" or line == "\\" or line.startswith("\\ "):
             return
         if line.startswith("#if "):
+            self.layer_ += 1
             if self.layer:
                 self.layer += 1
                 return
@@ -375,6 +377,7 @@ class Miniterm:
                 self.layer = 1
             return
         if line.startswith("#ifndef "):
+            self.layer_ += 1
             if self.layer:
                 self.layer += 1
                 return
@@ -386,6 +389,7 @@ class Miniterm:
                 self.layer = 1
             return
         if line.startswith("#ifdef "):
+            self.layer_ += 1
             if self.layer:
                 self.layer += 1
                 return
@@ -401,6 +405,11 @@ class Miniterm:
         if line == "#endif":
             if self.layer:
                 self.layer -= 1
+            if self.layer_:
+                self.layer_ -= 1
+            else:
+                self.layer = self.layer_ = 0
+                raise RuntimeError(f"{line[9:]}: '#if…' without corresponding #endif")
             return
 
         if self.layer:
@@ -410,7 +419,12 @@ class Miniterm:
             self.goahead_delay = float(line[7:])
             return
         if line.startswith("#include "):
+            layer_,self.layer_ = self.layer_,0
             await self.send_file(line[9:])
+            if self.layer_:
+                self.layer = self.layer_ = 0
+                raise RuntimeError(f"{line[9:]}: '#if…' without corresponding #endif")
+            self.layer_ = layer_
             return
 
         i = line.find('\\ ')
