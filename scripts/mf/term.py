@@ -366,13 +366,6 @@ class Miniterm:
         line = line.strip()
         if line == "" or line == "\\" or line.startswith("\\ "):
             return
-        if line.startswith("#include "):
-            if self.layer:
-                return
-            await self.send_file(line[9:])
-            if self.layer:
-                raise RuntimeError(f"{line[9:]}: '#if…' without corresponding #endif")
-            return
         if line.startswith("#if "):
             if self.layer:
                 self.layer += 1
@@ -412,6 +405,14 @@ class Miniterm:
 
         if self.layer:
             return
+
+        if line.startswith("#delay "):
+            self.goahead_delay = float(line[7:])
+            return
+        if line.startswith("#include "):
+            await self.send_file(line[9:])
+            return
+
         i = line.find('\\ ')
         if i > -1:
             line = line[:i].strip()
