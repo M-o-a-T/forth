@@ -423,6 +423,8 @@ class Miniterm:
         if self.layer:
             return
 
+        if line == "#end":
+            raise EOFError
         if line.startswith("#delay "):
             self.goahead_delay = float(line[7:])
             return
