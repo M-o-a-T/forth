@@ -474,7 +474,7 @@ class Miniterm:
             if filename:
                 try:
                     anyio.from_thread.run(self.send_file, filename)
-                    sys.stderr.write('\n--- File {} sent ---\n'.format(filename))
+                    sys.stderr.write(f'\n--- File {filename} sent ---\n')
                 except Exception as e:
                     if not self.develop:
                         raise
