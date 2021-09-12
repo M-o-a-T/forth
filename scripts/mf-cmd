@@ -26,7 +26,7 @@ from mf.term import Miniterm, key_description
 @click.option("-x", "--exec", type=click.Path(), help="run this file")
 @click.option("-l", "--log", type=click.Path(), help="log to this file")
 @click.option("-b", "--batch", is_flag=True, help="don't start a console")
-@click.option("--develop", is_flag=True, help="show Python traceback on error")
+@click.option("-D", "--develop", is_flag=True, help="show Python traceback on error")
 @click.argument("command", nargs=-1)
 async def main(command, echo, encoding, filter, eol, raw, exit_char, menu_char, quiet, develop, go_ahead, exec, batch, log):
     """Command line tool, entry point"""
