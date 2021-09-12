@@ -94,6 +94,7 @@ class Miniterm:
         self.reader_task.cancel()
 
     async def run(self):
+        proc = None
         async with anyio.create_task_group() as tg:
             self.tg = tg
             self._closing = anyio.Event()
@@ -120,6 +121,13 @@ class Miniterm:
                 finally:
                     await self.stop()
                     tg.cancel_scope.cancel()
+        if proc is not None and hasattr(proc,"returncode"):
+            if proc.returncode is None:
+                proc.kill()
+            elif proc.returncode < 0:
+                raise RuntimeError(f"SIGNAL {-proc.returncode}")
+            elif proc.returncode > 0:
+                raise RuntimeError(f"EXIT {proc.returncode}")
 
     async def start(self):
         """start worker threads"""
