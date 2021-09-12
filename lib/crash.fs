@@ -5,9 +5,9 @@
 
 0 variable closest-found
 
-: traceinside. ( Address -- )
+: addr>woff ( address -- cstr offset addr | 0 )
   1 bic \ Thumb has LSB of address set.
-  dup flashvar-here u>= if drop exit then \ Flash variables or peripheral registers cannot be resolved this way.
+  dup flashvar-here u>= if drop 0 exit then \ Flash variables or peripheral registers cannot be resolved this way.
   0 closest-found ! \ Address zero (vector table) is more far away than all other addresses
 
   >r
@@ -23,9 +23,20 @@
   until
   drop
 
-  closest-found @ ?dup if dup ." ( " 6 + skipstring dup hex. ." + " r@ swap - hex. ." ) " 6 + ctype then
-  rdrop
+  closest-found @ ?dup if
+    6 + dup skipstring r> over - swap
+  else
+    rdrop 0
+  then
 ;
+
+: .word ( Address -- )
+  addr>woff if swap ctype ?dup if ( len ) [char] + emit base @ swap . base ! then space then
+;
+
+\ : .word ( address -- )
+\   addr>woff if drop ctype space then
+\ ; 
 
 \ Call trace on return stack.
 
@@ -36,20 +47,26 @@
 : ct ( -- )
   cr
   rdepth 0 do
-    i hex. i 2+ rpick dup hex. traceinside. cr
+    i hex. i 2+ rpick dup hex. .word cr
   loop
 ;
+
+#if defined unhandled
 
 : ct-irq ( -- ) \ Try your very best to help tracing unhandled interrupt causes...
   cr cr
   unhandled
   cr
-  h.s
+  \ h.s
+  sp@ ." SP=" hex.
+  rp@ ." RP=" hex.
   cr
-  ." Calltrace:" ct
+  \ ." Calltrace:" ct
   reset \ Trap execution
 ;
 
 : ct-init ['] ct-irq irq-fault ! ;
 : init ct-init init ;
 ct-init
+
+#endif
