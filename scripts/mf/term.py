@@ -450,10 +450,13 @@ class Miniterm:
         async with await anyio.open_file(filename, 'r') as f:
             sys.stderr.write('--- Sending file {} ---\n'.format(filename))
             while True:
-                line = await f.readline()
-                if line == "":
+                try:
+                    line = await f.readline()
+                    if line == "":
+                        break
+                    line = await self.preprocess(line)
+                except EOFError:
                     break
-                line = await self.preprocess(line)
                 if not line:
                     continue
                 if self.go_ahead:
