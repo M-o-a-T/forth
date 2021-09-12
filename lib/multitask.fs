@@ -64,13 +64,13 @@ boot-task variable last-task
 \ 2 is on run-check queue
 \ 3 has ended: cannot be rescheduled
 
-: stop ( -- ) =idle task-state ! pause ;
-\ Stop current task (can be woken up later)
-
 : =idle  0 0-foldable ;  \ wait
 : =sched 1 0-foldable ;  \ schedule
 : =check 2 0-foldable ;  \ check
 : =dead  3 0-foldable ;  \ oww
+
+: stop ( -- ) =idle task-state ! pause ;
+\ Stop current task (can be woken up later)
 
 \ -----------------
 \ Create a new task
