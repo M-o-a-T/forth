@@ -135,6 +135,15 @@ boot-task variable last-task
   (cont) (go)
 ;
 
+: fill ( addr cells -- )
+\ fills a stack, i.e. from the bottom
+  0 ?do
+    1 cells -
+    $deadbeef over !
+  loop
+  drop
+;
+
 : preparetask ( *args N task a-addr -- )
 \ Prepare stacks.
 \ The param stack contains
@@ -150,6 +159,9 @@ boot-task variable last-task
   \ 2: stack: below
   0         r@ 3 cells + ! \ No abort
   ['] false r@ 4 cells + ! \ No handler
+
+  r@ task-sp stackspace fill
+  r@ task-rp stackspace fill
 
   cr
   r@ task-sp ( *args N a-addr SP )
@@ -184,13 +196,25 @@ boot-task variable last-task
 \  Multitasking insight
 \ --------------------------------------------------
 
+: find-beef ( stack-end -- n )
+  stackspace cells -
+  stackspace 0 do
+    dup @ $deadbeef <> if drop
+      i if stackspace i - else -1 then unloop exit
+    then
+    cell+
+  loop
+  drop 0
+;
+
 : .task
-    dup             ." Task: " hex.
+    dup ." Task:" .word-off
     dup 1 cells + @ ." State: " .
-    dup 2 cells + @ ." Stack: " hex.
-    dup 3 cells + @ ." Handler: " hex.
+    dup task-sp find-beef ." S:" .
+    dup task-rp find-beef ." R:" .
     dup .word
-    dup 4 cells + @ ?dup if ." Check: " .word then
+    dup 3 cells + @ ?dup if ." Err:" .word then
+    dup 4 cells + @ ?dup if ." Check:" .word then
     cr drop
 ;
 

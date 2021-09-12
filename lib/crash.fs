@@ -34,9 +34,9 @@
   addr>woff if swap ctype ?dup if ( len ) [char] + emit base @ swap . base ! then space then
 ;
 
-\ : .word ( address -- )
-\   addr>woff if drop ctype space then
-\ ; 
+: .word-off ( address -- )
+  addr>woff if drop ctype space then
+; 
 
 \ Call trace on return stack.
 
