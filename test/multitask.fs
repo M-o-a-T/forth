@@ -3,30 +3,24 @@
 \  Lowpower mode
 \ --------------------------------------------------
 
-#if defined eint
 : up-alone? ( -- ? ) \ Checks if all other tasks are currently in idle state
-  next-task @ \ Current task is in UP. Start with the next one.
-  begin
-    dup up @ <> \ Scan the whole round-robin list until back to current task.
-  while
-    dup 1 cells + @ if drop false exit then \ Check state of this task and exit if it is active
-    @ \ Next task in list
-  repeat
-  drop true
+  this-task @ 0=
 ;
 
+#if defined irq-systick
 : sleep ( -- ) [ $BF30 h, ] inline ; \ WFI Opcode, Wait For Interrupt, enters sleep mode
 
 task: lowpower-task
 
 : lowpower& ( -- )
-  lowpower-task activate
-    begin
-      eint? if \ Only enter sleep mode if interrupts have been enabled
-        dint up-alone? if ."  Sleep " sleep then eint
-      then
-      pause
-    again
+  begin
+    eint? if \ Only enter sleep mode if interrupts have been enabled
+      dint
+      up-alone? if ."  Sleep " sleep then
+      eint
+    then
+    yield
+  again
 ;
 #endif
 
@@ -35,33 +29,34 @@ task: lowpower-task
 \ --------------------------------------------------
 
 compiletoram
-#if defined eint
+#if defined irq-systick
   eint
 #endif
-  multitask
+\  multitask
 
 0 variable seconds
 task: timetask
 
 : time& ( -- )
-  timetask background
-    begin
-      1 seconds +!
-      seconds @ . cr
-      seconds @ 10 mod 0= if boot-task wake then
-      stop
-    again
+  begin
+    1 seconds +!
+    seconds @ . cr
+    seconds @ 10 mod 0= if boot-task wake then
+    stop
+    yield  \ debugging
+  again
 ;
 
 : \st singletask ;
 
-time&
-#if defined eint
-  lowpower&
+timetask run time&
+#if defined irq-systick
+lowpower-task run lowpower&
 #endif
-  tasks
+tasks
 
-\st \ we overrun the serial buffer otherwise
+\st
+\ we overrun the serial buffer otherwise
 
 #if defined irq-systick
 
@@ -69,10 +64,14 @@ time&
 
  ' tick irq-systick !
  800000 $E000E014 ! \ How many ticks between interrupts ? This is 1/10th second
-      7 $E000E010 ! \ Enable the systick interrupt.
+\     7 $E000E010 ! \ Enable the systick interrupt.
 
-multitask
+#endif
+#end
 
+\ multitask
+
+#if defined irq-systick
 #delay 1.3
 stop \ Idle the boot task
 #delay 1
@@ -80,5 +79,4 @@ stop \ Idle the boot task
 0 $E000E010 ! \ Disable systick
  
 #endif
-multitask
-dud
+\ multitask
