@@ -5,14 +5,18 @@
 : u.2 ( u -- ) 0 <# # # #> type ;
 
 : dump16 ( addr -- ) \ Print 16 bytes memory
-  base @ >r hex
-  $F bic
-  dup hex. ." :  "
+  base @ hex swap  ( base addr )
+  dup $F bic swap $F and  ( base addr< addrf )
+  over hex. ." :  "
 
-  dup 16 + over do
-    i c@ u.2 space \ Print data with 2 digits
-    i $F and 7 = if 2 spaces then
-  loop
+  over dup 16 + swap do ( base addr< addrf )
+    i $F and ( base addr f if )
+    dup 8 = if space then
+    over < if 9 spaces else
+    i @ hex.
+    then
+  1 cells +loop
+  drop
 
   ."  | "
 
@@ -22,18 +26,17 @@
       loop
 
   ."  |" cr
-  r> base !
+  base !
 ;
 
 : dump ( addr len -- ) \ Print a memory region
   cr
-  over 15 and if 16 + then \ One more line if not aligned on 16
+  over + swap ( end addr )
   begin
-    swap ( len addr )
     dup dump16
-    16 + ( len addr+16 )
-    swap 16 - ( addr+16 len-16 )
-    dup 0<
+    $f bic
+    $10 + ( end addr+16 )
+    2dup <=
   until
   2drop
 ;
