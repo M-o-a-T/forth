@@ -210,9 +210,10 @@ boot-task variable last-task
 : .task
     dup ." Task:" .word-off
     dup 1 cells + @ ." State: " .
+    dup boot-task <> if
     dup task-sp find-beef ." S:" .
     dup task-rp find-beef ." R:" .
-    dup .word
+    then
     dup 3 cells + @ ?dup if ." Err:" .word then
     dup 4 cells + @ ?dup if ." Check:" .word then
     cr drop
