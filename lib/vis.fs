@@ -26,7 +26,7 @@
 \             2020-05-20 smudge? changed
 \             2020-05-22 wordlist changed  wid? added
 
-\ Wordlists for Mecrisp-Stellaris                                      MM-170504
+\ Wordlists for Mecrisp-Stellaris
 \ ------------------------------------------------------------------------------
 
 \             Copyright (C) 2017-2020 Manfred Mahlow @ forth-ev.de
@@ -45,12 +45,7 @@
 \    Mecrisp-Stellaris  2.3.6-hook-find  or  2.3.8-ra  or a later version with
 \    hook-find.
 
-     ' hook-find drop
-
-\ ** Recommends
-
-\    Terminalprogram: e4thcom -t mecrisp-st -b B115200
-
+' hook-find drop
 
 \ * The Forth Search-Order and three wordlists are added:
 \
@@ -118,9 +113,9 @@
 \
 \ ------------------------------------------------------------------------------
 
-  compiletoflash      \ This extension must be compiled in flash.
+compiletoflash      \ This extension must be compiled in flash.
 
-  hex
+hex
 
 \ An alias for WORD in the Mecrisp Stellaris core.
 : \words ( -- ) words ;
@@ -128,44 +123,41 @@
 
 \ Three wordlists are implemented now, all as members of the forth-wordlist:
 
-   align 0 , here cell+ ,     here constant forth-wordlist
-
-   align 0 , forth-wordlist , here constant inside-wordlist
-
-   align 0 , forth-wordlist , here constant root-wordlist
+align 0 , here cell+ ,     here constant forth-wordlist
+align 0 , forth-wordlist , here constant inside-wordlist
+align 0 , forth-wordlist , here constant root-wordlist
 
 
   forth-wordlist ,
 \ Return a wordlist identifier for a new empty wordlist.
 : wordlist ( -- wid )
-\ align here 0 ,                               MM-200522
   align here [ here @ not literal, ] ,
 ;
 
   inside-wordlist ,
-\ Return true if lfa|wid is the wid of a wordlist.     MM-200522
+\ Return true if lfa|wid is the wid of a wordlist.
 : wid? ( lfa|wid -- f )
   @ [ here @ not literal, ] =
 ;
 
   inside-wordlist ,
 \ lfa of the first word in flash
-  dictionarystart constant _sof_
+\ "dictionarystart" changes after compileroram
+dictionarystart constant _sof_
 
+  inside-wordlist ,
+\ Max number of active word lists
+#6 constant #vocs 
 
 \ We need two buffers for the FORTH search order:
 
   inside-wordlist ,
-  #6 constant #vocs 
-
 \ A buffer for the search order in compiletoflash mode.
+#vocs 1+ cells buffer: c2f-context
+
   inside-wordlist ,
-  #vocs 1+ cells buffer: c2f-context
-
-
 \ A buffer for the search order in compiletoram mode.
-  inside-wordlist ,
-  #vocs 1+ cells buffer: c2r-context
+#vocs 1+ cells buffer: c2r-context
 
   inside-wordlist ,
 \ Return the addr of the actual search order depending on the compile mode.
@@ -175,12 +167,12 @@
 
 
   inside-wordlist ,
-\ Current for the compiletoflash mode.
-  forth-wordlist variable c2f-current
+\ Current for compiletoflash mode.
+forth-wordlist variable c2f-current
 
   inside-wordlist ,
-\ Current for the compiletoram mode.
-  forth-wordlist variable c2r-current
+\ Current for compiletoram mode.
+forth-wordlist variable c2r-current
 
   inside-wordlist ,
 \ Current depending on the compile mode.
@@ -191,17 +183,17 @@
 
   inside-wordlist ,
 \ A buffer to register a context switching request.
-  0 variable _csr_
+0 variable _csr_
 
   inside-wordlist ,
 \ A buffer for some flags in a wordlist tag (wtag).
-  0 variable wflags
+0 variable wflags
 
 
   inside-wordlist ,
 \ A flag, true for searching the dictionary with context switching support,
 \ false for searching the compilation context only without context switching.
-  -1 variable _indic_ 
+-1 variable _indic_ 
 
 
   inside-wordlist ,
@@ -261,7 +253,7 @@
 \ Return true if the word at lfa is smudged.
 : smudged? ( lfa -- flag )
 \ cell+ h@ FFFF <>
-  cell+ h@ [ here @ FFFFFFFF = FFFF and literal, ] <>   \ MM-200520
+  cell+ h@ [ here @ FFFFFFFF = FFFF and literal, ] <>
 ;
 
 \ End of Tools to display wordlists.
@@ -429,16 +421,14 @@
 : abort ( -- ) cr quit ;  \ required for e4thcom error detection
 
 
-inside-wordlist set-current  \ MM-200419
+inside-wordlist set-current
 
 : wlst-init ( -- )
   compiletoflash -1 set-order  compiletoram -1 set-order  \ init both orders
   ['] find-in-dictionary hook-find !
 ;
 
-root-wordlist set-current   \ MM-191228
-
-\ MM-200419   (C) message only on reset
+root-wordlist set-current
 
 \ Finally we have to redefine INIT to set HOOK-FIND to call FIND-IN-DICTIONARY.
 : init ( -- )
@@ -453,14 +443,7 @@ init   \ Init the wordlist extension.
 
 decimal
 
-\ ------------------------------------------------------------------------------
-\ Last Revision: MM-200522 0.8.4 : wordlist changed  wid? added  .wid changed
-\                MM-200520 smudge? changed
-\                MM-200419 0.8.3
-\                          init changed to only display (C) message on reset
-\                MM-200122 Final review of release 0.8.2.
-\
-\                MM-170604 First test implementation (feasibilty test)
+\ Last Revision: MM-200522 0.8.4
 
 \ ------------------------------------------------------------------------------
 \ Implementation Notes:
@@ -527,7 +510,7 @@ decimal
 \  Changelog: 2020-04-19 vis-0.8.2-core.txt --> vis-0.8.3-core.fs
 \             2020-05-22 vis-0.8.4-core.fs  minor changes
 
-\ Source Code Library for Mecrisp-Stellaris                           MM-170628
+\ Source Code Library for Mecrisp-Stellaris
 \ ------------------------------------------------------------------------------
 \              Vocabulary Prefixes ( VOCs ) for Mecrisp-Stellaris
 \
@@ -670,11 +653,6 @@ inside-wordlist set-current
 ;
 
 
-\ Given a VOCs wid return the wid of the parent voc or zero if no voc was
-\ inherited.
-\ : vocnext ( wid1 -- wid2|0 ) [ 2 cells literal, ] - @ ;
-
-\ MM-200103 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 \ Given a vocs wid return the wid of the parent voc or zero if no voc was
 \ inherited. Return 0 if wid is the wid of a wordlist.
   : vocnext ( wid1 -- wid2|0 )
@@ -694,16 +672,12 @@ inside-wordlist set-current
   drop root-wordlist search-in-wordlist
 ;
 
-\ ------- MM-200110 -----------
-
 \ The search-in-order defined in wordlists only searches the top wordlist of
 \ every search order entry. To seach all wordlists except root of every entry
 \ search-in-order must be overwriten as follows:
 
 : search-in-vocs-without-root ( c-addr len a-addr -- lfa|0 )
-\ @     MM-200102  !!!!!!!!!!!!
   begin
-   \ dup .
    >r 2dup r@ search-in-wordlist dup if nip nip r> drop exit then drop
    r> vocnext dup 0= 
   until
@@ -720,9 +694,6 @@ inside-wordlist set-current
   begin
     @ ( c-addr u wid|0 ) dup
   while
-\    >r 2dup r> search-in-wordlist dup      \ old search  MM-200101
-\ -- new search
-    \ dup .id                                                     
     >r 2dup r> dup root-wordlist =
     if \ ."  swl "
       search-in-wordlist
@@ -730,7 +701,7 @@ inside-wordlist set-current
       search-in-vocs-without-root
     then
     dup 
-\ --
+
     if nip nip r> drop exit then drop
     r> cell+ dup >r
   repeat
@@ -744,7 +715,7 @@ inside-wordlist set-current
 \ Note: Based on mecrisps case insensitive non-ANS compare  !!!!!
 : search-in-dictionary ( c-addr len -- lfa|0 )
   _sop_ @ dup context =
-  if   \ ."  in order "  dup @ .id    \ MM-191226
+  if   \ ."  in order "  dup @ .id
     search-in-order
   else  \ ."  in voc "  dup @ .id
     search-in-vocs
@@ -778,17 +749,15 @@ inside-wordlist set-current
 ;
 
 
-\ MM-190721-24
 \ Create a VOC that extends the VOC wid (inherits from VOC wid).
 : voc-extend ( "name" wid -- )
   \ compile the VOCs itag ( the wid of the inherited VOC )
-    align ,
+  align ,
   \ create the VOC as an immediate word
-   2 wflags !  \ set voc-flag in wtag
-   here ( addr of names wtag ) cell+ ( lfa of name )
-\  <builds , postpone immediate    \ MM-191226    
-   <builds , [ ' immediate call, ] 
-    does> dovoc 
+  2 wflags !  \ set voc-flag in wtag
+  here ( addr of names wtag ) cell+ ( lfa of name )
+  <builds , [ ' immediate call, ] 
+  does> dovoc 
 ;
 
 
@@ -809,7 +778,7 @@ root-wordlist set-current   \ Some tools needed in VOC contexts
 
 
 : definitions ( -- ) 
-\ _SOP_ @ @ set-current postpone .. immediate ;      \ MM-191226
+\ _SOP_ @ @ set-current postpone .. immediate ;
   _SOP_ @ @ set-current [ ' .. call, ] immediate ;
 
 
@@ -822,8 +791,6 @@ root-wordlist set-current   \ Some tools needed in VOC contexts
 : first ( -- )
 \ <voc> first overwrite the top of the permanent search order with the top wid
 \ of the current temporary search order.
-\  _sop_ @ @ context ! postpone .. immediate ;       MM-191226
-\  _sop_ @ @ context ! \.. immediate ;               MM-191227
   _sop_ @ @ context !  [ ' .. call, ] immediate ;
 
 
@@ -853,7 +820,6 @@ get-order nip inside-wordlist swap set-order
     align voc-context @ ,
   \ set bit 0 of the wflags in the next created words wtag
     1 wflags !
-\    [ ' .. call, ]  \ MM-200105  MM-200106
 ;
 
 
@@ -862,7 +828,6 @@ get-order nip inside-wordlist swap set-order
 
 
 \ Print the data stack and stay in the current context.
-\  sticky   MM-191228
   : .s ( -- ) .s ;
 
 
@@ -898,10 +863,8 @@ init  \ now vocs can be used.
 
 compiletoflash
 
-: find ( a u -- xt|0 flags )  \ MM-200522
+: find ( a u -- xt|0 flags )
   inside first  search-in-dictionary lfa>xt,flags  forth first ;
-
-\ MM-200521
 
 root definitions  inside first
 
@@ -911,15 +874,15 @@ root definitions  inside first
 
 forth definitions
 
-: ' ( "name" -- xt ) (' lfa>xt ;  \ MM-200522
+: ' ( "name" -- xt ) (' lfa>xt ;
 
 : ['] ( "name" -- ) ' literal, immediate ;
 
 \ postpone needs to be redefined because the core word has an internal tick
 \ dependency, that is not fullfilled, when the new find is used.
 
-: postpone ( "name" -- )   \ MM-191227
-  (' inside lfa>xt,flags dup $10 and if drop call, exit then  \ MM-200519
+: postpone ( "name" -- )
+  (' inside lfa>xt,flags dup $10 and if drop call, exit then
   drop literal, ['] call, call,  immediate
 ;
 
@@ -992,7 +955,7 @@ compiletoram
 \             200522 vis-0.8.4-??.fs  vid redefined  ?wid changed
 \                                     .nid and core? new
 
-\ Source Code Library for Mecrisp-Stellaris                           MM-190718
+\ Source Code Library for Mecrisp-Stellaris
 \ ------------------------------------------------------------------------------
 
   compiletoflash
@@ -1014,8 +977,7 @@ compiletoram
 
 \ Given a words lfa print its name with allVOCabulary prefixes. If it's  a
 \ word from the Stellaris core do not print the prefix forth.
-: .nid ( lfa -- )  \ MM-200522
-\  dup _sof_ @ u>= over forth-wordlist u< and if .id exit then
+: .nid ( lfa -- )
   dup core? if .id exit then
   0 swap
   begin
@@ -1027,7 +989,7 @@ compiletoram
       dup wid?
     then
   until
-  over if dup forth-wordlist = if drop then then  \ no forth prefix  MM-200522
+  over if dup forth-wordlist = if drop then then
   begin
     dup
   while
@@ -1039,32 +1001,21 @@ compiletoram
 \ Given a wid of a VOCabulary print the VOCabulary name, given a wid of a
 \ wordlist print the address.
 
-  forth first definitions  decimal
+root definitions  decimal  inside first
 
-\ Last Revision: MM-200522 vis-0.8.4-??.fs  vid redefined  ?wid changed 
-\                          ?vid removed  .nid new
-\                MM-200108 ?voc-words --> ?words
+: only ( -- )
+  [ root .. voc-context @ literal, forth .. voc-context @ literal, ] 
+  dup 3 set-order  immediate ;
 
-\ vis-0.8.2-also.txt    Source Code Library for Mecrisp-Stellaris      MM-191228
-\ ------------------------------------------------------------------------------
-  compiletoflash
+: also ( -- ) 
+  get-order dup #vocs = if ."  ? search order overflow " abort then
+  over swap 1+ set-order  postpone first  immediate ;
 
-  root definitions  decimal  inside first
+: previous ( -- )
+  get-order dup 1 = if ."  ? search order underflow " abort then
+  nip 1- set-order immediate ;
 
-  : only ( -- )
-    [ root .. voc-context @ literal, forth .. voc-context @ literal, ] 
-    dup 3 set-order  immediate ;
-
-  : also ( -- ) 
-    get-order dup #vocs = if ."  ? search order overflow " abort then
-    over swap 1+ set-order  postpone first  immediate ;
-\   over swap 1+ set-order [ ' first call, ] immediate ;
-
-  : previous ( -- )
-    get-order dup 1 = if ."  ? search order underflow " abort then
-    nip 1- set-order immediate ;
-
-  forth definitions  forth first
+forth definitions  forth first
 
 compiletoram  \ EOF vis-0.8.4-mecrisp-stellaris.fs 
  
