@@ -260,6 +260,7 @@ forth definitions
 \multi definitions
 
 : (abort) ( flag cstr )
+\ runtime for abort"
   swap ?dup if
     swap abortmsg ! throw
   else drop then
@@ -531,12 +532,15 @@ inline ;
 : task-init
   ['] task-end hook-quit !
   idle-task [run] idle
-  \ multitask
+  multitask
 ;
 
 forth definitions
 
 : init init task-init ;
 
-task-init
+task-init singletask
+\ Going back to singletask is temporary: we need to either
+\ get a serial IRQ with input buffer, or teach the terminal
+\ to wait for the echo.
 
