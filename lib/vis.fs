@@ -226,29 +226,6 @@ forth-wordlist variable c2r-current
   dup if dup lfa>xt swap lfa>flags h@ else dup then
 ;
 
-
-\ Tools to display wordlists:
-
-  \voc-wl ,
-: .id ( lfa -- )
-  lfa>nfa count type space
-;
-
-  \voc-wl ,
-: .wid ( lfa|wid -- )
-\ dup @ if ( wid = lfa ) .id else u. then
-  dup wid? if u. else .id then
-;
-
-
-  \voc-wl ,
-\ Print some word header information.
-: .header ( lfa -- )
-  ." lfa: " dup hex. dup ." xt: " lfa>xt hex.    \ print lfa and xt
-  ." name: " lfa>nfa count type space            \ print name
-;
-
-
   \voc-wl ,
 \ Return true if the word at lfa is smudged.
 : smudged? ( lfa -- flag )
@@ -973,32 +950,6 @@ compiletoram
 : core? ( lfa -- f ) \ true if lfa is in the mecrisp core
   _sof_ @ u>= over forth-wordlist u< and
 ;
-
-\ Given a words lfa print its name with allVOCabulary prefixes. If it's  a
-\ word from the Stellaris core do not print the prefix forth.
-: .nid ( lfa -- )
-  dup core? if .id exit then
-  0 swap
-  begin
-    dup lfa>wtag tag>wid
-    dup forth-wordlist =
-    if
-      over dup forth-wordlist u>= swap root-wordlist u<= and if drop then -1
-    else
-      dup wid?
-    then
-  until
-  over if dup forth-wordlist = if drop then then
-  begin
-    dup
-  while
-    .wid     
-  repeat
-  drop
-;
-
-\ Given a wid of a VOCabulary print the VOCabulary name, given a wid of a
-\ wordlist print the address.
 
 root definitions  decimal  \voc first
 
