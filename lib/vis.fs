@@ -783,7 +783,7 @@ root-wordlist set-current   \ Some tools needed in VOC contexts
 
 
 \ Create a VOC that extends (inherits from) the actual VOC context.
- : voc: ( "name" -- )
+: voc: ( "name" -- )
   _sop_ @ CONTEXT = if 0 else VOC-context @ then voc-extend
 ;
 
