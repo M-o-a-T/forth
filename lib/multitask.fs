@@ -192,9 +192,9 @@ boot-task variable last-task
   2 cells - \ Adjust RP for saved loop index+limit
   swap sp+! ( SP ) \ Save the adjusted RP to the param stack
 
-  ." save " dup hex.
+  \ ." save " dup hex.
   r> 2 cells +
-  ." to " dup hex. cr
+  \ ." to " dup hex. cr
   !  \ and finally save SP to task
 ;
 
