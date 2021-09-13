@@ -1,6 +1,5 @@
 \ word lists etc. for vis
 
-compiletoram
 \voc also definitions
 
 : .wtag ( wtag -- ) ." wtag: " hex. ;
