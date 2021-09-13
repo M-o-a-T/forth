@@ -258,93 +258,13 @@
 
 
   inside-wordlist ,
-: .wtag ( wtag -- ) ." wtag: " hex. ;
-
-  inside-wordlist ,
-: .ctag ( ctag -- ) ." ctag: " hex. ;
-
-
-  inside-wordlist ,
 \ Return true if the word at lfa is smudged.
 : smudged? ( lfa -- flag )
 \ cell+ h@ FFFF <>
   cell+ h@ [ here @ FFFFFFFF = FFFF and literal, ] <>   \ MM-200520
 ;
 
-
-  inside-wordlist ,
-\ Show the word at lfa if its a member of the wordlist wid.
-: show-wordlist-item ( lfa wid -- )
-  >r dup forth-wordlist >=   \ tagged word ?
-  if ( lfa )
-    dup lfa>wtag tag>wid r@ =     \ wid(lfa) = wid
-    if ( lfa )
-     \ long version
-       cr dup lfa>wtag dup 1 and if over lfa>ctag .ctag else #15 spaces then
-       .wtag .header
-     \ short
-       \ .id space
-    else
-      drop
-    then
-  else ( lfa )
-   \ long
-     cr #30 spaces .header
-   \ short
-     \ .id space
-  then
-  r> drop
-;
-
-
-  inside-wordlist ,
-: show-wordlist-item ( lfa wid -- )                        \ MM-200520
-  over smudged? if show-wordlist-item else 2drop then
-;
-  
-
-
-  inside-wordlist ,
-: show-wordlist-in-ram ( wid lfa -- )
-  drop ( wid ) >r
-  dictionarystart ( lfa )
-  begin
-    dup _sof_ <>
-  while
-    dup r@ show-wordlist-item
-    dictionarynext if drop _sof_ then
-  repeat
-  r> 2drop ;
-
-
-  inside-wordlist ,
-\ : show-wordlist-in-flash ( wid lfa -- )
-: show-wordlist-in-flash ( wid lfa -- )
-\ List all words of wordlist wid (defined in flash) starting with word at lfa.
-\ lfa must be in flash
-\ forth-wordlist dictionarystart c2f-... lists all forth-wordlist words
-\ forth-wordlist dup             c2f-... lists forth-wordlist words starting
-\                                        with lfa(forth-wordlist)
-\ wid dup                        c2f-... lists all words of wordlist wid
-  swap >r  ( lfa ) ( R: wid )
-  begin ( lfa )
-    dup r@ show-wordlist-item
-    dictionarynext 
-  until
-  r> 2drop
-;
-
-
-  forth-wordlist ,
-\ Show all words of the wordlist wid.
-: show-wordlist ( wid -- )
-  dup forth-wordlist =
-  if dup _sof_ else dup forth-wordlist then show-wordlist-in-flash
-  compiletoram? if 0 show-wordlist-in-ram else drop then
-;
-
 \ End of Tools to display wordlists.
-
 
   inside-wordlist ,
 \ Return true if name of word at lfa equals c-addr,u and word is smudged.
@@ -482,45 +402,6 @@
 
   forth-wordlist ,
 : get-current ( -- wid ) current @ ;
-
-
-  inside-wordlist ,
-: ?words ( wid f -- )
-\ If f = -1 do not list the mecrisp core words.
-\  context @ 
-\  swap if
-   if ( wid )
-    \ Show words in flash starting with FORTH-WORDLIST.
-    dup forth-wordlist
-  else
-    \ Show words in flash starting with the first word in flash.
-\   dup forth-wordlist over = if _sof_ else forth-wordlist then  \ fails MM-200102
-    dup dup forth-wordlist = if _sof_ else forth-wordlist then   \ works
-  then
-  show-wordlist-in-flash
-  dup cr ." << FLASH: " .wid
-  compiletoram?
-  if
-    cr dup ." >> RAM:   " .wid 
-    0 show-wordlist-in-ram
-  else
-     drop
-  then
-;
-
-  forth-wordlist ,
-: words ( -- ) context @ 0 ?words ;
-
-  root-wordlist ,
-  : words ( -- ) words ;
-
-  root-wordlist ,
-\ Display the search order and the compilation context.
-: order ( -- ) 
-  cr ." context: " get-order 0 ?do .wid space loop
-  cr ." current: " current @ .wid
-  ."  compileto" compiletoram? if ." ram" else ." flash" then
-;
 
 
 \ We have to redefine all defining words of the Mecrisp Core to make them add
@@ -1157,84 +1038,6 @@ compiletoram
 
 \ Given a wid of a VOCabulary print the VOCabulary name, given a wid of a
 \ wordlist print the address.
-: .vid ( wid -- )  \ MM-200522
-  tag>wid
-  dup wid? if .wid exit then
-  .nid
-;
-
-root definitions
-
-\ Display the search order, the compilation contex and the compilation mode.
-: order ( -- ) 
-  cr ." context: "
-  _sop_ @ context =
-  if  \ default search order
-    context
-    begin
-      dup @ dup
-    while
-      .vid space cell+
-    repeat
-    2drop
-  else  \ voc search order
-    voc-context @
-    begin
-      dup .vid space vocnext dup 0=         \ MM-200102
-    until
-    drop root-wordlist .wid space
-  then
-  cr ." current: " current @ .vid space
-  ." compileto" compiletoram? if ." ram" else ." flash" then
-;
-
-
- inside definitions
-
-: dashes ( +n -- ) 0 ?do [char] - emit loop ;
-
-: ?words ( wid f -- )
-\ If f = -1 do not list the mecrisp core words.
-  if  ( wid )
-    \ Show words in flash starting with FORTH-WORDLIST.
-    dup forth-wordlist
-  else  ( wid )
-    \ Show words in flash starting with the first word in flash.
-\   dup forth-wordlist over = if _sof_ else forth-wordlist then  \ fails MM-200102
-    dup dup forth-wordlist = if _sof_ else forth-wordlist then   \ works
-  then
-  show-wordlist-in-flash 
-  dup cr ." << FLASH: " .vid
-  compiletoram?
-  if
-    cr dup ." >> RAM:   " .vid
-    0 show-wordlist-in-ram
-    cr 15 dashes
-  else
-     drop
-  then
-;
-
-: \?? ( f -- ) 
-    cr 15 dashes
-    >r _sop_ @ @ ( lfa|wid ) 
-    begin
-      dup r@ ?words \ cr
-      vocnext dup 0=
-    until
-    r> 2drop
-;
-
-  forth definitions
-
-  : words ( -- ) 0 \?? cr ;
-
-  root definitions
-
-  : words ( -- ) words ;
-
-  sticky : ?? ( -- )
-  -1 \?? order ."   base: " base @ dup decimal u. base !  cr 2 spaces .s ;
 
   forth first definitions  decimal
 
@@ -1262,90 +1065,6 @@ root definitions
     nip 1- set-order immediate ;
 
   forth definitions  forth first
-
-\ Last Revision: MM-200122
-
-\ vis-0.8.2-vocs.fs     Source Code Library for Mecrisp-Stellaris     MM-191228
-\ ------------------------------------------------------------------------------
-
-inside first definitions  decimal
-
-: ?voc ( lfa --) dup lfa>wtag 3 and 2 =  if space space .vid else drop then ;
-
-forth definitions
-
-\ Show all the VOCs that are actually defined in the dictionary.
-: vocs ( -- )
-  cr ." FLASH: "   \ show VOCs defined in FLASH
-  forth-wordlist
-  begin
-    dup ?voc dictionarynext
-  until
-  drop
-  compiletoram?
-  if
-    cr ."   RAM: "   \ show VOCs define in RAM
-    dictionarystart ( lfa )
-    begin
-      dup _sof_ <>
-    while
-      dup ?voc dictionarynext if drop _sof_ then
-    repeat
-    drop
-  then
-  space
-;
-
-forth first
-
-\ Last Revision: MM-200522 minor edit
-
-\ vis-0.8.3-items.fs    Source Code Library for Mecrisp-Stellaris     MM-191228
-\ ------------------------------------------------------------------------------
-
-  compiletoflash
-
-  inside first definitions  decimal
-
-: ?item ( lfa --) dup lfa>wtag 3 and 1 = 
-   if
-      3 spaces
-      dup lfa>ctag dup 1 = if drop ." sticky " else tag>wid .vid then 
-      $08 emit ." : " .vid
-   else
-     drop
-   then ;
-
-
-  forth definitions
-
-\ Show all context switching items which are actually defined in the dictionary.
-: items ( -- )
-  cr ." FLASH:"  \ show items defined in FLASH
-  forth-wordlist
-  begin
-    dup ?item
-    dictionarynext
-  until
-  drop
-  compiletoram?
-  if
-    cr ."   RAM:"  \ show items defined in RAM
-    dictionarystart ( lfa )
-    begin
-      dup _sof_ <>
-    while
-      dup ?item
-      dictionarynext if drop _sof_ then
-    repeat
-    drop 
-  then
-  space
-;
-
-  forth first
-
-\ Last Revision: MM-200522 ?vid --> .vid
 
 compiletoram  \ EOF vis-0.8.4-mecrisp-stellaris.fs 
  
