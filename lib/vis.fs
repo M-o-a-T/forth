@@ -717,11 +717,11 @@ get-order nip \voc-wl swap set-order
 ;
 
 : (dovoc ( wid -- )
-  _csr_ ! _?csr_ 1 _csr_ !   \ 190724
+  _csr_ ! _?csr_ 1 _csr_ !
 ;
 
 : dovoc ( a -- )
-  @ (dovoc                   \ 190724
+  @ (dovoc
 ;
 
 
