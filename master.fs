@@ -2,7 +2,7 @@
 \ It should be written to be idempotent.
 \ 
 
-#if token voc find drop 0=
+#if token vis find drop 0=
 \ We need to load the "vis" extension first, (a) because it doesn't upcall
 \ 'init', second because currently (2021-09) there's a bug in Mecrisp(?)
 \ that prevents it from working when it's not loaded first.
@@ -10,7 +10,7 @@
 #endif
 
 #if token defined find drop 0=
-\ We want to use "#if defined X" instead of the dance from above.
+\ We want to use "#if defined X" instead of this dance.
 
 : defined   ( "token" -- flag ) token find drop 0<> ; 
 : undefined ( "token" -- flag ) defined not ;
