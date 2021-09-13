@@ -25,6 +25,9 @@
 \ Parameter stack space: @stackspace cells
 \ Return stack space: @stackspace cells
 
+forth definitions decimal
+voc: \multi  \multi also definitions
+
 #if undefined eint
 \ if running on Linux …
 : eint inline ;
@@ -51,6 +54,8 @@ boot-task variable up  \ User Pointer
 
 boot-task variable last-task
 
+\multi definitions
+
 0 variable irq-task  \ list of waiting tasks
 
 \ these point to the word *after* a task's stack
@@ -75,6 +80,7 @@ boot-task variable last-task
 : =check 2 0-foldable ;  \ check
 : =dead  3 0-foldable ;  \ oww
 
+forth definitions
 : stop ( -- ) =idle task-state ! pause ;
 \ Stop current task (can be woken up later)
 
@@ -84,6 +90,8 @@ boot-task variable last-task
 
 : task: ( "name" -- )  stackspace 2* taskvars + cells  buffer: ;
 \ two stacks
+
+\multi definitions
 
 0 variable abortmsg
 
@@ -119,6 +127,8 @@ boot-task variable last-task
   task-end
 ;
 
+forth definitions
+
 : catch ( x1 .. xn xt -- y1 .. yn throwcode / z1 .. zm 0 )
     [ $B430 h, ]  \ push { r4  r5 } to save I and I'
     sp@ >r handler @ >r rp@ handler !
@@ -128,6 +138,8 @@ boot-task variable last-task
     r> handler !  rdrop  unloop 
     0  \ no error
 ;
+
+\multi definitions
 
 : (cont) r> ;
 
@@ -149,6 +161,8 @@ boot-task variable last-task
   loop
   drop
 ;
+
+forth definitions
 
 : preparetask ( *args N task a-addr -- )
 \ Prepare stacks.
@@ -202,6 +216,8 @@ boot-task variable last-task
 \  Multitasking insight
 \ --------------------------------------------------
 
+\multi definitions
+
 : find-beef ( stack-end -- n )
   stackspace cells -
   stackspace 0 do
@@ -216,6 +232,8 @@ boot-task variable last-task
 \ --------------------------------------------------
 \  Exception handling
 \ --------------------------------------------------
+
+forth definitions
 
 : throw ( throwcode -- )
 \ Throw an error code.
@@ -236,12 +254,19 @@ boot-task variable last-task
   -1 throw
 ;
 
+\multi definitions
+
 : (abort) ( flag cstr )
   swap ?dup if
     swap abortmsg ! throw
   else drop then
 ;
+
+forth definitions
+
 : abort" postpone c" ['] (abort) call, immediate ;
+
+\multi definitions
 
 : (chk-unqueued) ( task -- )
 \ check that task is not queued
@@ -336,6 +361,8 @@ boot-task variable last-task
   ['] =idle 4 cells + !
 ;
 
+forth definitions
+
 : yield   ( stacks may fly around )
 \ hooked to "pause" when multitasking
   this-task @ 0= if
@@ -416,6 +443,8 @@ boot-task variable last-task
   dup >r ' preparetask r> wake
 ;
 
+\multi definitions
+
 : (*run) ( *args n task a-addr )
   over >r  preparetask  r> wake
 ;
@@ -423,6 +452,8 @@ boot-task variable last-task
 : (run) ( task a-addr )
   0 -rot (*run)
 ;
+
+forth definitions
 
 : [run]
   ' literal, ['] (run) call,
@@ -464,6 +495,7 @@ immediate ;
 \ This task checks whether anything else in the system is running, or wants
 \ to run. Otherwise it sleeps, to conserve (some) power.
 
+\multi definitions
 
 #if defined irq-systick
 : sleep ( c -- c ) [ $BF30 h, ] inline ; \ WFI Opcode, Wait For Interrupt, enters sleep mode
@@ -498,6 +530,8 @@ inline ;
   idle-task [run] idle
   \ multitask
 ;
+
+forth definitions
 
 : init init task-init ;
 
