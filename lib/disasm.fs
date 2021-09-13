@@ -15,13 +15,13 @@
 
 \ Partial ARM Cortex M3/M4 Disassembler, Copyright (C) 2013  Matthias Koch
 \ This is free software under GNU General Public License v3.
-\ Knows all M0 and some M3/M4 machine instructions, 
+\ Knows all M0 and some M3/M4 machine instructions,
 \ resolves call entry points, literal pools and handles inline strings.
 \ Usage: Specify your target address in disasm-$ and give disasm-step some calls.
 
 FORTH DEFINITIONS  DECIMAL
 
-voc \disasm   \disasm also definitions 
+voc \disasm   \disasm also definitions
 
 \ ---------------------------------------
 \  Memory pointer and instruction fetch
@@ -34,7 +34,7 @@ voc \disasm   \disasm also definitions
   2 disasm-$ +!   ;
 
 \ --------------------------------------------------
-\  Try to find address as code start in Dictionary 
+\  Try to find address as code start in Dictionary
 \ --------------------------------------------------
 
 : disasm-string ( -- ) \ Takes care of an inline string
@@ -52,7 +52,7 @@ voc \disasm   \disasm also definitions
     dictionarynext
   until
   drop
-  r> 
+  r>
 
   case \ Check for inline strings ! They are introduced by calls to ." or s" internals.
     ['] ." $1E + of ."   -->  .' " disasm-string ." '" endof \ It is ." runtime ?
@@ -72,11 +72,11 @@ voc \disasm   \disasm also definitions
 : addr. u.8 ;
 
 : register. ( u -- )
-  case 
+  case
     13 of ."  sp" endof
     14 of ."  lr" endof
     15 of ."  pc" endof
-    dup ."  r" decimal u.ns hex 
+    dup ."  r" decimal u.ns hex
   endcase ;
 
 \ ----------------------------------------
@@ -115,17 +115,17 @@ voc \disasm   \disasm also definitions
     $1 of ." ne" endof  \ Z clear
     $2 of ." cs" endof  \ C set
     $3 of ." cc" endof  \ C clear
-                       
+
     $4 of ." mi" endof  \ N set
     $5 of ." pl" endof  \ N clear
     $6 of ." vs" endof  \ V set
     $7 of ." vc" endof  \ V clear
-                       
+
     $8 of ." hi" endof  \ C set Z clear
     $9 of ." ls" endof  \ C clear or Z set
     $A of ." ge" endof  \ N == V
     $B of ." lt" endof  \ N != V
-                       
+
     $C of ." gt" endof  \ Z==0 and N == V
     $D of ." le" endof  \ Z==1 or N != V
   endcase
@@ -175,7 +175,7 @@ voc \disasm   \disasm also definitions
                                 16 rshift $7FF and ( Opcode DestinationL DestinationH )
                                 dup $400 and if $FFFFF800 or then ( Opcode DestinationL DestinationHsigned )
                                 11 lshift or ( Opcode Destination )
-                                shl 
+                                shl
                                 disasm-$ @ +
                                 dup addr. name. \ Try to resolve destination
                               then
@@ -205,7 +205,7 @@ voc \disasm   \disasm also definitions
                                                    then
                               then
 
-  \ 
+  \
   \ 1111 0i0x xxxs nnnn 0iii dddd iiii iiii
   \ F    0    0    0    0    0    0    0
   \ F    A    0    0    8    0    0    0
@@ -276,31 +276,31 @@ $D000 $F000 opcode? not if else dup $0F00 and 8 rshift       \ B(1) conditional 
                          $01 of ." bne" endof  \ Z clear
                          $02 of ." bcs" endof  \ C set
                          $03 of ." bcc" endof  \ C clear
-                       
+
                          $04 of ." bmi" endof  \ N set
                          $05 of ." bpl" endof  \ N clear
                          $06 of ." bvs" endof  \ V set
                          $07 of ." bvc" endof  \ V clear
-                       
+
                          $08 of ." bhi" endof  \ C set Z clear
                          $09 of ." bls" endof  \ C clear or Z set
                          $0A of ." bge" endof  \ N == V
                          $0B of ." blt" endof  \ N != V
-                       
+
                          $0C of ." bgt" endof  \ Z==0 and N == V
                          $0D of ." ble" endof  \ Z==1 or N != V
-                         \ $0E: Undefined Instruction
-                         \ $0F: SWI                       
+                         $0E of ." UNDEF" endof  \ Undefined Instruction
+                         $0F of ." swi"  0 imm8.   drop exit endof
                        endcase
                        space
                        dup $FF and dup $80 and if $FFFFFF00 or then
-                       shl disasm-$ @ 1 bic + 2 + addr. 
+                       shl disasm-$ @ 1 bic + 2 + addr.
                     then
 
 $E000 $F800 opcode? if ." b"                                 \ B(2) unconditional branch
                       dup $7FF and shl
                       dup $800 and if $FFFFF000 or then
-                      disasm-$ @ + 2+                     
+                      disasm-$ @ + 2+
                       space addr.
                     then
 
@@ -461,7 +461,8 @@ drop \ Forget opcode
 
   ROOT DEFINITIONS
 
-: seec ( -- ) \ Continues to see
+: seec ( addr -- ) \ Disassemble starting at this address
+  disasm-$ !
   base @ hex cr
 
   begin
@@ -476,8 +477,7 @@ drop \ Forget opcode
 
 sticky
 : see ( -- ) \ Takes name of definition and shows its contents from beginning to first ret
-  ' disasm-$ !
-  seec
+  ' seec
 ;
 
 FORTH ONLY DEFINITIONS
