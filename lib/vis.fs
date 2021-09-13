@@ -938,14 +938,6 @@ compiletoram
 
   \voc first definitions  decimal
 
-: ?wid ( wid1 -- wid1|wid2 )
-  dup root-wordlist   = if drop [ (' root   literal, ] exit then
-  dup forth-wordlist  = if drop [ (' forth  literal, ] exit then
-  dup \voc-wl = if drop [ (' \voc literal, ] exit then
-;
-
-: .wid ( wid -- ) ?wid .wid ;
-
 : core? ( lfa -- f ) \ true if lfa is in the mecrisp core
   _sof_ @ u>= over forth-wordlist u< and
 ;

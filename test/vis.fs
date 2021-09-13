@@ -16,6 +16,15 @@ compiletoram
   dup wid? if u. else .id then
 ;
 
+: ?wid ( wid1 -- wid1|wid2 )    
+  dup root-wordlist   = if drop [ (' root   literal, ] exit then
+  dup forth-wordlist  = if drop [ (' forth  literal, ] exit then
+  dup \voc-wl = if drop [ (' \voc literal, ] exit then
+;
+
+: .wid ( wid -- ) ?wid .wid ; 
+         
+
 : .header ( lfa -- )
   ." lfa: " dup hex. dup ." xt: " lfa>xt hex.    \ print lfa and xt
   ." name: " lfa>nfa count type space            \ print name
