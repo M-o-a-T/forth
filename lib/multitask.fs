@@ -54,6 +54,9 @@ boot-task variable up  \ User Pointer
 
 boot-task variable last-task
 
+forth definitions
+: in-boot-task? up @ boot-task = ; 
+
 \multi definitions
 
 0 variable irq-task  \ list of waiting tasks
@@ -469,7 +472,7 @@ immediate ;
 \ Override standard words so they work with tasks
 
 : depth
-  boot-task this-task = if depth else
+  in-boot-task? if depth else
     sp@ this-task task-sp - 1 cells /
   then
 ;
