@@ -53,7 +53,7 @@
 \
 \       \WORDS          ( -- )
 \       FORTH-WORDLIST  ( -- wid )
-\       INSIDE-WORDLIST ( -- wid )
+\       VOC-WORDLIST    ( -- wid )
 \       ROOT-WORDLIST   ( -- wid )
 \       WORDLIST        ( -- wid )
 \       SHOW-WORDLIST   ( wid -- )
@@ -68,7 +68,7 @@
 \       WORDS           ( -- )
 \       ORDER           ( -- )
 \
-\   INSIDE-WORDLIST
+\   VOC-WORDLIST   
 \   holds words needed for the implementation but normally not required for
 \   applications.
 \
@@ -78,7 +78,7 @@
 \ * The search order can be changed with GET-ORDER and SET-ORDER.
 \
 \ * Dictionary searching is done by the new word FIND-IN-DICTIONARY (defined in
-\   the INSIDE-WORDLIST). It is called via HOOK-FIND by the now vectored Mecrisp
+\   the VOC-WORDLIST). It is called via HOOK-FIND by the now vectored Mecrisp
 \   word FIND .
 \
 \ * New words are added to the FORTH-WORDLIST by default. This can be changed
@@ -124,7 +124,7 @@ hex
 \ Three wordlists are implemented now, all as members of the forth-wordlist:
 
 align 0 , here cell+ ,     here constant forth-wordlist
-align 0 , forth-wordlist , here constant inside-wordlist
+align 0 , forth-wordlist , here constant \voc-wl
 align 0 , forth-wordlist , here constant root-wordlist
 
 
@@ -134,94 +134,94 @@ align 0 , forth-wordlist , here constant root-wordlist
   align here [ here @ not literal, ] ,
 ;
 
-  inside-wordlist ,
+  \voc-wl ,
 \ Return true if lfa|wid is the wid of a wordlist.
 : wid? ( lfa|wid -- f )
   @ [ here @ not literal, ] =
 ;
 
-  inside-wordlist ,
+  \voc-wl ,
 \ lfa of the first word in flash
 \ "dictionarystart" changes after compileroram
 dictionarystart constant _sof_
 
-  inside-wordlist ,
+  \voc-wl ,
 \ Max number of active word lists
 #6 constant #vocs 
 
 \ We need two buffers for the FORTH search order:
 
-  inside-wordlist ,
+  \voc-wl ,
 \ A buffer for the search order in compiletoflash mode.
 #vocs 1+ cells buffer: c2f-context
 
-  inside-wordlist ,
+  \voc-wl ,
 \ A buffer for the search order in compiletoram mode.
 #vocs 1+ cells buffer: c2r-context
 
-  inside-wordlist ,
+  \voc-wl ,
 \ Return the addr of the actual search order depending on the compile mode.
 : context ( -- a-addr )
   compiletoram? if c2r-context else c2f-context then
 ;
 
 
-  inside-wordlist ,
+  \voc-wl ,
 \ Current for compiletoflash mode.
 forth-wordlist variable c2f-current
 
-  inside-wordlist ,
+  \voc-wl ,
 \ Current for compiletoram mode.
 forth-wordlist variable c2r-current
 
-  inside-wordlist ,
+  \voc-wl ,
 \ Current depending on the compile mode.
 : current ( -- a-addr )
   compiletoram? if c2r-current else c2f-current then
 ;
 
 
-  inside-wordlist ,
+  \voc-wl ,
 \ A buffer to register a context switching request.
 0 variable _csr_
 
-  inside-wordlist ,
+  \voc-wl ,
 \ A buffer for some flags in a wordlist tag (wtag).
 0 variable wflags
 
 
-  inside-wordlist ,
+  \voc-wl ,
 \ A flag, true for searching the dictionary with context switching support,
 \ false for searching the compilation context only without context switching.
 -1 variable _indic_ 
 
 
-  inside-wordlist ,
+  \voc-wl ,
 \ Compile a wordlist tag ( wtag).
 : wtag, ( -- )
   align current @ wflags @ or ,  0 wflags !  0 _indic_ !
 ;
 
 
-  inside-wordlist ,
+  \voc-wl ,
 : lfa>flags ( a-addr1 -- a-addr2 ) cell+ ;
 
-  inside-wordlist ,
+  \voc-wl ,
 : lfa>nfa ( a-addr -- cstr-addr ) lfa>flags 2+ ;
 
-  inside-wordlist ,
+  \voc-wl ,
 : lfa>xt ( a-addr -- xt ) lfa>nfa skipstring ;
 
-  inside-wordlist ,
+  \voc-wl ,
 : lfa>wtag ( a-addr -- wtag ) [ 1 cells literal, ] - @ ;
 
-  inside-wordlist ,
+  \voc-wl ,
 : lfa>ctag ( a-addr -- ctag ) [ 2 cells literal, ] - @ ;
 
-  inside-wordlist ,
+  \voc-wl ,
 : tag>wid ( wtag -- wid ) [ 1 cells 1- not literal, ] and ;
 
-  inside-wordlist ,
+  \voc-wl ,
 : lfa>xt,flags ( a-addr -- xt|0 flags )
   dup if dup lfa>xt swap lfa>flags h@ else dup then
 ;
@@ -229,19 +229,19 @@ forth-wordlist variable c2r-current
 
 \ Tools to display wordlists:
 
-  inside-wordlist ,
+  \voc-wl ,
 : .id ( lfa -- )
   lfa>nfa count type space
 ;
 
-  inside-wordlist ,
+  \voc-wl ,
 : .wid ( lfa|wid -- )
 \ dup @ if ( wid = lfa ) .id else u. then
   dup wid? if u. else .id then
 ;
 
 
-  inside-wordlist ,
+  \voc-wl ,
 \ Print some word header information.
 : .header ( lfa -- )
   ." lfa: " dup hex. dup ." xt: " lfa>xt hex.    \ print lfa and xt
@@ -249,7 +249,7 @@ forth-wordlist variable c2r-current
 ;
 
 
-  inside-wordlist ,
+  \voc-wl ,
 \ Return true if the word at lfa is smudged.
 : smudged? ( lfa -- flag )
 \ cell+ h@ FFFF <>
@@ -258,7 +258,7 @@ forth-wordlist variable c2r-current
 
 \ End of Tools to display wordlists.
 
-  inside-wordlist ,
+  \voc-wl ,
 \ Return true if name of word at lfa equals c-addr,u and word is smudged.
 \ Note: Based on mecrisps case insensitive non-ANS compare.
 : name? ( c-addr u lfa -- c-addr u lfa flag )
@@ -271,7 +271,7 @@ forth-wordlist variable c2r-current
 ;
 
 
-  inside-wordlist ,
+  \voc-wl ,
 \ If the word with name c-addr,u is a member of wordlist wid, return its lfa.
 \ Otherwise return zero.
 \ Note: Based on mecrisps case insensitive non-ANS compare.
@@ -293,7 +293,7 @@ forth-wordlist variable c2r-current
 ;
 
 
-  inside-wordlist ,
+  \voc-wl ,
 \ If the word with name c-addr,u is a member of wordlist wid, return its lfa.
 \ Otherwise return zero.
 \ Note: Based on mecrisps case insensitive non-ANS compare.
@@ -328,7 +328,7 @@ forth-wordlist variable c2r-current
 ;
 
 
-  inside-wordlist , 
+  \voc-wl , 
 \ If the word with name c-addr,u is a member of wordlist wid, return its lfa.
 \ Otherwise return zero.
 \ Note: Based on mecrisps case insensitive non-ANS compare.
@@ -341,7 +341,7 @@ forth-wordlist variable c2r-current
 ;
 
 
-  inside-wordlist ,
+  \voc-wl ,
 \ Search the word with name c-addr,u in the search order at a-addr. If found
 \ return the words lfa otherwise retun 0.
 \ Note: Based on mecrisps case insensitive non-ANS compare.
@@ -358,7 +358,7 @@ forth-wordlist variable c2r-current
 ;
 
 
-  inside-wordlist ,
+  \voc-wl ,
 \ Search the dictionary for the word with the name c-addr,u. Return xt and flags
 \ if found, 0 and invalid flags otherwise.
 \ Note: Based on mecrisps case insensitive non-ANS compare.
@@ -367,7 +367,7 @@ forth-wordlist variable c2r-current
 ;
 
 
-  inside-wordlist ,
+  \voc-wl ,
 \ Return the number of wordlists (wids) in the search order.
 : w/o ( -- wid1 ... widn n )
   0 context begin dup @ while swap 1+ swap cell+ repeat drop
@@ -421,7 +421,7 @@ forth-wordlist variable c2r-current
 : abort ( -- ) cr quit ;  \ required for e4thcom error detection
 
 
-inside-wordlist set-current
+\voc-wl set-current
 
 : wlst-init ( -- )
   compiletoflash -1 set-order  compiletoram -1 set-order  \ init both orders
@@ -586,10 +586,10 @@ root-wordlist set-current  hex
 
 : vis ( -- ) ." 0.8.4" ;
 
-\ inside-wordlist first
-get-order nip inside-wordlist swap set-order
+\ \voc-wl first
+get-order nip \voc-wl swap set-order
 
-inside-wordlist set-current
+\voc-wl set-current
 
 
 \ VOC context pointer for the compiletoflash mode.
@@ -800,15 +800,15 @@ root-wordlist set-current   \ Some tools needed in VOC contexts
 ;
 
 
-\ inside-wordlist first
+\ \voc-wl first
 
-get-order nip inside-wordlist swap set-order
+get-order nip \voc-wl swap set-order
 
 
  2 wflags !
  : root ( -- )   root-wordlist   (dovoc  immediate ;
  2 wflags !
- : inside ( -- ) inside-wordlist (dovoc  immediate ;
+ : \voc ( -- ) \voc-wl (dovoc  immediate ;
  2 wflags !
  : forth ( -- )  forth-wordlist  (dovoc  immediate ;
 
@@ -831,7 +831,7 @@ get-order nip inside-wordlist swap set-order
   : .s ( -- ) .s ;
 
 
-inside-wordlist set-current
+\voc-wl set-current
 
 \ MM-200419  (C) message only on reset
 
@@ -846,8 +846,8 @@ inside-wordlist set-current
   wlst-init  ['] vocs-quit hook-quit !  ['] vocs-find hook-find !
 ;
 
-\ inside-wordlist first
-get-order nip inside-wordlist swap set-order
+\ \voc-wl first
+get-order nip \voc-wl swap set-order
 
 root-wordlist set-current
 
@@ -864,9 +864,9 @@ init  \ now vocs can be used.
 compiletoflash
 
 : find ( a u -- xt|0 flags )
-  inside first  search-in-dictionary lfa>xt,flags  forth first ;
+  \voc first  search-in-dictionary lfa>xt,flags  forth first ;
 
-root definitions  inside first
+root definitions  \voc first
 
 : (' ( "name" -- lfa )
   token search-in-dictionary ?dup if exit then ."  not found." abort
@@ -882,7 +882,7 @@ forth definitions
 \ dependency, that is not fullfilled, when the new find is used.
 
 : postpone ( "name" -- )
-  (' inside lfa>xt,flags dup $10 and if drop call, exit then
+  (' \voc lfa>xt,flags dup $10 and if drop call, exit then
   drop literal, ['] call, call,  immediate
 ;
 
@@ -960,13 +960,12 @@ compiletoram
 
   compiletoflash
 
-  inside first definitions  decimal
+  \voc first definitions  decimal
 
 : ?wid ( wid1 -- wid1|wid2 )
   dup root-wordlist   = if drop [ (' root   literal, ] exit then
   dup forth-wordlist  = if drop [ (' forth  literal, ] exit then
-  dup inside-wordlist = if drop [ (' inside literal, ] exit then
-
+  dup \voc-wl = if drop [ (' \voc literal, ] exit then
 ;
 
 : .wid ( wid -- ) ?wid .wid ;
@@ -1001,7 +1000,7 @@ compiletoram
 \ Given a wid of a VOCabulary print the VOCabulary name, given a wid of a
 \ wordlist print the address.
 
-root definitions  decimal  inside first
+root definitions  decimal  \voc first
 
 : only ( -- )
   [ root .. voc-context @ literal, forth .. voc-context @ literal, ] 

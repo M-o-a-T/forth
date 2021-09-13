@@ -1,7 +1,7 @@
 \ word lists etc. for vis
 
 compiletoram
-inside also definitions
+\voc also definitions
 
 : .wtag ( wtag -- ) ." wtag: " hex. ;
            
@@ -44,9 +44,6 @@ inside also definitions
   repeat
   r> 2drop ;
   
-  
-  inside-wordlist ,
-\ : show-wordlist-in-flash ( wid lfa -- )
 : show-wordlist-in-flash ( wid lfa -- )  
 \ List all words of wordlist wid (defined in flash) starting with word at lfa.
 \ lfa must be in flash
@@ -72,7 +69,7 @@ forth definitions
   compiletoram? if 0 show-wordlist-in-ram else drop then
 ;
 
-inside definitions
+\voc definitions
 
 : ?words ( wid f -- )   
 \ If f = -1 do not list the mecrisp core words.
@@ -121,7 +118,7 @@ root definitions
 \ Given a wid of a VOCabulary print the VOCabulary name, given a wid of a
 \ wordlist print the address.
 
-inside definitions
+\voc definitions
 : .vid ( wid -- )  \ MM-200522
   tag>wid
   dup wid? if .wid exit then
@@ -140,7 +137,7 @@ sticky : ?? ( -- )
   -1 \?? order ."   base: " base @ dup decimal u. base !  cr 2 spaces .s ;
  
 
-inside first definitions
+\voc first definitions
   
 : ?item ( lfa --) dup lfa>wtag 3 and 1 =
    if
@@ -178,7 +175,7 @@ forth definitions
   space
 ;
 
-inside first definitions  decimal
+\voc first definitions  decimal
   
 : ?voc ( lfa --) dup lfa>wtag 3 and 2 =  if space space .vid else drop then ;
     
