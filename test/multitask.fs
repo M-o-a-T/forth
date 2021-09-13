@@ -1,38 +1,7 @@
 
 \ --------------------------------------------------
-\  Lowpower mode
-\ --------------------------------------------------
-
-: up-alone? ( -- ? ) \ Checks if all other tasks are currently in idle state
-  this-task @ 0=
-;
-
-#if defined irq-systick
-: sleep ( -- ) [ $BF30 h, ] inline ; \ WFI Opcode, Wait For Interrupt, enters sleep mode
-
-task: lowpower-task
-
-: lowpower& ( -- )
-  begin
-    eint? if \ Only enter sleep mode if interrupts have been enabled
-      dint
-      up-alone? if ."  Sleep " sleep then
-      eint
-    then
-    yield
-  again
-;
-#endif
-
-\ --------------------------------------------------
 \  Examples
 \ --------------------------------------------------
-
-compiletoram
-#if defined irq-systick
-  eint
-#endif
-\  multitask
 
 0 variable seconds
 task: timetask
