@@ -141,7 +141,7 @@ boot-task variable last-task
   (cont) (go)
 ;
 
-: fill ( addr cells -- )
+: sfill ( addr cells -- )
 \ fills a stack, i.e. from the bottom
   0 ?do
     1 cells -
@@ -166,8 +166,8 @@ boot-task variable last-task
   0         r@ 3 cells + ! \ No abort
   ['] false r@ 4 cells + ! \ No handler
 
-  r@ task-sp stackspace fill
-  r@ task-rp stackspace fill
+  r@ task-sp stackspace sfill
+  r@ task-rp stackspace sfill
 
   cr
   r@ task-sp ( *args N a-addr SP )
