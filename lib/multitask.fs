@@ -531,5 +531,5 @@ inline ;
 
 : init init task-init ;
 
-\ task-init
+task-init
 
