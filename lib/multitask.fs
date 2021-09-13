@@ -58,9 +58,9 @@ boot-task variable last-task
 
 \ decrement a stack pointer and store data there.
 : sp+! ( data sp -- sp-1 )
-  ." save " over hex.
+  \ ." save " over hex.
   1 cells -
-  ." to " dup hex. cr
+  \ ." to " dup hex. cr
   tuck ! inline ;
 
 \ task state:
