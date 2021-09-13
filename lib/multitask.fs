@@ -26,9 +26,10 @@
 \ Return stack space: @stackspace cells
 
 #if undefined eint
-: eint ;
-: dint ;
-: eint? false ;
+\ if running on Linux …
+: eint inline ;
+: dint inline ;
+: eint? false 0-foldable ;
 #endif
 
 #if undefined .word
