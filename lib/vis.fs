@@ -229,7 +229,6 @@ forth-wordlist variable c2r-current
   \voc-wl ,
 \ Return true if the word at lfa is smudged.
 : smudged? ( lfa -- flag )
-\ cell+ h@ FFFF <>
   cell+ h@ [ here @ FFFFFFFF = FFFF and literal, ] <>
 ;
 
@@ -284,7 +283,7 @@ forth-wordlist variable c2r-current
         name?
         if
           r> r> drop over >r >r         \ R: wid lfa.found
-          \ for debugginng only :
+          \ for debugging only :
           \ cr dup lfa>wtag .wtag dup .header  \ print wtag(lfa) and name(lfa)
           \
         then
@@ -293,7 +292,7 @@ forth-wordlist variable c2r-current
       name?
       if 
         r> r> drop over >r >r           \ R: wid lfa.found
-        \ for debugginng only :
+        \ for debugging only :
         \ cr 9 spaces dup .header
         \
       then
