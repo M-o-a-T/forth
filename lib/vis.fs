@@ -376,7 +376,7 @@ forth-wordlist variable c2r-current
 \ a wordlist tag when creating a new word:
 \ ------------------------------------------------------------------------------
   forth-wordlist ,
-  : : ( "name" -- ) wtag, : ;
+: : ( "name" -- ) wtag, : ;
 
   forth-wordlist set-current
 
@@ -595,7 +595,7 @@ get-order nip \voc-wl swap set-order
 
 
 \ Return the addr of the search oder pointer depending on the compile mode.  
-  : _sop_ ( -- a-addr ) compiletoram? if _c2r-sop_ else _c2f-sop_ then ; 
+: _sop_ ( -- a-addr ) compiletoram? if _c2r-sop_ else _c2f-sop_ then ; 
 
 
 \ Save the context switching request of the word with address lfa.
@@ -631,8 +631,8 @@ get-order nip \voc-wl swap set-order
 
 \ Given a vocs wid return the wid of the parent voc or zero if no voc was
 \ inherited. Return 0 if wid is the wid of a wordlist.
-  : vocnext ( wid1 -- wid2|0 )
-    dup @ if [ 2 cells literal, ] - @ else dup - then ;
+: vocnext ( wid1 -- wid2|0 )
+  dup @ if [ 2 cells literal, ] - @ else dup - then ;
 
 
 \ Search the VOCs search order (voc-context) at a-addr for a match with the
@@ -800,11 +800,11 @@ get-order nip \voc-wl swap set-order
 
 
 \ Make the next created word a sticky one.
-  : sticky ( -- ) align 1 , 1 wflags ! ;
+: sticky ( -- ) align 1 , 1 wflags ! ;
 
 
 \ Print the data stack and stay in the current context.
-  : .s ( -- ) .s ;
+: .s ( -- ) .s ;
 
 
 \voc-wl set-current
