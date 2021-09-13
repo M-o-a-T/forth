@@ -384,28 +384,6 @@ class Miniterm:
             if not int(res.strip()):
                 self.layer = 1
             return
-        if line.startswith("#ifndef "):
-            self.layer_ += 1
-            if self.layer:
-                self.layer += 1
-                return
-            try:
-                await self.chat(f"' {line[8:]} drop", timeout=0.1)
-            except TimeoutError:
-                pass
-            else:
-                self.layer = 1
-            return
-        if line.startswith("#ifdef "):
-            self.layer_ += 1
-            if self.layer:
-                self.layer += 1
-                return
-            try:
-                await self.chat(f"' {line[7:]} drop", timeout=0.1)
-            except TimeoutError:
-                self.layer = 1
-            return
         if line == "#else":
             if self.layer <= 1:
                 self.layer = 1-self.layer
