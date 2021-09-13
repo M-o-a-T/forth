@@ -724,6 +724,17 @@ get-order nip \voc-wl swap set-order
   @ (dovoc
 ;
 
+root-wordlist set-current   \ Some tools needed in VOC contexts
+
+\ Switch back from a VOC search order (voc-context) to the FORTH search order.
+: .. ( -- )
+  0 _csr_ !  _?csr_  immediate
+;
+
+: definitions ( -- ) 
+  _SOP_ @ @ set-current [ ' .. call, ] immediate ;
+
+\voc-wl set-current
 
 \ Create a VOC that extends the VOC wid (inherits from VOC wid).
 : voc-extend ( "name" wid -- )
@@ -732,7 +743,7 @@ get-order nip \voc-wl swap set-order
   \ create the VOC as an immediate word
   2 wflags !  \ set voc-flag in wtag
   here ( addr of names wtag ) cell+ ( lfa of name )
-  <builds , [ ' immediate call, ] 
+  <builds dup (dovoc [ ' definitions call, ] , [ ' immediate call, ] 
   does> dovoc 
 ;
 
@@ -746,16 +757,6 @@ get-order nip \voc-wl swap set-order
 
 root-wordlist set-current   \ Some tools needed in VOC contexts
 
-
-\ Switch back from a VOC search order (voc-context) to the FORTH search order.
-: .. ( -- )
-  0 _csr_ !  _?csr_  immediate
-;
-
-
-: definitions ( -- ) 
-\ _SOP_ @ @ set-current postpone .. immediate ;
-  _SOP_ @ @ set-current [ ' .. call, ] immediate ;
 
 
 \ Create a VOC that extends (inherits from) the actual VOC context.
