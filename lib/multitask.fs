@@ -31,6 +31,11 @@
 : eint? false ;
 #endif
 
+#if undefined .word
+\ not debugging
+: .word drop inline ;
+#endif
+
 5 constant taskvars
 
 ' false 0 0 1 0  taskvars  nvariable boot-task
