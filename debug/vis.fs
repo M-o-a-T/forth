@@ -1,4 +1,4 @@
-\ word lists etc. for vis
+\ word lists, introspection etc. for vis
 
 \voc also definitions
 
@@ -112,7 +112,7 @@ forth definitions
 
 : dashes ( +n -- ) 0 ?do [char] - emit loop ;
 
-: \?? ( f -- )
+: \??? ( f -- )
     cr 15 dashes
     >r _sop_ @ @ ( lfa|wid )
     begin
@@ -124,7 +124,7 @@ forth definitions
 
 forth definitions
 
-: words ( -- ) 0 \?? cr ;
+: words ( -- ) 0 \??? cr ;
 
 
 root definitions
@@ -172,11 +172,8 @@ root definitions
 : order ( -- )
   cr ." context: " get-order 0 ?do .wid space loop
   cr ." current: " current @ .wid
-  ."  compileto" compiletoram? if ." ram" else ." flash" then
+  ."  >" compiletoram? if ." ram" else ." flash" then
 ;
-
-sticky : ?? ( -- )
-  -1 \?? order ."   base: " base @ dup decimal u. base !  cr 2 spaces .s ;
 
 
 \voc first definitions
@@ -327,7 +324,21 @@ forth definitions
   cr
 ;
 
+: \?? ( f -- )
+    cr
+    >r _sop_ @ @ ( lfa|wid )
+    begin
+      dup r@ ?list \ cr
+      vocnext dup 0=
+    until
+    r> 2drop
+    cr
+;
+
 forth definitions
+
+: words ( -- ) 0 \?? cr ;
+
 
 : list ( f -- )
   cr
@@ -339,6 +350,9 @@ forth definitions
   drop
 ;
 root definitions
+
+sticky : ?? ( -- )
+  -1 \?? order ."   base: " base @ dup decimal u. base !  cr 2 spaces .s ;
 
 : list ( -- ) list ;
 
