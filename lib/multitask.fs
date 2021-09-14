@@ -478,6 +478,12 @@ immediate ;
   then
 ;
 
+: rdepth
+  in-boot-task? if rdepth else
+    rp@ this-task task-rp - 1 cells /
+  then
+;
+
 : .s 
   \ can't patch our "depth" into the core, so …
   ." Stack: [" depth . ." ] "
