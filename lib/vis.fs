@@ -632,7 +632,7 @@ get-order nip \voc-wl swap set-order
 \ Given a vocs wid return the wid of the parent voc or zero if no voc was
 \ inherited. Return 0 if wid is the wid of a wordlist.
 : vocnext ( wid1 -- wid2|0 )
-  dup @ if [ 2 cells literal, ] - @ else dup - then ;
+  dup @ if 2 cells - @ else drop 0 then ;
 
 
 \ Search the VOCs search order (voc-context) at a-addr for a match with the
