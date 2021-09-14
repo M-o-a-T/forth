@@ -111,6 +111,7 @@ forth definitions
   else
      drop
   then
+  cr
 ;
 
 : dashes ( +n -- ) 0 ?do [char] - emit loop ;
@@ -335,7 +336,6 @@ forth definitions
       vocnext dup 0=
     until
     r> 2drop
-    cr
 ;
 
 forth definitions
