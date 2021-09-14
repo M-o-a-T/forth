@@ -4,28 +4,16 @@
 
 forth definitions
 
-.s
-
 var> also
-
-.s
 
 int object: i1
 
-.s
-
 12345 i1 !
 i1 ?
-.s
 i1 _addr_  dup hex.  @ .
-.s
 
 int class: uint
-.s
 : show ( a-addr -- ) __ @ u. ;
-.s
-
-__ ?? .s
 
 __ ?? ..
 
@@ -50,13 +38,13 @@ p1 y ?
 
 : show ( a-addr -- )    dup __ x ? __ y ? ;
 
-  p1 show
+p1 show
 
-  #1 #2 p1 set
+#1 #2 p1 set
 
-  p1 show
+p1 show
 
-  p1 get .s 
+p1 get
 
-  2drop  .s
+2drop
 
