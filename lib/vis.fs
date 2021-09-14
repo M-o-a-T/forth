@@ -760,6 +760,25 @@ root-wordlist set-current   \ Some tools needed in VOC contexts
   [ hook-quit @ literal, ] execute
 ;
 
+: (ign ( voc -- ) \ remove this vocabulary from the search list
+  >r get-order r>
+  ( voc… n ign )
+  over 1 = if ."  ? search order underflow " abort then
+  over 0 do
+    i 2 + pick
+    ( voc… n ign xign )
+    over =
+    if
+      drop  ( voc… n )
+      i 1+ roll drop 1- set-order
+      unloop exit
+    then
+  loop
+  \ not found. Oh well. Just clean up.
+  drop 0 do drop loop
+;
+
+
 root-wordlist set-current
 
 : first ( -- )
@@ -781,6 +800,10 @@ root-wordlist set-current
 \ remove the last-added vocabulary from the search list
   get-order dup 1 = if ."  ? search order underflow " abort then
   nip 1- set-order immediate ;
+
+: ignore ( -- )
+\ remove the current temp vocabulary from the search list
+  _sop_ @ @ (ign immediate ;
 
 \voc-wl set-current
 
