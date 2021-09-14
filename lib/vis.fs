@@ -895,7 +895,8 @@ compiletoflash
 root definitions  \voc first
 
 : (' ( "name" -- lfa )
-  token search-in-dictionary ?dup if exit then ."  not found." abort
+  token 2dup search-in-dictionary ?dup if -rot 2drop exit then
+  ."   " type ."  not found." abort
 ;  
 
 forth definitions
