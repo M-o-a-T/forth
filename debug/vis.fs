@@ -174,6 +174,9 @@ root definitions
 root definitions
 \ Display the search order and the compilation context.
 : order ( -- )
+  _sop_ @ context <> if
+    cr ."    temp: " _sop_ @ @ .wid
+  then
   cr ." context: " get-order 0 ?do .wid space loop
   cr ." current: " current @ .wid
   ."  >" compiletoram? if ." ram" else ." flash" then
