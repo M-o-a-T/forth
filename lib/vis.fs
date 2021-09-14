@@ -567,7 +567,6 @@ get-order nip \voc-wl swap set-order
 
 \voc-wl set-current
 
-
 \ VOC context pointer for the compiletoflash mode.
   root-wordlist variable c2f-voc-context
 
@@ -623,7 +622,7 @@ get-order nip \voc-wl swap set-order
     _csr_ @ dup 1 and if  drop 1 _csr_ bic! exit then
     ( csr|0 )
     ?dup if ( csr )  \ context switching requested
-       voc-context !  0 _csr_ !  voc-context
+      voc-context !  0 _csr_ !  voc-context
     else
       context
     then
