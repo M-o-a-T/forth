@@ -892,9 +892,6 @@ init  \ now vocs can be used.
 
 compiletoflash
 
-: find ( a u -- xt|0 flags )
-  \voc first  search-in-dictionary lfa>xt,flags  forth first ;
-
 root definitions  \voc first
 
 : (' ( "name" -- lfa )
