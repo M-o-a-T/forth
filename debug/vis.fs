@@ -357,6 +357,9 @@ forth definitions
 ;
 root definitions
 
+sticky : ??? ( -- )
+  -1 \??? order ."   base: " base @ dup decimal u. base !  cr 2 spaces .s ;
+
 sticky : ?? ( -- )
   -1 \?? order ."   base: " base @ dup decimal u. base !  cr 2 spaces .s ;
 
