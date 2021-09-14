@@ -123,8 +123,23 @@ class-root definitions
 
 \ Create a class that inherits from / extends the actual class context. 
 \ This is just a subvocabulary.
+
+\ When we declare "class: foo" followed by "class: bar", we want them to be
+\ (a) siblings and (b) declared in the same vocabulary.
+\ If you want subclasses, use "foo class: bar".
+??
 : class: ( "name" -- )
-  \voc voc:
+  _sop_ @ context = if
+    context @
+    dup (ign
+    current @ over = if
+      dup lfa>wtag tag>wid current !
+    then ( voc )
+    vocnext
+  else
+    VOC-context @ ..
+  then
+  voc-extend
 ;
 
   forth definitions
