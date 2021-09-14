@@ -35,7 +35,7 @@ __seal
 
 : @ ( a -- n ) h@ inline ;
 : ! ( n a -- ) h! inline ;
-: ? ( a -- )  h@ ! ;
+: ? ( a -- )  h@ . ;
 
 
 forth definitions only
