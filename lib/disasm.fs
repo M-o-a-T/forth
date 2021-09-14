@@ -21,7 +21,7 @@
 
 FORTH DEFINITIONS  DECIMAL
 
-voc \disasm   \disasm also definitions
+voc: \disasm
 
 \ ---------------------------------------
 \  Memory pointer and instruction fetch
@@ -48,7 +48,7 @@ voc \disasm   \disasm also definitions
   dictionarystart
   begin
 \   dup 6 + dup skipstring r@ = if ."   --> " ctype else drop then
-    dup 6 + skipstring  r@ = if ."   -->  " dup inside .nid then  \ MM-200522
+    dup 6 + skipstring  r@ = if ."   -->  " dup \voc .nid then  \ MM-200522
     dictionarynext
   until
   drop
