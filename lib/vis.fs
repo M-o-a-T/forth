@@ -616,15 +616,18 @@ get-order nip \voc-wl swap set-order
 
 \ Process the last saved context switching request. 
 : _?csr_ ( -- )
-    \ *** for context switching debugging only
-    \ cr _csr_ @ ." _csr_=" .
-    \ postponed context switch request ? reset postpone flag csr.0 and exit
-    _csr_ @ dup 1 and if  drop 1 _csr_ bic! exit then ( csr|0 )
+    \ cr _csr_ @ ." _csr_=" .  \ debugging
+
+    \ is this a postponed context switch request?
+    \ if so, clear postpone flag csr.0 and exit
+    _csr_ @ dup 1 and if  drop 1 _csr_ bic! exit then
+    ( csr|0 )
     ?dup if ( csr )  \ context switching requested
        voc-context !  0 _csr_ !  voc-context
-    else ( )
+    else
       context
     then
+    ( ctx )
     _sop_ !
 ;
 
