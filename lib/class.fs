@@ -131,7 +131,8 @@ class-root definitions
 
 \ Create a class that only inherits from / extends class-root.
 : class: ( "name" -- )
-  [ class-root .. \voc voc-context @ literal, ] ( wid of class-root ) voc-extend ;
+  [ ' class-root call, ] \voc voc:
+;
    
 forth only
 
