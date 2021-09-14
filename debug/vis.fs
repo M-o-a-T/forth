@@ -15,10 +15,13 @@
   dup wid? if u. else .id then
 ;
 
-: ?wid ( wid1 -- wid1|wid2 )    
-  dup root-wordlist   = if drop [ (' root   literal, ] exit then
-  dup forth-wordlist  = if drop [ (' forth  literal, ] exit then
-  dup \voc-wl = if drop [ (' \voc literal, ] exit then
+: ?wid ( wid1 -- wid1|wid2 )
+  case
+    root-wordlist  of [ (' root   literal, ]  endof
+    forth-wordlist of [ (' forth  literal, ]  endof
+    \voc-wl        of [ (' \voc   literal, ]  endof
+  dup  \ 'endcase' drops our value, but we want to keep it
+  endcase
 ;
 
 : .wid ( wid -- ) ?wid .wid ; 
