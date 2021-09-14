@@ -4,15 +4,6 @@
 
 voc: \cls
 
-: +field ( n1 n2 "name" -- n3=n1+n2 ) \ Exec: a1 -- a2=a1+n1
-\ Create a field in a structure definition with a size of n2 bytes.
-\ n1 = size of the structure before creating  the field
-\ n3 = size of the structure after creating the field
-\
-  <builds over , +
-  does> @ +
-;
-
 
 \ classes.txt        Source Code Library for Mecrisp-Stellaris        MM-170628
 \ ------------------------------------------------------------------------------
@@ -72,6 +63,16 @@ voc: \cls
 \ Abort with error message if called with an invald magic number (ivr-sys).
 : ?ivr-sys ( magic n -- magic n )
   over ivr-sys - if ." invalid instance size" abort exit then ;
+
+
+: +field ( n1 n2 "name" -- n3=n1+n2 ) \ Exec: a1 -- a2=a1+n1
+\ Create a field in a structure definition with a size of n2 bytes.
+\ n1 = size of the structure before creating  the field
+\ n3 = size of the structure after creating the field
+\
+  <builds over , +
+  does> @ +
+;
 
 
 forth definitions
