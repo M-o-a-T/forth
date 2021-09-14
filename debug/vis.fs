@@ -24,8 +24,8 @@
   endcase
 ;
 
-: .wid ( wid -- ) ?wid .wid ; 
-         
+: .wid ( wid -- ) ?wid .wid ;
+
 
 : .header ( lfa -- )
   ." lfa: " dup hex. dup ." xt: " lfa>xt hex.    \ print lfa and xt
@@ -309,21 +309,18 @@ forth definitions
 
 : ?list ( wid f -- )
 \ If f = -1 do not list the mecrisp core words.
-\  context @
-\  swap if
    if ( wid )
     \ Show words in flash starting with FORTH-WORDLIST.
     dup forth-wordlist
   else
     \ Show words in flash starting with the first word in flash.
-\   dup forth-wordlist over = if _sof_ else forth-wordlist then  \ fails MM-200102
     dup dup forth-wordlist = if _sof_ else forth-wordlist then   \ works
   then
   show-word-in-flash
   dup cr ." << FLASH: " .wid
   compiletoram?
   if
-    cr dup ." >> RAM:   " .wid
+    dup cr ." >> RAM:   " .wid
     0 show-word-in-ram
   else
      drop
@@ -335,7 +332,7 @@ forth definitions
     cr
     >r _sop_ @ @ ( lfa|wid )
     begin
-      dup r@ ?list \ cr
+      dup r@ ?list
       vocnext dup 0=
     until
     r> 2drop
