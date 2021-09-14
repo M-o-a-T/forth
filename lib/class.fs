@@ -112,7 +112,7 @@ voc: class-root
 class-root definitions
 
 \ Create an instance variable in the current class definition.
-: ivar ( "name" magic n1 -- magic n2 )
+: ivar: ( "name" magic n1 -- magic n2 )
   ?ivr-sys class-item +field
 ;
 
