@@ -731,8 +731,56 @@ root-wordlist set-current   \ Some tools needed in VOC contexts
   0 _csr_ !  _?csr_  immediate
 ;
 
+: (def ( -- )
+  _SOP_ @ @ set-current ;
+
 : definitions ( -- ) 
-  _SOP_ @ @ set-current [ ' .. call, ] immediate ;
+  (def [ ' .. call, ] immediate ;
+
+
+\ Make the current compilation context the new search context.
+: @voc ( -- )
+  get-current (dovoc immediate
+;
+
+2 wflags !
+: root ( -- )   root-wordlist   (dovoc  immediate ;
+2 wflags !
+: \voc ( -- ) \voc-wl (dovoc  immediate ;
+2 wflags !
+: forth ( -- )  forth-wordlist  (dovoc  immediate ;
+
+
+\voc-wl set-current
+
+
+: vocs-quit ( -- )
+  0 _csr_ !  context _sop_ !
+  \ ." reset "  \ only for debugging
+  [ hook-quit @ literal, ] execute
+;
+
+root-wordlist set-current
+
+: first ( -- )
+\ overwrite the top of the permanent search order with the top wid
+\ of the current temporary search order.
+  _sop_ @ @ context !  [ ' .. call, ] immediate ;
+
+: only ( -- )
+\ use only the base vocabulary (forth+root)
+  [ .. voc-context @ literal, forth .. voc-context @ literal, ] 
+  dup 3 set-order  immediate ;
+
+: also ( -- ) 
+\ add the current temp vocabulary to the search list
+  get-order dup #vocs = if ."  ? search order overflow " abort then
+  over swap 1+ set-order  [ ' first call, ] immediate ;
+
+: previous ( -- )
+\ remove the last-added vocabulary from the search list
+  get-order dup 1 = if ."  ? search order underflow " abort then
+  nip 1- set-order immediate ;
 
 \voc-wl set-current
 
@@ -743,51 +791,29 @@ root-wordlist set-current   \ Some tools needed in VOC contexts
   \ create the VOC as an immediate word
   2 wflags !  \ set voc-flag in wtag
   here ( addr of names wtag ) cell+ ( lfa of name )
-  <builds dup (dovoc [ ' definitions call, ] , [ ' immediate call, ] 
+  <builds
+    \ we want to:
+    \ - store the address so "dovoc" can get it
+    \ - set definitions
+    \ - add the word to the search order
+    dup , (dovoc (def [ ' also call, ' immediate call, ] 
   does> dovoc 
 ;
 
-
-: vocs-quit ( -- )
-  0 _csr_ !  context _sop_ !
-  \ ." reset "  \ only for debugging
-  [ hook-quit @ literal, ] execute
-;
-
-
 root-wordlist set-current   \ Some tools needed in VOC contexts
-
-
 
 \ Create a VOC that extends (inherits from) the actual VOC context.
 : voc: ( "name" -- )
-  _sop_ @ CONTEXT = if 0 else VOC-context @ then voc-extend
+  _sop_ @ context = if 0 else VOC-context @ then voc-extend
 ;
 
 
-: first ( -- )
-\ <voc> first overwrite the top of the permanent search order with the top wid
-\ of the current temporary search order.
-  _sop_ @ @ context !  [ ' .. call, ] immediate ;
-
-
-\ Make the current compilation context the new search context.
-: @voc ( -- )
-  get-current (dovoc immediate
-;
+\ restore basic system state
 
 
 \ \voc-wl first
 
 get-order nip \voc-wl swap set-order
-
-
- 2 wflags !
- : root ( -- )   root-wordlist   (dovoc  immediate ;
- 2 wflags !
- : \voc ( -- ) \voc-wl (dovoc  immediate ;
- 2 wflags !
- : forth ( -- )  forth-wordlist  (dovoc  immediate ;
 
 
 \ Make the next created word a context switching one (assign a ctag).
@@ -945,19 +971,8 @@ compiletoram
 
 root definitions  decimal  \voc first
 
-: only ( -- )
-  [ root .. voc-context @ literal, forth .. voc-context @ literal, ] 
-  dup 3 set-order  immediate ;
 
-: also ( -- ) 
-  get-order dup #vocs = if ."  ? search order overflow " abort then
-  over swap 1+ set-order  postpone first  immediate ;
-
-: previous ( -- )
-  get-order dup 1 = if ."  ? search order underflow " abort then
-  nip 1- set-order immediate ;
-
-forth definitions  forth first
+forth definitions only
 
 compiletoram  \ EOF vis-0.8.4-mecrisp-stellaris.fs 
  
