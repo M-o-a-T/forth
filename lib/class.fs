@@ -1,5 +1,10 @@
 \ Classes. They go to a subvocabulary of \voc.
 
+#if undefined eval
+#include lib/util.fs
+#endif
+
+
 \voc definitions
 
 voc: \cls
@@ -77,12 +82,14 @@ voc: class-root
   class-root ['] .. execute immediate
 ;
 
+
 \ Begin or extend an instance definition in a class definition.
 : __ivar ( -- magic 0|inherited-size ) 
   ivr-sys current @ dup _csr_ ! 
   s" u/i" 2dup 4 pick search-in-wordlist
   if ." instance is sealed" abort exit then
-  evaluate nip
+  eval ( magic size )
+  nip
 ;
 
 
@@ -103,7 +110,8 @@ voc: class-root
 \ Assign the actual class context to the next created word and return the 
 \ instance size of the class on the stack.
 : class-item ( -- u/i )
-  voc-context @ _csr_ ! s" u/i" evaluate  \ get the instance size
+  \ get the instance size
+  voc-context @ _csr_ ! s" u/i" eval
   item  \ compile the next word as vocabulary setter
 ;
 
