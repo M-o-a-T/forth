@@ -204,22 +204,22 @@ forth-wordlist variable c2r-current
 
 
   \voc-wl ,
-: lfa>flags ( a-addr1 -- a-addr2 ) cell+ ;
+: lfa>flags ( a-addr1 -- a-addr2 ) cell+  inline ;
 
   \voc-wl ,
-: lfa>nfa ( a-addr -- cstr-addr ) lfa>flags 2+ ;
+: lfa>nfa ( a-addr -- cstr-addr ) lfa>flags 2+  inline ;
 
   \voc-wl ,
 : lfa>xt ( a-addr -- xt ) lfa>nfa skipstring ;
 
   \voc-wl ,
-: lfa>wtag ( a-addr -- wtag ) [ 1 cells literal, ] - @ ;
+: lfa>wtag ( a-addr -- wtag ) 1 cells - @ ;
 
   \voc-wl ,
-: lfa>ctag ( a-addr -- ctag ) [ 2 cells literal, ] - @ ;
+: lfa>ctag ( a-addr -- ctag ) 2 cells - @ ;
 
   \voc-wl ,
-: tag>wid ( wtag -- wid ) [ 1 cells 1- not literal, ] and ;
+: tag>wid ( wtag -- wid ) 1 cells 1- bic  inline ;
 
   \voc-wl ,
 : lfa>xt,flags ( a-addr -- xt|0 flags )
