@@ -856,6 +856,7 @@ get-order nip \voc-wl swap set-order
 
 
 \ Print the data stack and stay in the current context.
+sticky
 : .s ( -- ) .s ;
 
 
