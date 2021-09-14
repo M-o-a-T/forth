@@ -89,7 +89,6 @@ voc: class-root
 \ Terminate an instance definition in a class definition.
 : __seal ( magic size -- )
   ?ivr-sys s" constant u/i" evaluate drop
-  previous  \ take the class VOC off the search list
 ;
 
 
