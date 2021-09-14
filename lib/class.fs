@@ -46,17 +46,6 @@ voc: \cls
 
 \ ------------------------------------------------------------------------------
 
-0 variable _vcm_
-
-: definitions
-  definitions 2 _vcm_ !
-; 
-
-\ Abort with error message if not in class compile mode.
-: _?ccm_ ( -- )
-  _vcm_ @ 2 <> if ." class compile mode missing" abort then
-;
-
 
 #1234567890 constant ivr-sys
 
@@ -90,7 +79,7 @@ voc: class-root
 
 \ Begin or extend an instance definition in a class definition.
 : __ivar ( -- magic 0|inherited-size ) 
-  _?ccm_ ivr-sys current @ dup _csr_ ! 
+  ivr-sys current @ dup _csr_ ! 
   s" u/i" 2dup 4 pick search-in-wordlist
   if ." instance is sealed" abort exit then
   evaluate nip
@@ -99,13 +88,14 @@ voc: class-root
 
 \ Terminate an instance definition in a class definition.
 : __seal ( magic size -- )
-  _?ccm_ ?ivr-sys s" constant u/i" evaluate drop
+  ?ivr-sys s" constant u/i" evaluate drop
+  previous  \ take the class VOC off the search list
 ;
 
 
 \ Make the current class compilation context the actual search context.
 : __ ( -- )
-  _?ccm_ get-current _csr_ ! immediate
+  get-current _csr_ ! immediate
 ;
 
 
