@@ -4,6 +4,7 @@
 
 voc: \cls
 
+\voc also
 
 \ classes.txt        Source Code Library for Mecrisp-Stellaris        MM-170628
 \ ------------------------------------------------------------------------------
@@ -68,7 +69,6 @@ forth definitions
 \ A root VOC for all classes.
 
 voc: class-root
-\voc also
 
 0 constant u/i   \ class-root has no instance data defined
 
@@ -99,7 +99,7 @@ voc: class-root
 ;
 
 
-\cls definitions
+\voc \cls definitions
 
 \ Assign the actual class context to the next created word and return the 
 \ instance size of the class on the stack.
@@ -110,7 +110,6 @@ voc: class-root
 
 
 class-root definitions
-class-root also
 
 \ Create an instance variable in the current class definition.
 : ivar ( "name" magic n1 -- magic n2 )
