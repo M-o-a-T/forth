@@ -403,6 +403,14 @@ class Miniterm:
 
         if line == "#end":
             raise EOFError
+        if line == "#echo":
+            sys.stderr.write("\n")
+            return
+        if line.startswith("#echo "):
+            sys.stderr.write(line[6:]+"\n")
+            return
+        if line.startswith("#error "):
+            raise RuntimeError(line[7:])
         if line.startswith("#delay "):
             self.goahead_delay = float(line[7:])
             return
