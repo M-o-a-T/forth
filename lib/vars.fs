@@ -22,7 +22,7 @@ __seal
 
 : @ ( a -- n ) c@ inline ;
 : ! ( n a -- ) c! inline ;
-: ? ( a -- )  c@ base @ swap hex . base ! ;
+: ? ( a -- )  c@ base @ swap hex  0 <# # # #> type space  base ! ;
 
 
 forth definitions only
