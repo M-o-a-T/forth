@@ -147,7 +147,7 @@ forth definitions
 : (cont) r> ;
 
 : (go) ( *params? a-addr -- does-not-return )
-  cr ." RUN: " dup dup hex. .word cr
+  \ cr ." RUN: " dup dup hex. .word cr
   execute (dead)
 \ catch ?dup if (die) else (dead) then
 ;

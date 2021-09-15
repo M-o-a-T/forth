@@ -134,7 +134,7 @@ class-root definitions
 \ When we declare "class: foo" followed by "class: bar", we want them to be
 \ (a) siblings and (b) declared in the same vocabulary.
 \ If you want subclasses, use "foo class: bar".
-??
+
 : class: ( "name" -- )
   _sop_ @ context = if
     context @
