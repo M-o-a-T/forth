@@ -434,22 +434,29 @@ class Miniterm:
     async def send_file(self, filename):
         """Send a file. Runs in write thread."""
         async with await anyio.open_file(filename, 'r') as f:
-            sys.stderr.write('--- Sending file {} ---\n'.format(filename))
-            while True:
-                try:
-                    line = await f.readline()
-                    if line == "":
+            sys.stderr.write(f'--- Sending file {filename} ---\n')
+            num = 0
+            try:
+                while True:
+                    try:
+                        num += 1
+                        line = await f.readline()
+                        if line == "":
+                            break
+                        line = await self.preprocess(line)
+                    except EOFError:
+                        sys.stderr.write(f'--- EOF {filename} ---\n')
                         break
-                    line = await self.preprocess(line)
-                except EOFError:
-                    break
-                if not line:
-                    continue
-                if self.go_ahead:
-                    await self.chat(line, timeout=True)
-                else:
-                    await self.stream.send(self.tx_encoder.encode(line))
-                # sys.stderr.write('.')  # Progress indicator.
+                    if not line:
+                        continue
+                    if self.go_ahead:
+                        await self.chat(line, timeout=True)
+                    else:
+                        await self.stream.send(self.tx_encoder.encode(line))
+                    # sys.stderr.write('.')  # Progress indicator.
+            except Exception as exc:
+                sys.stderr.write(f'--- in {filename} : {num}\n')
+                raise
 
     def upload_file(self):
         """Ask user for filename and send its contents"""
