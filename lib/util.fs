@@ -29,7 +29,19 @@ sticky  \ deleted by "find" in "defined"
   then
 ;
 
+: voc-eval  ( addr n -- )
+\ given a word in the current vocabulary, find and run it.
+  1 \voc _csr_ bis!
+  2dup find drop ?dup if
+    -rot 2drop execute
+  else
+    space type ."  not found"
+    -3 abort
+  then
+;
+
 #endif
+
 
 
 \ clean up
