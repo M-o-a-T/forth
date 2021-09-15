@@ -18,6 +18,8 @@ int class: uint
 __ ?? ..
 
 
+forth definitions
+
 class-root class: point
 __ivar
   int ivar: x
