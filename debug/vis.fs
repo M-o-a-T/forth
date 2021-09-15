@@ -179,10 +179,18 @@ root definitions
 root definitions
 \ Display the search order and the compilation context.
 : order ( -- )
-  _sop_ @ context <> if
-    cr ."    temp: " _sop_ @ @ .wid
+  cr ." context: " context @ .wid
+  voc-context @ context <> if
+    cr ."     VOC: " voc-context @ .wid
   then
-  cr ." context: " get-order 0 ?do .wid space loop
+  _sop_ @ @ context @ <> if
+    cr ."     SOP: " _sop_ @ @ .wid
+  then
+  _csr_ @ context @ <> if
+    cr ."  switch: " _csr_ @ 1 bic ?dup if .wid else ." ---" then
+    _csr_ @ 1 and if ."  switch" then
+  then
+  cr ."   order: " get-order 0 ?do .wid space loop
   cr ." current: " current @ .wid
   ."  >" compiletoram? if ." ram" else ." flash" then
 ;
