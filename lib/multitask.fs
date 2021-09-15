@@ -26,6 +26,10 @@
 
 forth definitions only  decimal
 
+#if defined throw
+#error Do not use with singletasked catch/throw
+#endif
+
 #if undefined eint
 \ happens when running on Linux …
 : eint inline ;
