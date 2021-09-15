@@ -5,9 +5,19 @@ only forth definitions
 compiletoram?
 
 
-#if undefined eval
+#if token defined find drop 0=
+\ We want to use "#if defined X" instead of the above dance.
 
-compiletoflash
+sticky  \ deleted by "find"
+: defined   ( "token" -- flag ) token find drop 0<> ; 
+
+sticky  \ deleted by "find" in "defined"
+: undefined ( "token" -- flag ) defined not ;
+
+#endif
+
+
+#if undefined eval
 
 : eval  ( addr n -- )
 \ given a word, find and run it.
