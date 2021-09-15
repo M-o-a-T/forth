@@ -140,6 +140,11 @@ root definitions
 
 \voc definitions
 
+: core? ( lfa -- f )
+\ true if lfa is in the mecrisp core
+  _sof_ @ u>= over forth-wordlist u< and
+;
+
 \ Given a words lfa print its name with allVOCabulary prefixes. If it's  a
 \ word from the Stellaris core do not print the prefix forth.
 : .nid ( lfa -- )

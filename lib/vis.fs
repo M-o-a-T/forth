@@ -1008,10 +1008,6 @@ compiletoram
 
   \voc first definitions  decimal
 
-: core? ( lfa -- f ) \ true if lfa is in the mecrisp core
-  _sof_ @ u>= over forth-wordlist u< and
-;
-
 root definitions  decimal  \voc first
 
 
