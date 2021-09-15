@@ -88,7 +88,7 @@ voc: class-root
   ivr-sys current @ dup _csr_ ! 
   s" u/i" 2dup 4 pick search-in-wordlist
   if ." instance is sealed" abort exit then
-  eval ( magic size )
+  voc-eval ( magic size )
   nip
 ;
 
@@ -111,7 +111,7 @@ voc: class-root
 \ instance size of the class on the stack.
 : class-item ( -- u/i )
   \ get the instance size
-  voc-context @ _csr_ ! s" u/i" eval
+  voc-context @ _csr_ ! s" u/i" voc-eval
   item  \ compile the next word as vocabulary setter
 ;
 
