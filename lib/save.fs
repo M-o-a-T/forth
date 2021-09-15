@@ -7,6 +7,11 @@
 \ : syscall ( r0 r1 r2 r3 r4 r5 r6 Syscall# -- r0 )
 
 \ int open(const char *pathname, int flags, mode_t mode);
+
+forth only definitions
+
+voc: \file
+
 5 constant #open
 
 8 base ! 
@@ -104,3 +109,5 @@ decimal
 : save" ( -- ) [char] " parse save ;
 
 \ -----------------------------------------------------------------------------
+
+forth only definitions
