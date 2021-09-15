@@ -19,7 +19,7 @@
 \ resolves call entry points, literal pools and handles inline strings.
 \ Usage: Specify your target address in disasm-$ and give disasm-step some calls.
 
-FORTH DEFINITIONS  DECIMAL
+forth definitions  decimal
 
 voc: \disasm
 
@@ -459,7 +459,7 @@ drop \ Forget opcode
 \  Disassembler for definitions
 \ ------------------------------
 
-  ROOT DEFINITIONS
+  root definitions
 
 : seec ( addr -- ) \ Disassemble starting at this address
   disasm-$ !
@@ -480,5 +480,5 @@ sticky
   ' seec
 ;
 
-FORTH ONLY DEFINITIONS
+forth only definitions
 

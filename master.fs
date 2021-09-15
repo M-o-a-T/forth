@@ -10,10 +10,8 @@
 #endif
 
 #if token defined find drop 0=
-\ We want to use "#if defined X" instead of this dance.
-
-: defined   ( "token" -- flag ) token find drop 0<> ; 
-: undefined ( "token" -- flag ) defined not ;
+#error vis.fs should have done this
+#include lib/util.fs
 #endif
 
 #if undefined init

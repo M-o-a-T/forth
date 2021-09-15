@@ -1,8 +1,9 @@
 \ small utility code
+\ WARNING must be called with "forth only definitions" in effect
 
 
-only forth definitions
 compiletoram?
+compiletoflash
 
 
 #if token defined find drop 0=

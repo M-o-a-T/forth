@@ -10,7 +10,6 @@
 \ triggered by an interrupt.
 
 \ Configuration:
-40 constant stackspace \ 64 stack elements for every task
 
 \ Internal stucture of task memory:
 \ 0: Pointer to next task
@@ -25,20 +24,23 @@
 \ Parameter stack space: @stackspace cells
 \ Return stack space: @stackspace cells
 
-forth definitions decimal
-voc: \multi  \multi also definitions
+forth definitions only  decimal
 
 #if undefined eint
-\ if running on Linux …
+\ happens when running on Linux …
 : eint inline ;
 : dint inline ;
-: eint? false 0-foldable ;
+: eint? true 0-foldable ;
 #endif
 
 #if undefined .word
 \ not debugging
 : .word drop inline ;
 #endif
+
+voc: \multi
+
+40 constant stackspace \ 64 stack elements for every task
 
 5 constant taskvars
 
@@ -546,6 +548,8 @@ forth definitions
 : init init task-init ;
 
 task-init singletask
+
+only
 \ Going back to singletask is temporary: we need to either
 \ get a serial IRQ with input buffer, or teach the terminal
 \ to wait for the echo.

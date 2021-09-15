@@ -3,6 +3,8 @@
 \  Trace of the return stack entries
 \ -----------------------------------------------------------------------------
 
+forth definitions only
+
 0 variable closest-found
 
 : addr>woff ( address -- cstr offset addr | 0 )

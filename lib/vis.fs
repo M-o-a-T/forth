@@ -400,7 +400,10 @@ forth-wordlist variable c2r-current
 \voc-wl set-current
 
 : wlst-init ( -- )
-  compiletoflash -1 set-order  compiletoram -1 set-order  \ init both orders
+  compiletoram? 
+  compiletoram -1 set-order
+  compiletoflash -1 set-order
+  if compiletoram then
   ['] find-in-dictionary hook-find !
 ;
 
@@ -554,9 +557,6 @@ decimal
 
 \ ------------------------------------------------------------------------------
 
-\ This extension must be compiled in FLASH.
-
-compiletoflash
 
 root-wordlist set-current  hex
 
@@ -618,8 +618,8 @@ get-order nip \voc-wl swap set-order
     \ cr _csr_ @ ." _csr_=" .  \ debugging
 
     \ is this a postponed context switch request?
-    \ if so, clear postpone flag csr.0 and exit
-    _csr_ @ dup 1 and if  drop 1 _csr_ bic! exit then
+    \ if so, clear postpone flag in csr and exit
+    _csr_ @ dup 1 and if  drop 1 _csr_ bic!  exit then
     ( csr|0 )
     ?dup if ( csr )  \ context switching requested
       voc-context !  0 _csr_ !  voc-context
@@ -825,6 +825,12 @@ root-wordlist set-current
   does> dovoc 
 ;
 
+root-wordlist set-current
+
+\ Make the next created word a sticky one.
+: sticky ( -- ) align 1 , 1 wflags ! ;
+
+
 root-wordlist set-current   \ Some tools needed in VOC contexts
 
 \ Create a VOC that extends (inherits from) the actual VOC context.
@@ -850,10 +856,7 @@ get-order nip \voc-wl swap set-order
     1 wflags !
 ;
 
-
-\ Make the next created word a sticky one.
-: sticky ( -- ) align 1 , 1 wflags ! ;
-
+root-wordlist set-current   \ Some tools needed in VOC contexts
 
 \ Print the data stack and stay in the current context.
 sticky
@@ -889,8 +892,9 @@ forth-wordlist set-current
 
 init  \ now vocs can be used.
 
-
-compiletoflash
+#if compiletoram?
+#error duh
+#endif
 
 root definitions  \voc first
 
@@ -945,9 +949,6 @@ root definitions
 
 : postpone ( "name" -- ) postpone postpone immediate ;
 
-  forth first definitions  decimal
-
-compiletoram
 
 \ ------------------------------------------------------------------------------
 \ Last Revision: MM-200522 0.8.3 : voc-init changed to only display (C) message
@@ -1008,14 +1009,7 @@ compiletoram
 \ Source Code Library for Mecrisp-Stellaris
 \ ------------------------------------------------------------------------------
 
-  compiletoflash
+forth definitions only decimal compiletoram
 
-  \voc first definitions  decimal
-
-root definitions  decimal  \voc first
-
-
-forth definitions only
-
-compiletoram  \ EOF vis-0.8.4-mecrisp-stellaris.fs 
+\ EOF vis-0.8.4-mecrisp-stellaris.fs 
  

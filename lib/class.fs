@@ -149,7 +149,7 @@ class-root definitions
   voc-extend
 ;
 
-  forth definitions
+forth definitions
 
 \ Create a class that only inherits from / extends class-root.
 : class: ( "name" -- )

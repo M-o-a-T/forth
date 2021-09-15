@@ -1,6 +1,8 @@
 
 \ A convenient memory dump helper
 
+forth only definitions
+
 : u.4 ( u -- ) 0 <# # # # # #> type ;
 : u.2 ( u -- ) 0 <# # # #> type ;
 

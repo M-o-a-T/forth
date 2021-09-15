@@ -375,4 +375,4 @@ sticky : ?? ( -- )
 
 : list ( -- ) list ;
 
-forth first
+forth definitions only decimal compiletoram
