@@ -909,8 +909,12 @@ forth definitions
 \ dependency, that is not fullfilled, when the new find is used.
 
 : postpone ( "name" -- )
-  (' \voc lfa>xt,flags dup $10 and if drop call, exit then
-  drop literal, ['] call, call,  immediate
+  (' lfa>xt,flags $10 and if
+    call,
+  else
+    literal, ['] call, call,
+  then
+  immediate
 ;
 
 : reg: ( "name" n -- )
