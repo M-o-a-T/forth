@@ -208,7 +208,6 @@ class Miniterm:
                 ('active' if self.stream.cd else 'inactive')))
         except AttributeError:
             pass
-            raise
         sys.stderr.write(f"\n--- Settings: {self.name}\n")
         sys.stderr.write(f'--- serial input encoding: {self.input_encoding}\n')
         sys.stderr.write(f'--- serial output encoding: {self.output_encoding}\n')
