@@ -413,8 +413,28 @@ class Miniterm:
             if not int(res.strip()):
                 self.layer = 1
             return
+        if line.startswith("#if-ok "):
+            self.layer_ += 1
+            if self.layer:
+                self.layer += 1
+                return
+            try:
+                res = await self.chat(f"{line[7:]} .", timeout=True)
+            except TimeoutError:
+                self.layer = 1
+            return
+        if line.startswith("#if-ram "):
+            self.layer_ += 1
+            if self.layer:
+                self.layer += 1
+                return
+            res = await self.chat(f"compiletoram? compiletoram .", timeout=True)
+            ram = int(res.strip())
+            res = await self.chat(f"{line[8:]} .", timeout=True)
             if not int(res.strip()):
                 self.layer = 1
+            if not ram:
+                await self.chat(f"compiletoflash", timeout=True)
             return
         if line == "#else":
             if not self.layer_:
