@@ -35,6 +35,8 @@ async def main(port, echo, encoding, filter, eol, raw, exit_char, menu_char, qui
     """Command line tool, entry point"""
 
     baud=115200
+    if batch and develop:
+        raise click.UsageError("Batch and development mode don't like each other.")
     if menu_char == exit_char:
         raise click.UsageError('--exit-char can not be the same as --menu-char')
     if not 1<=len(port)<=2:
