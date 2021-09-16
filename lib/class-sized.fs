@@ -8,6 +8,9 @@ __ivar
 __seal
 
 0 constant size
+: size@
+  s" size" voc-eval
+;
 
 : setup ( object -- )
   dup __ setup
@@ -18,8 +21,8 @@ __seal
 : object: ( -- )
   \ add actual buffer size
   size@ swap
-  class-item +  buffer:
-  ..
+  \voc \cls class-item +
+  buffer:
 ;
 
 

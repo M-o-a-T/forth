@@ -77,6 +77,10 @@ voc: class-root
 
 0 constant u/i   \ class-root has no instance data defined
 
+\ retrieve a possibly-subclassed u/i
+: u/i@ s" u/i" voc-eval ;  
+
+
 \ Return an object's data address.
 : _addr_ ( oid -- addr )
   class-root ['] .. execute immediate
@@ -104,15 +108,13 @@ voc: class-root
   get-current _csr_ ! immediate
 ;
 
-
 \voc \cls definitions
 
 \ Assign the actual class context to the next created word and return the 
 \ instance size of the class on the stack.
 : class-item ( -- u/i )
   \ get the instance size
-  voc-context @ _csr_ ! s" u/i" voc-eval
-  item  \ compile the next word as vocabulary setter
+  u/i@ item  \ compile the next word as vocabulary setter
 ;
 
 
@@ -121,6 +123,11 @@ class-root definitions
 \ Create an instance variable in the current class definition.
 : ivar: ( "name" magic n1 -- magic n2 )
   ?ivr-sys class-item +field
+;
+
+: setup  ( object -- )
+\ Initialize class variables.
+  drop
 ;
 
 \ Create an instance of a class.
