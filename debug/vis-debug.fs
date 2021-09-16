@@ -46,8 +46,7 @@
     then
     dictionarynext
   until
-  ( c-addr u lfa ) 2drop r> ( c-addr wid ) 2drop
-  r> ( lfa|0 )
+  ( c-addr u lfa |R: wid lfa.found ) 2drop drop  rdrop r> ( lfa|0 )
 ;
 
 
@@ -110,7 +109,6 @@
 : _!csr-dbg_ ( lfa -- )
     0 _csr_ ! dup
     if ( lfa ) \ found
-      \ *** for context switching debugging only
       ."  found: " dup .header 
       ( lfa ) dup forth-wordlist >   \ tagged word ?
       if ( lfa ) 

@@ -48,7 +48,7 @@
   r> drop
 ;
 
-: show-wordlist-item ( lfa wid -- )                        \ MM-200520
+: show-wordlist-item ( lfa wid -- )
   over smudged? if show-wordlist-item else 2drop then
 ;
 
@@ -170,7 +170,7 @@ root definitions
 
 \ Given a wid of a VOCabulary print the VOCabulary name, given a wid of a
 \ wordlist print the address.
-: .vid ( wid -- )  \ MM-200522
+: .vid ( wid -- )
   tag>wid
   dup wid? if .wid exit then
   .nid
@@ -279,7 +279,7 @@ forth definitions
   r> drop
 ;
 
-: show-word-name ( lfa wid -- )                        \ MM-200520
+: show-word-name ( lfa wid -- )
   over smudged? if show-word-name else 2drop then
 ;
 
