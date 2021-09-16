@@ -149,14 +149,15 @@ class-root definitions
   voc-extend
 ;
 
+
 forth definitions
 
 \ Create a class that only inherits from / extends class-root.
 : class: ( "name" -- )
   [ ' class-root call, ] \voc voc:
 ;
-   
-forth only
+
+forth definitions only
 
 \ \index  class  object  compiletoram  compiletoflash
 

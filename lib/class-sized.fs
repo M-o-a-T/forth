@@ -1,9 +1,10 @@
 forth only
+class-root also
 \voc \cls definitions
 
 class-root class: sized
 __ivar
-  hint ivar \offset
+  var> hint ivar: \offset
 __seal
 
 0 constant size
