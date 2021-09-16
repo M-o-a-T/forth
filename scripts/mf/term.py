@@ -34,6 +34,9 @@ from serial.tools.miniterm import (
     key_description,
 )
 
+class EarlyEOFError(EOFError):
+    pass
+
 class AsyncDummy:
     def __init__(self,val):
         self.val = val
@@ -411,7 +414,7 @@ class Miniterm:
             return
 
         if line == "#end":
-            raise EOFError
+            raise EarlyEOFError
         if line == "#echo":
             sys.stderr.write("\n")
             return
@@ -465,8 +468,14 @@ class Miniterm:
                         if line == "":
                             break
                         line = await self.preprocess(line)
-                    except EOFError:
+                    except EarlyEOFError as err:
+                        sys.stderr.write(f'--- END {filename} : {num}\n')
+                        self.layer = self.layer_ = 0
+                    except EOFError as err:
                         sys.stderr.write(f'--- EOF {filename} ---\n')
+                        if self.layer_:
+                            self.layer = self.layer_ = 0
+                            raise RuntimeError(f"{line[9:]}: '#if…' without corresponding '#endif'")
                         break
                     if not line:
                         continue
