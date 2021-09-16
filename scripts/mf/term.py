@@ -66,7 +66,7 @@ class Miniterm:
     log = None
     _data = b""
 
-    def __init__(self, command=None, stream=None, name=None, echo=False, eol='lf', filters=(), go_ahead = None, file=None, batch=None, logfile=None, develop=False):
+    def __init__(self, command=None, stream=None, name=None, echo=False, eol='lf', filters=(), go_ahead = None, file=None, batch=None, logfile=None, develop=False, flags=()):
         if bool(command) == bool(stream):
             raise RuntimeError("Specify one of 'command' and 'stream'")
         self.command = command
@@ -91,6 +91,13 @@ class Miniterm:
             self.console = Console()
         elif not file:
             raise RuntimeError("You need a file to send if you send a batch job")
+        self.flags = {}
+        for fl in self.flags:
+            try:
+                fl,v = fl.split("=",1)
+            except ValueError:
+                v="-1"
+            self.flags[fl] = v
 
     def _stop_reader(self):
         """Stop reader thread only, wait for clean exit of thread"""
@@ -436,6 +443,24 @@ class Miniterm:
             if not ram:
                 await self.chat(f"compiletoflash", timeout=True)
             return
+        if line.startswith("#if-flag "):
+            self.layer_ += 1
+            if self.layer:
+                self.layer += 1
+                return
+            for f in line[9:].split():
+                if f[0] == "!":
+                    if f[1:] in self.flags:
+                        break
+                else:
+                    if f not in self.flags:
+                        break
+            else:  # no "break" was hit, all match
+                return
+            # some "break" was hit, mismatch
+            self.layer = 1
+            return
+
         if line == "#else":
             if not self.layer_:
                 raise RuntimeError(f"'#else' without corresponding '#if…'")
@@ -472,6 +497,10 @@ class Miniterm:
                 return
             else:
                 raise RuntimeError("Did not fail")
+        if line.startswith("#send "):
+            val = self.flags.get(line[6:],"0")
+            sys.stderr.write(val+"\n")
+            return
         if line.startswith("#echo "):
             sys.stderr.write(line[6:]+"\n")
             return
@@ -489,7 +518,9 @@ class Miniterm:
             self.layer_ = layer_
             return
 
-        i = line.find('\\ ')
+        if line.endswith("  \\"):
+            line = line[:-3]
+        i = line.find(' \\ ')
         if i > -1:
             line = line[:i].strip()
         if not line:

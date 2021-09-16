@@ -27,11 +27,12 @@ from mf.term import Miniterm, key_description
 @click.option("-R", "--inv-reset", is_flag=True, help="Is the reset wire inverted?")
 @click.option("-g", "--go-ahead", help="Continuation signal")
 @click.option("-x", "--exec", type=click.Path(), help="run this file")
+@click.option("-F", "--flag", type=str, multiple=True, help="set this flag")
 @click.option("-l", "--log", type=click.Path(), help="log to this file")
 @click.option("-b", "--batch", is_flag=True, help="don't start a console")
 @click.option("-D", "--develop", is_flag=True, help="show Python traceback on error")
 @click.argument("port", nargs=-1)
-async def main(port, echo, encoding, filter, eol, raw, exit_char, menu_char, quiet, develop, reset, go_ahead, exec, batch, log, inv_reset):
+async def main(port, echo, encoding, filter, eol, raw, exit_char, menu_char, quiet, develop, reset, go_ahead, exec, batch, log, inv_reset, flag):
     """Command line tool, entry point"""
 
     baud=115200
@@ -58,7 +59,7 @@ async def main(port, echo, encoding, filter, eol, raw, exit_char, menu_char, qui
 
 
     async with Serial(port, baud) as stream:
-        term = Miniterm(stream=stream, echo=echo, eol=eol.lower(), filters=filters, go_ahead=go_ahead, file=exec, batch=batch, logfile=log, develop=develop)
+        term = Miniterm(stream=stream, echo=echo, eol=eol.lower(), filters=filters, go_ahead=go_ahead, file=exec, batch=batch, logfile=log, develop=develop, flags=flag)
         term.exit_character = chr(exit_char)
         term.menu_character = chr(menu_char)
         term.raw = raw

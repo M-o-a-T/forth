@@ -10,6 +10,18 @@ while ``moat-cmd`` talks to a Forth program via its stdin/stdout.
 
 There is no networking option. Use ``moat-term socat …`` if you need it.
 
+This terminal strips backslashed comments, leading or trailing whitespace,
+and empty lines.
+
+.. warning
+
+    Forth words are not recognized: strings that contain a lone backslash
+    will not result in a valid program. The same holds for ``postpone \\``
+    and similar code.
+
+    It's still possible to do the latter: a ``\\`` at the end of the line
+    will not be filtered if it's preceded by exactly one space.
+
 Command line options
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -60,6 +72,15 @@ Use ``-l PATH`` to send the terminal output to this file.
 This option is required in batch mode if you want to capture the terminal
 output. For display on your terminal, use ``-l /dev/stdout``.
 
+Test flags and values
++++++++++++++++++++++
+
+You can use ``-F NAME`` to set this flag. The Forth text can then test for
+this flag's presence (or absence) and proceed accordingly.
+
+Uses include seeding a gateway node with different parameters, or changing
+various tests while keeping the source code unified.
+
 Terminal control
 ~~~~~~~~~~~~~~~~
 
@@ -86,17 +107,23 @@ These commands are only processed when sending text files. Typing them to
 the Forth interpreter will send them unmodified, most likely resulting in a
 ``not found.`` error message.
 
+``#if``-like statements may be nested arbitrarily deep. Leaving a dangling
+``#if`` open at the end of your file results in an error.
+
+Conditionals
+::::::::::::
+
 #if WORD…
 +++++++++
 
-The words are evaluated. The sequence is expected to leave a single value on the
-stack.
+Your basic conditional statement.
 
-The statement is true if the value thus printed is not zero.
+The words are evaluated. The result should be a single value on the stack.
 
-It's bad form to depend on existing stack contents.
+The statement is true if that value is not zero, as in Forth.
 
-``#if`` statements may be nested arbitrarily deep, but not across files.
+You may depend on existing stack contents, but at the end your code must
+have increased ``DEPTH`` by exactly one. We might check that.
 
 ``WORD…`` must not emit anything and may not cause an error.
 
@@ -117,6 +144,12 @@ This test checks whether the WORDs result in a Forth OK prompt.
     catch specific failures, using ``CATCH`` and ``THROW``.
 
     See the end of ``fs/test/ring.fs`` for an example.
+
+#if-flag NAME…
+++++++++++++++
+
+This statements is true if every named flag is set, or cleared when prefixed with
+a ``!``.
 
 #ifdef NAME
 +++++++++++
@@ -152,24 +185,21 @@ middle of compiling something, might be detrimental to your health.
 #else
 +++++
 
-If the previous ``#if`` failed, execution resumes after this statement,
-otherwise it is suspended.
+If you don't know what ``#else`` does, this document won't help.
 
 #endif
 ++++++
 
-Resume execution skipped by the last previous unclosed ``#if`` or
-``#else``.
-
-.. note
-
-    All processing statements below this point are ignored.
+Whatever the last preceding ``#if``-like statement did: we continue here.
 
 then
 ++++
 
 OK, OK, this is Forth, so here's your favorite synonym for ``#endif``. 😎
 
+
+Other processor statements
+::::::::::::::::::::::::::
 
 #include PATH
 +++++++++++++
@@ -196,10 +226,10 @@ is encountered.
 #echo [TEXT]
 ++++++++++++
 
-Emits this text without sending it to Forth.
+Show this text on the terminal, without sending it to Forth.
 
-This is useful if you need to comment statements which should wait for
-manual debugging.
+This is useful if you need to show statements which the user needs for
+manual debugging, or just to annotate your log.
 
 #ok WORD…
 +++++++++
@@ -221,14 +251,32 @@ If your statement may or may not fail, you really should fix the situation
 to be more deterministic. In a pinch, use this workaround::
 
     #if-ok WORD…
-    #endif
+    #then
 
 #delay TIME
 +++++++++++
 
-Change the allowable delay between sending something and getting an ``ok``
+Change the maximum delay between sending a line and getting an ``ok``
 back form Forth.
 
 ``#-ok`` will always wait this long. So will ``#if-ok`` if it doesn't get a
 "good" reply.
+
+#send NAME
+++++++++++
+
+Send the text associated with the flag ``NAME``.
+
+If there is no text attached to the flag, ``-1`` will be sent; if it doesn't exist at
+all, ``0`` (zero).
+
+The text is sent as a line of its own.
+
+This feature was added to send serial numbers or other parameters to your
+client processors, just by passing them on the command line (or in your
+Python code). The inablility to do more, e.g. interpolate flag values into
+the Forth source, is deliberate: this terminal is not intended to be a macro
+processor that rivals the one in C. If you need a more elaborate mechanism
+to generate variations in your code, Python offers several templating
+systems.
 
