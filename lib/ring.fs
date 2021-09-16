@@ -4,48 +4,52 @@ forth definitions only
 #include lib/class.fs
 #endif
 
-#if undefined \multi
-#include lib/multitask.fs
+#if undefined abort" ( " )
+#include lib/abort.fs
 #endif
+
+#if \voc \cls undefined sized
+#include lib/class-sized.fs
+#endif
+
+\ #if undefined \multi
+\ #include lib/multitask.fs
+\ #endif
 
 #if undefined var>
 #include lib/vars.fs
 #endif
 
-#if undefined eval?
+#if undefined voc-eval
 #include lib/util.fs
 #endif
 
-\ Bah. We need "exec,".
-#if undefined [sticky]
-#include lib/exec.fs
-#endif
-
 forth definitions only
-
-var> also
 \voc \cls also
 
-class: ring
+sized class: ring
 __ivar
-  cint ivar: limit
-  cint ivar: start
-  cint ivar: end
-  cint ivar: offset
-  int ivar: task
+  var> hint ivar: limit
+  var> hint ivar: start
+  var> hint ivar: end
+#if defined \multi
+  var> int  ivar: task
+#endif
 __seal
 
 0 constant size
 : size@ s" size" voc-eval ;
-: u/i@ s" u/i" voc-eval ;
 
 : setup ( ring -- )
 \ initialize our variables
-  u/i@ over offset !
+  dup __ setup
   size@ over limit !
   0 over start !
   0 over end !
-  0 swap task !
+#[if] defined \multi
+  0 over task !
+#endif
+  drop
 ;
 
 \ ************************************************************
@@ -56,13 +60,16 @@ __seal
   __ limit @ over = if drop 0 then
 ;
 
+#if defined \multi
 : wait ( ring -- )
   dup __ task @ abort" Dup wait"
   \multi this-task  swap __ task !
   stop
   \ the waker clears
 ;
+#endif
 
+#if defined \multi
 : wake (  ring -- )
   dup __ task @
   ?dup if
@@ -73,71 +80,82 @@ __seal
     drop
   then
 ;
-
-\voc sticky  \ temp VOC is cleared
-: object: ( -- )
-  \ add actual buffer size
-  size@ swap
-  class-item +  buffer:
-  ..
-;
-
+#endif
 
 : empty? ( ring -- bool )
   dup __ end @ swap __ start @ =
 ;
 
 : full? ( ring -- bool )
-  dup __ end @ over __ start @ - swap __ mask 1 =
+  dup __ end @ 1+ over __ mask swap __ start @ =
 ;
 
 : ! ( item ring -- )
   >r
 
+#[if] defined \multi
   begin
     r@ __ end @ dup 1+ r@ __ mask dup r@ __ start @ = 
   while 
-    .s
     2drop
     eint? if
       r@ __ wait
     else
-      rdrop exit
+      r> abort" Ring full"
     then
   repeat
+#else
+  r@ __ full? if r> abort" Ring full" then
+  r@ __ end @ dup 1+ r@ __ mask
+#endif
 
   ( item end endn )
   -rot
   ( endn item end )
-  
+#[if] defined \multi
+  dup 3 -roll ( end endn item end )
+#endif
+
+  r@ dup __ \offset @ + + c!  ( endn )
+  r@ __ end !
+
+#[if] defined \multi
   \ 1st char? wake up
-  dup r@ __ start @ = if
+  r@ __ start @ = if
     r@ __ wake
   then
-  
-  r@ dup __ offset @ + + c!  ( endn )
-  r> __ end !
+#endif
+  rdrop
 ;
 
 : @ ( ring -- item )
   >r
+#[if] defined \multi
   begin
     r@ __ start @  r@ __ end @  over =  while
     eint? if
       drop r@ __ wait
     else
-      -6 abort" empty"
+      r> abort" Ring empty"
     then
   repeat
+#else
+  r@ __ empty? if r> abort" Ring empty" then
+  r@ __ start @
+#endif
   ( start |r: ring )
   dup
-  r@ dup __ offset @ + + c@
+  r@ dup __ \offset @ + + c@
   swap 1+ r@ __ mask r@ __ start !
 
+#[if] defined \multi
   \ wake up writer
   \ We should only need that if the ring was full
   \ but testing for it is more expensive than simply checking
   r> __ wake
+#else
+  rdrop
+#endif
 ;
 
 : s! ( addr count ring )
