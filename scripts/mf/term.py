@@ -544,6 +544,7 @@ class Miniterm:
                     except EarlyEOFError as err:
                         sys.stderr.write(f'--- END {filename} : {num}\n')
                         self.layer = self.layer_ = 0
+                        break
                     except EOFError as err:
                         sys.stderr.write(f'--- EOF {filename} ---\n')
                         if self.layer_:
