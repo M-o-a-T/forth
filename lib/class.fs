@@ -130,6 +130,11 @@ class-root definitions
   drop
 ;
 
+: teardown  ( object -- )
+\ Unhook this object. By default do nothing.
+  drop
+;
+
 \ Create an instance of a class.
 : object: ( "name" -- )
   class-item buffer:
