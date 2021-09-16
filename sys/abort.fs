@@ -1,20 +1,23 @@
 \ This is the bare minimum abort implementation.
-#ifndef abort
+#if token abort find drop 0=
 : abort ( -- ) cr quit ;
 #endif
 
 \ already known? bye
-#ifdef abort"
+#if token abort" ( " ) find drop
 #end
 #endif
 
 \ If \voc is undefined, we defer the rest for later
-#ifndef \voc
+#if token \voc find drop 0=
 #end
 #endif
 
+\ at this point the basics are known to be loaded,
+\ thus we can use "#if defined".
+
 \voc definitions
-#ifndef aborthandler
+#if undefined aborthandler
 
 #if defined \multi
 #include lib/multi.fs
@@ -31,12 +34,16 @@
 0 variable abortcode
 
 forth definitions
+#if undefined aborthandler
+\voc also
+#endif
+
 : throw ( throwcode -- )
 \ Returns directly to the closest CATCH.
-\ DO NOT call with a throwcode of zero. 
-  handler @ ?dup if                     
-    \ restore previous state to jump to 
-    rp! r> handler ! r> swap >r sp! drop r>
+\ DO NOT call with a throwcode of zero.
+  aborthandler @ ?dup if
+    \ restore previous state to jump to
+    rp! r> aborthandler ! r> swap >r sp! drop r>
     unloop  exit
   else
     abortcode !
@@ -44,14 +51,14 @@ forth definitions
   then
 ;
 
-: catch ( x1 .. xn xt -- y1 .. yn throwcode / z1 .. zm 0 ) 
-\ Call something, catching a possible call to THROW 
+: catch ( x1 .. xn xt -- y1 .. yn throwcode / z1 .. zm 0 )
+\ Call something, catching a possible call to THROW
   [ $B430 h, ]  \ push { r4  r5 } to save I and I'
-  sp@ >r  handler @ >r  rp@ handler !
-  execute                                                      
-  r> handler !  rdrop
+  sp@ >r  aborthandler @ >r  rp@ aborthandler !
+  execute
+  r> aborthandler !  rdrop
   0 unloop
-;           
+;
 
 \voc definitions
 : abort-print
@@ -61,8 +68,8 @@ forth definitions
 	hex.
   then
   abortmsg @ ?dup if
-    ." : " ctype cr 
-    0 abortmsg !   
+    ." : " ctype cr
+    0 abortmsg !
   then
 ;
 
@@ -98,5 +105,4 @@ forth definitions
 \ (b) At runtime do *not* call INIT, just do your own thing.
 \voc ' abort-quit hook-quit !
 
-#endif
 forth only

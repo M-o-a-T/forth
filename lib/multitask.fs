@@ -27,7 +27,7 @@
 forth definitions only  decimal
 
 #if defined throw
-#error Do not use with singletasked catch/throw
+#error conflicts with single-tasked catch/throw
 #endif
 
 #if undefined eint
@@ -42,9 +42,17 @@ forth definitions only  decimal
 : .word drop inline ;
 #endif
 
-voc: \multi
+#if undefined var>
+#include lib/vars.fs
+#endif
 
-40 constant stackspace \ 64 stack elements for every task
+voc: \multi
+var> also
+
+class: task
+__ivar
+  0 
+__seal
 
 5 constant taskvars
 

@@ -20,15 +20,17 @@ compiletoflash
 : init ;
 #endif
 
+#include sys/abort.fs
+
 #if-flag multi
-#include lib/multitask.fs
+#include sys/multi.fs
+
 #echo
 #echo ************
 #echo  MULTI TASK
 #echo ************
 #echo
 #else
-#include lib/abort.fs
 #echo
 #echo -------------
 #echo  SINGLE TASK

@@ -394,8 +394,7 @@ forth-wordlist variable c2r-current
 : <builds  wtag, <builds ;
 \ ------------------------------------------------------------------------------
 
-: abort ( -- ) cr quit ;  \ required for e4thcom error detection
-
+#include sys/abort.fs
 
 \voc-wl set-current
 

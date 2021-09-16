@@ -1,3 +1,7 @@
+#if undefined class-root
+#include lib/class.fs
+#endif
+
 forth only
 class-root also
 \voc \cls definitions
