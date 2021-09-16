@@ -151,16 +151,6 @@ This test checks whether the WORDs result in a Forth OK prompt.
 This statements is true if every named flag is set, or cleared when prefixed with
 a ``!``.
 
-#ifdef NAME
-+++++++++++
-
-A shortcut for ``#if token NAME find drop``.
-
-#ifndef NAME
-++++++++++++
-
-A shortcut for ``#if token NAME find drop 0=``.
-
 #[if] WORD…
 +++++++++++
 
@@ -168,9 +158,6 @@ Like ``#if``, but will be wrapped in ``[`` and ``]``, thus works in compile
 context (and only there).
 
 It's bad form to use this across definitions.
-
-There are no ``#[ifdef]`` or ``#[ifndef]`` versions; use the long form if
-you really need them.
 
 #if-ram WORD…
 +++++++++++++
