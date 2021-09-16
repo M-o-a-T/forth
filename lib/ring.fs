@@ -1,11 +1,11 @@
 forth definitions only
 
-#if undefined class:
-#include lib/class.fs
+#if undefined abort" ( " )
+#include sys/abort.fs
 #endif
 
-#if undefined abort" ( " )
-#include lib/abort.fs
+#if undefined class:
+#include lib/class.fs
 #endif
 
 #if \voc \cls undefined sized
