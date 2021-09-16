@@ -11,21 +11,28 @@ rr setup
 rr 40 dump 
 
 #echo ## TEST
-rr empty? . rr full? .
+#ok rr empty?
+#ok rr full? not
 12 rr !
 23 rr !
-rr empty? . rr full? .
+#ok rr empty? not
+#ok rr full? not
 34 rr !
-rr empty? . rr full? .
 
 rr 20 dump 
-rr empty? .
-rr @ .
-rr @ .
-rr @ .
-rr empty? .
+#ok rr empty? not
+#ok rr full?
+#ok rr @ 12 =
+#ok rr @ 23 =
+#ok rr @ 34 =
+#ok rr empty?
+#ok rr full? not
 
 1 rr !
 12 rr !
 23 rr !
-34 rr ! ( hangs )
+: \push 34 rr ! ." ERROR" quit ;
+: push ' \push catch . ;
+#ok rr @ 1 =
+#ok rr @ 12 =
+#ok rr @ 23 =
