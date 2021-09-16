@@ -382,7 +382,7 @@ class Miniterm:
             if self.layer:
                 self.layer += 1
                 return
-            res = await self.chat(f"{line[4:]} .", timeout=0.1)
+            res = await self.chat(f"{line[4:]} .", timeout=True)
             if not int(res.strip()):
                 self.layer = 1
             return
@@ -391,7 +391,10 @@ class Miniterm:
             if self.layer:
                 self.layer += 1
                 return
-            res = await self.chat(f"[ {line[6:]} . ]", timeout=0.1)
+            res = await self.chat(f"[ {line[6:]} . ]", timeout=True)
+            if not int(res.strip()):
+                self.layer = 1
+            return
             if not int(res.strip()):
                 self.layer = 1
             return
@@ -418,13 +421,13 @@ class Miniterm:
             sys.stderr.write("\n")
             return
         if line.startswith("#check "):
-            res = await self.chat(f"{line[7:]} .", timeout=0.1)
+            res = await self.chat(f"{line[7:]} .", timeout=True)
             if not int(res.strip()):
                 raise RuntimeError("Check failed")
             return
         if line.startswith("#-ok "):
             try:
-                res = await self.chat(f"{line[4:]} .", timeout=0.1)
+                res = await self.chat(f"{line[4:]} .", timeout=True)
             except TimeoutError:
                 return
             else:
