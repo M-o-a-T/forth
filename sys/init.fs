@@ -28,11 +28,11 @@ compiletoflash
 #echo ************
 #echo
 #else
+#include lib/abort.fs
 #echo
 #echo -------------
 #echo  SINGLE TASK
 #echo -------------
 #echo
-#include lib/abort.fs
 #endif
 
