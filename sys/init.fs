@@ -1,6 +1,7 @@
-\ This is the master loader.
-\ It should be written to be idempotent.
+\ System initialization.
 \ 
+\ This file contains the basic minimum to get the rest of all of this up
+\ and running.
 
 #if token vis find drop 0=
 \ We need to load the "vis" extension first, (a) because it doesn't upcall
@@ -9,24 +10,19 @@
 #include lib/vis.fs
 #endif
 
+compiletoflash
 #if token defined find drop 0=
-#error vis.fs should have done this
 #include lib/util.fs
 #endif
 
+compiletoflash
 #if undefined init
 : init ;
 #endif
 
-#if defined syscall undefined save and
-compiletoram
-#include lib/save.fs
+#if-flag multi
+#include lib/multitask.fs
+#else
+#include lib/abort.fs
 #endif
 
-compiletoram
-#if undefined .word
-#include lib/crash.fs
-#endif
-#if undefined multitask
-#include lib/multitask.fs
-#endif
