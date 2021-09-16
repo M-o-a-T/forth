@@ -92,7 +92,7 @@ class Miniterm:
         elif not file:
             raise RuntimeError("You need a file to send if you send a batch job")
         self.flags = {}
-        for fl in self.flags:
+        for fl in flags:
             try:
                 fl,v = fl.split("=",1)
             except ValueError:
