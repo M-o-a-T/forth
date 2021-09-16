@@ -442,7 +442,7 @@ class Miniterm:
             if self.layer <= 1:
                 self.layer = 1-self.layer
             return
-        if line == "#endif":
+        if line == "#endif" or line == "#then":
             if self.layer:
                 self.layer -= 1
             if self.layer_:
