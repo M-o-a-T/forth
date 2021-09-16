@@ -22,7 +22,17 @@ compiletoflash
 
 #if-flag multi
 #include lib/multitask.fs
+#echo
+#echo ************
+#echo  MULTI TASK
+#echo ************
+#echo
 #else
+#echo
+#echo -------------
+#echo  SINGLE TASK
+#echo -------------
+#echo
 #include lib/abort.fs
 #endif
 
