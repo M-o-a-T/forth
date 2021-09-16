@@ -417,6 +417,8 @@ class Miniterm:
                 self.layer = 1
             return
         if line == "#else":
+            if not self.layer_:
+                raise RuntimeError(f"'#else' without corresponding '#if…'")
             if self.layer <= 1:
                 self.layer = 1-self.layer
             return
@@ -427,7 +429,7 @@ class Miniterm:
                 self.layer_ -= 1
             else:
                 self.layer = self.layer_ = 0
-                raise RuntimeError(f"{line[9:]}: '#if…' without corresponding #endif")
+                raise RuntimeError(f"'{line}' without corresponding '#if…'")
             return
 
         if self.layer:
@@ -463,7 +465,7 @@ class Miniterm:
             await self.send_file(line[9:])
             if self.layer_:
                 self.layer = self.layer_ = 0
-                raise RuntimeError(f"{line[9:]}: '#if…' without corresponding #endif")
+                raise RuntimeError(f"{line[9:]}: '#if…' without corresponding '#endif'")
             self.layer_ = layer_
             return
 
