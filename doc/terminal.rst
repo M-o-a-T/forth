@@ -280,3 +280,15 @@ processor that rivals the one in C. If you need a more elaborate mechanism
 to generate variations in your code, Python offers several templating
 systems.
 
+Coding hints
+~~~~~~~~~~~~
+
+For checking whether a word exists, "defined" and "undefined" words exist.
+If you want to introspect a vocabulary, you can use ``#if VOC defined NAME``
+which is not quite intuitive, but it works.
+
+For open-coding you can use ``#if token NAME find drop`` (remember that
+FIND returns two words), but that doesn't work for vocabularies: neither
+FIND nor EXECUTE are in the root vocabulary, and copying them there would
+be a bad idea.
+
