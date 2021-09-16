@@ -9,11 +9,15 @@ compiletoflash
 #if token defined find drop 0=
 \ We want to use "#if defined X" instead of the above dance.
 
+only root definitions
+
 sticky  \ deleted by "find"
 : defined   ( "token" -- flag ) token find drop 0<> ; 
 
 sticky  \ deleted by "find" in "defined"
 : undefined ( "token" -- flag ) defined not ;
+
+forth definitions
 
 #endif
 

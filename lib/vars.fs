@@ -11,9 +11,6 @@ __seal
 : ? ( a -- )  @ . ;
 
 
-forth definitions only
-
-
 class: cint
 
 __ivar
@@ -24,8 +21,6 @@ __seal
 : ! ( n a -- ) c! inline ;
 : ? ( a -- )  c@ base @ swap hex  0 <# # # #> type space  base ! ;
 
-
-forth definitions only
 
 class: hint
 
