@@ -386,6 +386,24 @@ class Miniterm:
             if not int(res.strip()):
                 self.layer = 1
             return
+        if line.startswith("#ifdef "):
+            self.layer_ += 1
+            if self.layer:
+                self.layer += 1
+                return
+            res = await self.chat(f"token {line[7:]} find drop 0= .", timeout=True)
+            if not int(res.strip()):
+                self.layer = 1
+            return
+        if line.startswith("#ifndef "):
+            self.layer_ += 1
+            if self.layer:
+                self.layer += 1
+                return
+            res = await self.chat(f"token {line[8:]} find drop 0= .", timeout=True)
+            if int(res.strip()):
+                self.layer = 1
+            return
         if line.startswith("#[if] "):
             self.layer_ += 1
             if self.layer:
