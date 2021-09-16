@@ -19,7 +19,7 @@ programs come with a few Forth-related improvements.
 Reset
 +++++
 
-The ``-r`` and ``-R`` options control whether the RTS line should be
+The ``-r`` and ``-R`` options control whether the ``RTS`` line should be
 asserted or not, and whether to briefly invert it before proceeding.
 
 Go Ahead
@@ -116,6 +116,8 @@ This test checks whether the WORDs result in a Forth OK prompt.
     fail for other reasons than you expected. It's generally better to
     catch specific failures, using ``CATCH`` and ``THROW``.
 
+    See the end of ``fs/test/ring.fs`` for an example.
+
 #ifdef NAME
 +++++++++++
 
@@ -199,6 +201,17 @@ Emits this text without sending it to Forth.
 This is useful if you need to comment statements which should wait for
 manual debugging.
 
+#ok WORD…
++++++++++
+
+The words are evaluated (as in ``#if``). The statement is OK if its value
+is not zero; otherwise an error is raised (as in ``#error``).
+
+.. note
+
+    To reverse the test, just add ``not`` to the end. ``#-ok`` tests for a
+    statement that breaks the interpreter.
+
 #-ok WORD…
 ++++++++++
 
@@ -207,14 +220,8 @@ manual debugging.
 If your statement may or may not fail, you really should fix the situation
 to be more deterministic. In a pinch, use this workaround::
 
-    #ifok WORD…
+    #if-ok WORD…
     #endif
-
-#check WORD…
-++++++++++++
-
-The words are evaluated (as in ``#if``). The statement is OK if its value
-is not zero; otherwise an error is raised (as in ``#error``).
 
 #delay TIME
 +++++++++++
