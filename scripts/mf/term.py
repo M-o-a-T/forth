@@ -460,8 +460,8 @@ class Miniterm:
         if line == "#echo":
             sys.stderr.write("\n")
             return
-        if line.startswith("#check "):
-            res = await self.chat(f"{line[7:]} .", timeout=True)
+        if line.startswith("#ok "):
+            res = await self.chat(f"{line[4:]} .", timeout=True)
             if not int(res.strip()):
                 raise RuntimeError("Check failed")
             return
