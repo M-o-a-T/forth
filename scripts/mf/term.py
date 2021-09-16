@@ -384,6 +384,15 @@ class Miniterm:
             if not int(res.strip()):
                 self.layer = 1
             return
+        if line.startswith("#[if] "):
+            self.layer_ += 1
+            if self.layer:
+                self.layer += 1
+                return
+            res = await self.chat(f"[ {line[6:]} . ]", timeout=0.1)
+            if not int(res.strip()):
+                self.layer = 1
+            return
         if line == "#else":
             if self.layer <= 1:
                 self.layer = 1-self.layer
