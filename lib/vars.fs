@@ -1,3 +1,7 @@
+#if undefined class:
+#include lib/class.fs
+#endif
+
 voc: var>
 
 class: int
