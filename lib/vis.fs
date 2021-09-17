@@ -733,7 +733,7 @@ root-wordlist set-current   \ Some tools needed in VOC contexts
 ;
 
 : (def ( -- )
-  _SOP_ @ @ set-current ;
+  _sop_ @ @ set-current ;
 
 : definitions ( -- ) 
   (def [ ' .. call, ] immediate ;
@@ -790,7 +790,7 @@ root-wordlist set-current
 : only ( -- )
 \ use only the base vocabulary (forth+root)
 \ plus whatever is current
-  [ .. voc-context @ literal, forth .. voc-context @ literal, ] 
+  [ root .. voc-context @ literal, forth .. voc-context @ literal, ]
   voc-context @
   3 set-order  immediate ;
 
