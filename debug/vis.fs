@@ -31,6 +31,13 @@
   ." name: " lfa>nfa count type space            \ print name
 ;
 
+: ramdictstart ( -- lfa )
+\ always returns RAM dictionary start
+  compiletoram? compiletoram
+  dictionarystart
+  swap not if compiletoflash then
+;
+
 : show-wordlist-item ( lfa wid -- )
   >r dup forth-wordlist >=   \ tagged word ?
   if ( lfa )
@@ -53,7 +60,7 @@
 
 : show-wordlist-in-ram ( wid lfa -- )
   drop ( wid ) >r
-  dictionarystart ( lfa )
+  ramdictstart ( lfa )
   begin
     dup _sof_ <>
   while
@@ -84,7 +91,7 @@ forth definitions
 : show-wordlist ( wid -- )
   dup forth-wordlist =
   if dup _sof_ else dup forth-wordlist then show-wordlist-in-flash
-  compiletoram? if 0 show-wordlist-in-ram else drop then
+  0 show-wordlist-in-ram
 ;
 
 \voc definitions
@@ -98,18 +105,12 @@ forth definitions
     dup forth-wordlist
   else
     \ Show words in flash starting with the first word in flash.
-\   dup forth-wordlist over = if _sof_ else forth-wordlist then  \ fails MM-200102
-    dup dup forth-wordlist = if _sof_ else forth-wordlist then   \ works
+    dup  dup forth-wordlist = if _sof_ else forth-wordlist then
   then
+  over cr ." << FLASH: " .wid
   show-wordlist-in-flash
-  dup cr ." << FLASH: " .wid
-  compiletoram?
-  if
-    cr dup ." >> RAM:   " .wid
-    0 show-wordlist-in-ram
-  else
-     drop
-  then
+  dup cr ." >> RAM:   " .wid
+  0 show-wordlist-in-ram
   cr
 ;
 
@@ -218,18 +219,15 @@ forth definitions
     dictionarynext
   until
   drop
-  compiletoram?
-  if
-    cr ."   RAM:"  \ show items defined in RAM
-    dictionarystart ( lfa )
-    begin
-      dup _sof_ <>
-    while
-      dup ?item
-      dictionarynext if drop _sof_ then
-    repeat
-    drop
-  then
+  cr ."   RAM:"  \ show items defined in RAM
+  ramdictstart
+  begin
+    dup _sof_ <>
+  while
+    dup ?item
+    dictionarynext if drop _sof_ then
+  repeat
+  drop
   space
 ;
 
@@ -247,17 +245,14 @@ forth definitions
     dup ?voc dictionarynext
   until
   drop
-  compiletoram?
-  if
-    cr ."   RAM: "   \ show VOCs define in RAM
-    dictionarystart ( lfa )
-    begin
-      dup _sof_ <>
-    while
-      dup ?voc dictionarynext if drop _sof_ then
-    repeat
-    drop
-  then
+  cr ."   RAM: "   \ show VOCs define in RAM
+  ramdictstart ( lfa )
+  begin
+    dup _sof_ <>
+  while
+    dup ?voc dictionarynext if drop _sof_ then
+  repeat
+  drop
   space
 ;
 
@@ -284,7 +279,7 @@ forth definitions
 
 : show-word-in-ram ( wid lfa -- )
   drop ( wid ) >r
-  dictionarystart ( lfa )
+  ramdictstart ( lfa )
   begin
     dup _sof_ <>
   while
@@ -328,15 +323,10 @@ forth definitions
     \ Show words in flash starting with the first word in flash.
     dup dup forth-wordlist = if _sof_ else forth-wordlist then
   then
+  over cr ." << FLASH: " .wid
   show-word-in-flash
-  dup cr ." << FLASH: " .wid
-  compiletoram?
-  if
-    dup cr ." >> RAM:   " .wid
-    0 show-word-in-ram
-  else
-     drop
-  then
+  dup cr ." >> RAM:   " .wid
+  0 show-word-in-ram
   cr
 ;
 
