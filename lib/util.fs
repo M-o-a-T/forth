@@ -33,7 +33,9 @@ forth definitions
     -3 abort
   then
 ;
+#endif
 
+#if undefined voc-eval  defined \voc  and
 : voc-eval  ( addr n -- )
 \ given a word in the current vocabulary, find and run it.
   1 \voc _csr_ bis!
