@@ -5,7 +5,7 @@
 #endif
 
 
-\voc definitions
+forth definitions
 
 voc: \cls
 
@@ -108,7 +108,7 @@ voc: class-root
   get-current _csr_ ! immediate
 ;
 
-\voc \cls definitions
+\cls definitions
 
 \ Assign the actual class context to the next created word and return the 
 \ instance size of the class on the stack.

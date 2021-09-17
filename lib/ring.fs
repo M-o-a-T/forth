@@ -8,7 +8,7 @@ forth definitions only
 #include lib/class.fs
 #endif
 
-#if \voc \cls undefined sized
+#if \cls undefined sized
 #include lib/class-sized.fs
 #endif
 
@@ -25,7 +25,7 @@ forth definitions only
 #endif
 
 forth definitions only
-\voc \cls also
+\cls also
 
 sized class: ring
 __ivar

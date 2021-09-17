@@ -2,9 +2,13 @@
 #include lib/class.fs
 #endif
 
+#if undefined vars>
+#include lib/vars.fs
+#endif
+
 forth only
 class-root also
-\voc \cls definitions
+\cls definitions
 
 class-root class: sized
 __ivar
@@ -25,7 +29,7 @@ __seal
 : object: ( -- )
   \ add actual buffer size
   size@ swap
-  \voc \cls class-item +
+  \cls class-item +
   buffer:
 ;
 
