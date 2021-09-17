@@ -332,7 +332,7 @@ class Miniterm:
         """Implement a simple menu / settings"""
         if c == self.menu_character or c == self.exit_character:
             # Menu/exit character again -> send itself
-            self.stream.send(self.tx_encoder.encode(c))
+            anyio.from_thread.run(self.stream.send,self.tx_encoder.encode(c))
             if self.echo:
                 self.console.write(c)
         elif c == '\x01':  # CTRL+A -> set encoding
