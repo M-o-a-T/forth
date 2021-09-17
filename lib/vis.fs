@@ -767,7 +767,7 @@ root-wordlist set-current   \ Some tools needed in VOC contexts
   over 1 = if ."  ? search order underflow " abort then
   over 0 do
     i 2 + pick
-    ( voc… n ign xign )
+    ( voc… n ign voc-N )
     over =
     if
       drop  ( voc… n )
