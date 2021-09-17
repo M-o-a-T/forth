@@ -48,6 +48,43 @@ forth definitions
 #endif
 
 
+\ mecrisp-without-RA doesn't have these
+
+#if undefined roll
+: roll ( xu xu-1 … x0 u -- xu-1 … x0 xu )
+  ?dup if  \ zero is no-op
+    dup
+    begin ( x* u u' )
+    ?dup while
+      rot >r 1-
+    repeat
+    ( xu u |R: xu-1 … x0 )
+    begin ?dup while
+      r> -rot 1-
+    repeat
+  then
+; 
+#endif
+
+#if undefined -roll
+: -roll ( xu-1 … x0 xu u -- xu xu-1 … x0 )
+  ?dup if  \ zero is no-op
+    dup
+    begin  ( x* xu u u' )
+    ?dup while
+      \ 3 roll
+      >r rot r> swap
+      >r 1-
+    repeat
+    ( xu u |R: xu-1 … x0 )
+    begin
+    ?dup while
+      r> swap 1-
+    repeat
+  then
+;
+#endif
+
 
 \ clean up
 #if ( compiletoram-flag  -- )
