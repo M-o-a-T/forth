@@ -1,6 +1,10 @@
 forth only definitions
 compiletoram decimal
 
+#if undefined dump
+#include lib/dump.fs
+#endif
+
 ring class: r4
 4 constant size
 
