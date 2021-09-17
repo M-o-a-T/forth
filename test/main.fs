@@ -6,9 +6,9 @@ compiletoflash
 #include lib/class.fs
 #endif
 
+compiletoram
 
 #if undefined int
-compiletoram
 #include test/class.fs
 forgetram
 #endif
@@ -28,7 +28,6 @@ compiletoflash
 #endif
 
 #if undefined ring
-compiletoflash
 #include lib/ring.fs
 #endif
 
@@ -38,15 +37,16 @@ compiletoram
 forgetram
 #endif
 
+#if-flag multi
 compiletoram
 #if undefined tasks
-#include debug/multicast.fs
+#include debug/multitask.fs
 #endif
 
-#if-flag multi
 #if undefined timetask
-#include test/multicast.fs
+#include test/multitask.fs
 forgetram
+#endif
 #endif
 
 
