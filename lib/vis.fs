@@ -902,7 +902,7 @@ root definitions  \voc first
   ."   " type ."  not found." abort
 ;  
 
-forth definitions
+root definitions
 
 : ' ( "name" -- xt ) (' lfa>xt ;
 
@@ -940,11 +940,8 @@ forth definitions
 \
 
 
-root definitions
 
-: ' ( "name" -- ) ' ;
 
-: ['] ( "name" -- ) postpone ['] immediate ;
 
 : postpone ( "name" -- ) postpone postpone immediate ;
 
