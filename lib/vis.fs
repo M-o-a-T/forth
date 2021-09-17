@@ -789,8 +789,10 @@ root-wordlist set-current
 
 : only ( -- )
 \ use only the base vocabulary (forth+root)
+\ plus whatever is current
   [ .. voc-context @ literal, forth .. voc-context @ literal, ] 
-  dup 3 set-order  immediate ;
+  voc-context @
+  3 set-order  immediate ;
 
 : also ( -- ) 
 \ add the current temp vocabulary to the search list
@@ -841,7 +843,7 @@ root-wordlist set-current   \ Some tools needed in VOC contexts
 \ restore basic system state
 
 
-\ \voc-wl first
+\ \voc-wl also
 
 get-order nip \voc-wl swap set-order
 
@@ -877,7 +879,7 @@ sticky
   wlst-init  ['] vocs-quit hook-quit !  ['] vocs-find hook-find !
 ;
 
-\ \voc-wl first
+\ \voc-wl also
 get-order nip \voc-wl swap set-order
 
 root-wordlist set-current
@@ -895,7 +897,7 @@ init  \ now vocs can be used.
 #error duh
 #endif
 
-root definitions  \voc first
+root definitions  \voc only
 
 : (' ( "name" -- lfa )
   token 2dup search-in-dictionary ?dup if -rot 2drop exit then
