@@ -202,6 +202,16 @@ Processing this file is terminated. This is not an error; the terminal
 resumes at the point where it was included / returns to the interactive
 prompt.
 
+#end
+++++
+
+Processing of all files is terminated. This is not an error; the terminal
+immediately returns to the prompt / exits.
+
+This is useful for debugging.
+
+There is no way to resume uploading. (Yet?)
+
 #error TEXT
 +++++++++++
 

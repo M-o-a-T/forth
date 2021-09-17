@@ -36,6 +36,8 @@ from serial.tools.miniterm import (
 
 class EarlyEOFError(EOFError):
     pass
+class AllEOFError(EOFError):
+    pass
 
 class AsyncDummy:
     def __init__(self,val):
@@ -119,6 +121,8 @@ class Miniterm:
                         await anyio.sleep(0.1)
                         try:
                             await self.send_file(self.file)
+                        except AllEOFError as err:
+                            pass
                         except Exception as e:
                             if not self.develop:
                                 raise
@@ -464,6 +468,8 @@ class Miniterm:
 
         if line == "#end":
             raise EarlyEOFError
+        if line == "#end*":
+            raise AllEOFError
         if line == "#echo":
             sys.stderr.write("\n")
             return
@@ -523,6 +529,10 @@ class Miniterm:
                         if line == "":
                             break
                         line = await self.preprocess(line)
+                    except AllEOFError as err:
+                        sys.stderr.write(f'--- END {filename} : {num}\n')
+                        self.layer = self.layer_ = 0
+                        raise
                     except EarlyEOFError as err:
                         sys.stderr.write(f'--- END {filename} : {num}\n')
                         self.layer = self.layer_ = 0
@@ -554,6 +564,8 @@ class Miniterm:
                 try:
                     anyio.from_thread.run(self.send_file, filename)
                     sys.stderr.write(f'\n--- File {filename} sent ---\n')
+                except AllEOFError as err:
+                    pass
                 except Exception as e:
                     if not self.develop:
                         raise
