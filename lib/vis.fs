@@ -939,9 +939,17 @@ root definitions
 \ … p1 in ( -- c-addr )
 \
 
+: forgetram 
+  compiletoram? compiletoram
+
+  postpone forth postpone only postpone definitions
+  forgetram
+
+  not if compiletoflash then
+;
 
 
-
+root definitions
 
 : postpone ( "name" -- ) postpone postpone immediate ;
 
