@@ -11,7 +11,6 @@
 ;
 
 : .wid ( lfa|wid -- )
-\ dup @ if ( wid = lfa ) .id else u. then
   dup wid? if u. else .id then
 ;
 
@@ -327,7 +326,7 @@ forth definitions
     dup forth-wordlist
   else
     \ Show words in flash starting with the first word in flash.
-    dup dup forth-wordlist = if _sof_ else forth-wordlist then   \ works
+    dup dup forth-wordlist = if _sof_ else forth-wordlist then
   then
   show-word-in-flash
   dup cr ." << FLASH: " .wid
