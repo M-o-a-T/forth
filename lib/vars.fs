@@ -6,7 +6,7 @@ voc: var>
 
 class: int
 
-__ivar
+__data
   cell+
 __seal
 
@@ -17,7 +17,7 @@ __seal
 
 class: cint
 
-__ivar
+__data
   1+
 __seal
 
@@ -28,7 +28,7 @@ __seal
 
 class: hint
 
-__ivar
+__data
   2 +
 __seal
 

@@ -28,12 +28,12 @@ forth definitions only
 \cls also
 
 sized class: ring
-__ivar
-  var> hint ivar: limit
-  var> hint ivar: start
-  var> hint ivar: end
+__data
+  var> hint field: limit
+  var> hint field: start
+  var> hint field: end
 #if defined \multi
-  var> int  ivar: task
+  var> int  field: task
 #endif
 __seal
 

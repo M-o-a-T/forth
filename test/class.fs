@@ -21,9 +21,9 @@ __ ?? ..
 forth definitions
 
 class-root class: point
-__ivar
-  int ivar: x
-  int ivar: y
+__data
+  int field: x
+  int field: y
 __seal
 
 

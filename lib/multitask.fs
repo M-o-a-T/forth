@@ -50,7 +50,7 @@ voc: \multi
 var> also
 
 class: task
-__ivar
+__data
   0 
 __seal
 

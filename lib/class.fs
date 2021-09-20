@@ -35,7 +35,7 @@ voc: \cls
 
 \ <class> definitions ( -- )  Make <class> the current compilation context.
 
-\ __ivar ( -- ivsys 0|inherited-size ) Begin or extend an instance definition
+\ __data ( -- ivsys 0|inherited-size ) Begin or extend an instance definition
 \                                      in the current class compilation context.
 
 \ __seal ( ivsys size -- )  Terminate an instance definition in the current 
@@ -88,7 +88,7 @@ voc: class-root
 
 
 \ Begin or extend an instance definition in a class definition.
-: __ivar ( -- magic 0|inherited-size ) 
+: __data ( -- magic 0|inherited-size ) 
   ivr-sys current @ dup _csr_ ! 
   s" u/i" 2dup 4 pick search-in-wordlist
   if ." instance is sealed" abort exit then
@@ -121,7 +121,7 @@ voc: class-root
 class-root definitions
 
 \ Create an instance variable in the current class definition.
-: ivar: ( "name" magic n1 -- magic n2 )
+: field: ( "name" magic n1 -- magic n2 )
   ?ivr-sys class-item +field
 ;
 

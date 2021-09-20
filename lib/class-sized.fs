@@ -11,8 +11,8 @@ class-root also
 \cls definitions
 
 class-root class: sized
-__ivar
-  var> hint ivar: \offset
+__data
+  var> hint field: \offset
 __seal
 
 0 constant size
