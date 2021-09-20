@@ -12,10 +12,6 @@ forth definitions only
 #include lib/class-sized.fs
 #endif
 
-\ #if undefined \multi
-\ #include lib/multitask.fs
-\ #endif
-
 #if undefined var>
 #include lib/vars.fs
 #endif

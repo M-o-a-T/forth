@@ -23,7 +23,7 @@ compiletoflash
 #include sys/abort.fs
 
 #if-flag multi
-#include sys/multi.fs
+#include sys/multitask.fs
 
 #echo
 #echo ************

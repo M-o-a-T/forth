@@ -20,7 +20,7 @@
 #if undefined aborthandler
 
 #if defined \multi
-#include lib/multi.fs
+#include sys/multi.fs
 \ multi.fs will re-import us
 #end
 #endif
