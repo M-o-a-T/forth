@@ -20,6 +20,10 @@ compiletoflash
 : init ;
 #endif
 
+#if-flag debug
+#include debug/vis.fs
+#endif
+
 #include sys/abort.fs
 
 #if-flag multi

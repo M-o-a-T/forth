@@ -2,6 +2,12 @@
 
 compiletoflash
 
+#if undefined ??
+#include debug/vis.fs
+#endif
+
+compiletoflash
+
 #if undefined class:
 #include lib/class.fs
 #endif
