@@ -26,10 +26,6 @@
 
 forth definitions only  decimal
 
-#if defined throw
-#error conflicts with single-tasked catch/throw
-#endif
-
 #if undefined eint
 \ happens when running on Linux …
 : eint inline ;
@@ -265,24 +261,6 @@ forth definitions
     then
   then
 ;
-
-: abort ( -- )
-\ Unconditionally throws a -1 error.
-  -1 throw
-;
-
-\multi definitions
-
-: (abort) ( flag cstr )
-\ runtime for abort"
-  swap ?dup if
-    swap abortmsg ! throw
-  else drop then
-;
-
-forth definitions
-
-: abort" postpone c" ['] (abort) call, immediate ;
 
 \multi definitions
 
