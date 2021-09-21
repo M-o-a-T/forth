@@ -134,7 +134,6 @@ forth-wl variable c2r-current
 
   \voc-wl ,
 \ Return true if name of word at lfa equals c-addr,u and word is smudged.
-\ Note: Based on mecrisps case insensitive non-ANS compare.
 : name? ( c-addr u lfa -- c-addr u lfa flag )
   >r 2dup r@ lfa>nfa count compare r> swap
   if  ( c-addr u lfa )  \ name = string c-addr,u
@@ -148,7 +147,6 @@ forth-wl variable c2r-current
   \voc-wl ,
 \ If the word with name c-addr,u is a member of wordlist wid, return its lfa.
 \ Otherwise return zero.
-\ Note: Based on mecrisps case insensitive non-ANS compare.
 : search-wl-in-ram ( c-addr u wid -- lfa|0 )
   >r dictionarystart 
   begin ( c-addr u lfa )
@@ -170,7 +168,6 @@ forth-wl variable c2r-current
   \voc-wl ,
 \ If the word with name c-addr,u is a member of wordlist wid, return its lfa.
 \ Otherwise return zero.
-\ Note: Based on mecrisps case insensitive non-ANS compare.
 : search-wl-in-flash ( c-addr u wid -- lfa|0 )
   dup 0 >r >r forth-wl = if _sof_ else forth-wl @  then
    begin
@@ -205,7 +202,6 @@ forth-wl variable c2r-current
   \voc-wl , 
 \ If the word with name c-addr,u is a member of wordlist wid, return its lfa.
 \ Otherwise return zero.
-\ Note: Based on mecrisps case insensitive non-ANS compare.
 : ??-wl ( c-addr u wid -- lfa|0 )
   >r compiletoram?
   if
@@ -219,8 +215,7 @@ compiletoram
 
   \voc-wl ,
 \ Search the word with name c-addr,u in the search order at a-addr. If found
-\ return the words lfa otherwise retun 0.
-\ Note: Based on mecrisps case insensitive non-ANS compare.
+\ return the words lfa otherwise return 0.
 : ??-order ( c-addr u a-addr -- lfa|0 )
   dup >r ( c-addr u a-addr )  \ a-addr = top of the search order
   begin
@@ -237,7 +232,6 @@ compiletoram
   \voc-wl ,
 \ Search the dictionary for the word with the name c-addr,u. Return xt and flags
 \ if found, 0 and invalid flags otherwise.
-\ Note: Based on mecrisps case insensitive non-ANS compare.
 : find-in-dict ( c-addr u -- xt|0 flags )
   context ??-order ( lfa ) lfa>xt,flags
 ;
@@ -396,6 +390,7 @@ get-order nip \voc-wl swap set-order
 \ Search the VOCs search order (voc-context) at a-addr for a match with the
 \ string c-addr,len. If found return the address (lfa) of the dictionary entry,
 \ otherwise return 0.
+\ This is the same code as ??-vocs-no-root, except for the last line.
 : ??-vocs ( c-addr len a-addr -- lfa|0 )
   @
   begin
@@ -407,9 +402,10 @@ get-order nip \voc-wl swap set-order
 ;
 
 \ The ??-order defined in wordlists only searches the top wordlist of
-\ every search order entry. To seach all wordlists except root of every entry
-\ ??-order must be overwriten as follows:
-
+\ every search order entry.
+\ This is the same code as ??-vocs except, for the last line.
+\ (Calling one from the other requires too much stack acrobatics
+\  to be worth the trouble.)
 : ??-vocs-no-root ( c-addr len a-addr -- lfa|0 )
   begin
    >r 2dup r@ ??-wl dup if nip nip r> drop exit then drop
@@ -418,11 +414,8 @@ get-order nip \voc-wl swap set-order
   nip nip
 ;
 
-\ from wordlists.txt
-
-\ Search the word with name c-addr,u in the search order at a-addr. If found
-\ return the words lfa otherwise retun 0.
-\ Note: Based on mecrisps case insensitive non-ANS compare.
+\ Search the word with name c-addr,u in the search order at a-addr.
+\ Return the word's lfa, or zero if not found.
 : ??-order ( c-addr u a-addr -- lfa|0 )
   dup >r ( c-addr u a-addr )  \ a-addr = top of the search order
   begin
@@ -446,7 +439,6 @@ get-order nip \voc-wl swap set-order
 
 \ Search the dictionary for a match with the given string. If found return the
 \ lfa of the dictionary entry, otherwise return 0.
-\ Note: Based on mecrisps case insensitive non-ANS compare  !!!!!
 : ??-dictionary ( c-addr len -- lfa|0 )
   _sop_ @ dup context =
   if   \ ."  in order "  dup @ .id
@@ -458,7 +450,6 @@ get-order nip \voc-wl swap set-order
 
 \ Search the dictionary for a match with the given string. If found return the 
 \ xt and the flags of the dictionary entry, otherwise return 0 and flags.
-\ Note: Based on mecrisps case insensitive non-ANS compare.
 : vocs-find ( c-addr len -- xt|0 flags )
   _indic_ @ 
   if

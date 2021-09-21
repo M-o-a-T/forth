@@ -20,38 +20,43 @@ After loading this extension there are three pre-defined vocabularies:
 
 * \VOC stores all the boring internals of the vocabulary implementation itself.
 
+.. note:
+
+    Mecrips is case insensitive (in ASCII); so is this extension,
+    as it uses Mecrisp's COMPARE.
+
 -----
 Usage
 -----
 
 voc: ( "name" -- )
-------------------
+++++++++++++++++++
 
 Create a stand-alone vocabulary prefix; it extends the root vocabulary.
 
 <voc> voc ( "name" -- )
------------------------
++++++++++++++++++++++++
 
 Create a vocabulary prefix that extends, i.e. inherits words from, the given voc.
 
 <voc> ?? ( -- )
----------------
++++++++++++++++
 
 Show all words of the actual VOC search order and stay in that VOC context.
 
 \.. ( -- )
-----------
+++++++++++
 
 
 Switch back from a VOC search order to the default Forth search order.
 
 <voc> definitions ( -- )
-------------------------
+++++++++++++++++++++++++
 
 Make <voc> the current compilation context.
 
 <voc> item ( -- )
------------------
++++++++++++++++++
 
 Make the next created word a context switching one.
 
@@ -74,19 +79,19 @@ when you have five GPIO registers with five accessors each.
 ``offset:`` is defined in ``fs/lib/util.fs``.
 
 sticky ( -- )
--------------
++++++++++++++
 
 Make the next created word a sticky one.
 
-Normally, a side effect of looking up a word clears the context switching
+Normally, looking up a word clears the context switching
 associated with the previous word. A sticky word prevents that.
 
-One main use is for debugging: ``??`` and ``.s`` are sticky so you can
+One use is for debugging: ``??`` and ``.s`` are sticky so you can
 add them to your code freely (assuming that the word before them doesn't
 consume the next token).
 
 @voc ( -- )
------------
++++++++++++
 
 Make the current compilation context the actual search context.
 
