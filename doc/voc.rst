@@ -51,9 +51,9 @@ sticky ( -- )  Make the next created word a sticky one.
 A brief recap of register map usage::
 
     voc: gpio
-    $00 reg: in ( a1 -- a2 )
-    $02 reg: out
-    $04 reg: dir
+    $00 offset: in ( a1 -- a2 )
+    $02 offset: out
+    $04 offset: dir
 
     : port: ( "name" a -- ) item constant ;
     $40004C00 gpio port: p1 ( -- a1 )
@@ -197,7 +197,7 @@ Changes, so far:
 * The new ``ignore`` search order modifier removes a given vocabulary from
   the search order.
 
-* Add ``reg:`` for declaring registers and similar constants.
+* Add ``offset:`` for declaring registers and similar constants.
 
 * The built-in ``('`` now reports which word hasn't been found.
 

@@ -14,6 +14,10 @@ compiletoflash
 
 compiletoram
 
+#if undefined p1
+#include test/offset.fs
+#endif
+
 #if undefined int
 #include test/class.fs
 forgetram

@@ -681,13 +681,19 @@ root definitions
   immediate
 ;
 
-: reg: ( "name" n -- )
+: offset ( "name" n -- )
 \ Simple building block for register maps
   <BUILDS ,
   DOES> @ +
 ;
 
 forth definitions
+
+: offset: ( "name" n -- )
+\ Simple building block for register maps and similar
+  <BUILDS ,
+  DOES> @ +
+;
 
 : forgetram 
   compiletoram? compiletoram
