@@ -18,7 +18,7 @@ compiletoram
 #include test/offset.fs
 #endif
 
-#if undefined int
+#if undefined p1
 #include test/class.fs
 forgetram
 #endif
