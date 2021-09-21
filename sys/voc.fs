@@ -700,10 +700,12 @@ root definitions
 \ … p1 in ( -- c-addr )
 \
 
+forth definitions
+
 : forgetram 
   compiletoram? compiletoram
 
-  postpone forth postpone only postpone definitions
+  [ ' forth call, ' only call, ' definitions call, ' .. call, ]
   forgetram
 
   not if compiletoflash then
