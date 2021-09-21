@@ -303,21 +303,11 @@ forth-wordlist variable c2r-current
 
 root-wordlist set-current
 
-\ Finally we have to redefine INIT to set HOOK-FIND to call FIND-IN-DICTIONARY.
-: init ( -- )
-  hook-find @ ['] find-in-dictionary <
-  if
-    ." Wordlist Extension 0.8.3 for Mecrisp-Stellaris by Manfred Mahlow" cr
-  then
-  wlst-init
-; 
-
+wlst-init
 
 \ ===================================
 \ Here's the actual "vocabulary" part
 \ ===================================
-
-init   \ Init the wordlist extension.
 
 decimal
 
@@ -630,11 +620,6 @@ sticky
 
 \ Initialize Mecrisp with wordlist and voc extension.
 : voc-init ( -- )
-  hook-find @ ['] vocs-find <
-  if
-    ." : VOCs ITEMs and STICKY Words for Mecrisp-Stellaris by Manfred Mahlow"
-    cr
-  then
   wlst-init  ['] vocs-quit hook-quit !  ['] vocs-find hook-find !
 ;
 
