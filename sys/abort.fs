@@ -1,4 +1,9 @@
 \ This is the bare minimum abort implementation.
+#if token forth find drop
+forth definitions only
+#endif
+compiletoflash
+
 #if token abort find drop 0=
 : abort ( -- ) cr quit ;
 #endif
