@@ -67,6 +67,7 @@ class Miniterm:
     console = None
     log = None
     _data = b""
+    _exc = None
 
     def __init__(self, command=None, stream=None, name=None, echo=False, eol='lf', filters=(), go_ahead = None, file=None, batch=None, logfile=None, develop=False, verbose=1, flags=()):
         if bool(command) == bool(stream):
@@ -125,17 +126,20 @@ class Miniterm:
                         except AllEOFError as err:
                             pass
                         except Exception as e:
+                            sys.stderr.write(f'\n--- ERROR: {e !r} ---\n')
                             if not self.develop:
                                 raise
-                            sys.stderr.write('\n--- ERROR: {} ---\n'.format(e))
 
                         self.file = None
                     if self.console is not None:
                         await self._closing.wait()
                     # otherwise we're done after the file is processed
+                except Exception as exc:
+                    self._exc = exc
                 finally:
-                    await self.stop()
-                    tg.cancel_scope.cancel()
+                    with anyio.move_on_after(2, shield=True):
+                        await self.stop()
+                        tg.cancel_scope.cancel()
         if proc is not None and hasattr(proc,"returncode"):
             if proc.returncode is None:
                 proc.kill()
@@ -143,6 +147,9 @@ class Miniterm:
                 raise RuntimeError(f"SIGNAL {-proc.returncode}")
             elif proc.returncode > 0:
                 raise RuntimeError(f"EXIT {proc.returncode}")
+        if self._exc is not None:
+            exc,self._exc = self._exc,None
+            raise exc
 
     async def start(self):
         """start worker threads"""

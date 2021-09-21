@@ -91,7 +91,8 @@ async def main(port, echo, encoding, filter, eol, raw, exit_char, menu_char, qui
         except Exception as exc:
             if develop:
                 raise
-            print(f"\nError: {exc !r}", file=sys.stderr)
+            if verbose > 1:
+                print(f"\nError: {exc !r}", file=sys.stderr)
             sys.exit(1)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
