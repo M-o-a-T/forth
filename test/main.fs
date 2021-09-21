@@ -3,7 +3,7 @@
 compiletoflash
 
 #if undefined ??
-#include debug/vis.fs
+#include debug/voc.fs
 #endif
 
 compiletoflash

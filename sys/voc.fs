@@ -7,6 +7,9 @@
 \ ------------------------------------------------------------------------------
 \
 \ Mangled by Matthias Urlichs <matthias@urlichs.de>.
+\
+\ ??-* => search-in-*
+\ *-wl => *-wordlist
 
 compiletoflash      \ This extension must be compiled in flash.
 
@@ -16,14 +19,14 @@ hex
 : \words ( -- ) words ;
 
 
-\ Three wordlists are implemented now, all as members of the forth-wordlist:
+\ Three wordlists are implemented now, all as members of the forth-wl:
 
-align 0 , here cell+ ,     here constant forth-wordlist
-align 0 , forth-wordlist , here constant \voc-wl
-align 0 , forth-wordlist , here constant root-wordlist
+align 0 , here cell+ ,     here constant forth-wl
+align 0 , forth-wl , here constant \voc-wl
+align 0 , forth-wl , here constant root-wl
 
 
-  forth-wordlist ,
+  forth-wl ,
 \ Return a wordlist identifier for a new empty wordlist.
 : wordlist ( -- wid )
   align here [ here @ not literal, ] ,
@@ -63,11 +66,11 @@ dictionarystart constant _sof_
 
   \voc-wl ,
 \ Current for compiletoflash mode.
-forth-wordlist variable c2f-current
+forth-wl variable c2f-current
 
   \voc-wl ,
 \ Current for compiletoram mode.
-forth-wordlist variable c2r-current
+forth-wl variable c2r-current
 
   \voc-wl ,
 \ Current depending on the compile mode.
@@ -146,7 +149,7 @@ forth-wordlist variable c2r-current
 \ If the word with name c-addr,u is a member of wordlist wid, return its lfa.
 \ Otherwise return zero.
 \ Note: Based on mecrisps case insensitive non-ANS compare.
-: search-wordlist-in-ram ( c-addr u wid -- lfa|0 )
+: search-wl-in-ram ( c-addr u wid -- lfa|0 )
   >r dictionarystart 
   begin ( c-addr u lfa )
     dup _sof_ <> 
@@ -168,10 +171,10 @@ forth-wordlist variable c2r-current
 \ If the word with name c-addr,u is a member of wordlist wid, return its lfa.
 \ Otherwise return zero.
 \ Note: Based on mecrisps case insensitive non-ANS compare.
-: search-wordlist-in-flash ( c-addr u wid -- lfa|0 )
-  dup 0 >r >r forth-wordlist = if _sof_ else forth-wordlist @  then
+: search-wl-in-flash ( c-addr u wid -- lfa|0 )
+  dup 0 >r >r forth-wl = if _sof_ else forth-wl @  then
    begin
-    dup forth-wordlist >           \ tagged word ?
+    dup forth-wl >           \ tagged word ?
     if
       dup lfa>wtag tag>wid r@ =    \ wid(lfa) = wid ?
       if
@@ -203,12 +206,12 @@ forth-wordlist variable c2r-current
 \ If the word with name c-addr,u is a member of wordlist wid, return its lfa.
 \ Otherwise return zero.
 \ Note: Based on mecrisps case insensitive non-ANS compare.
-: search-in-wordlist ( c-addr u wid -- lfa|0 )
+: ??-wl ( c-addr u wid -- lfa|0 )
   >r compiletoram?
   if
-    2dup r@ search-wordlist-in-ram ?dup if nip nip r> drop exit then
+    2dup r@ search-wl-in-ram ?dup if nip nip r> drop exit then
   then
-  r> search-wordlist-in-flash
+  r> search-wl-in-flash
 ;
 
 
@@ -216,12 +219,12 @@ forth-wordlist variable c2r-current
 \ Search the word with name c-addr,u in the search order at a-addr. If found
 \ return the words lfa otherwise retun 0.
 \ Note: Based on mecrisps case insensitive non-ANS compare.
-: search-in-order ( c-addr u a-addr -- lfa|0 )
+: ??-order ( c-addr u a-addr -- lfa|0 )
   dup >r ( c-addr u a-addr )  \ a-addr = top of the search order
   begin
     @ ( c-addr u wid|0 ) dup
   while
-    >r 2dup r> search-in-wordlist dup
+    >r 2dup r> ??-wl dup
     if nip nip r> drop exit then drop
     r> cell+ dup >r
   repeat
@@ -234,7 +237,7 @@ forth-wordlist variable c2r-current
 \ if found, 0 and invalid flags otherwise.
 \ Note: Based on mecrisps case insensitive non-ANS compare.
 : find-in-dictionary ( c-addr u -- xt|0 flags )
-  context search-in-order ( lfa ) lfa>xt,flags
+  context ??-order ( lfa ) lfa>xt,flags
 ;
 
 
@@ -244,36 +247,36 @@ forth-wordlist variable c2r-current
   0 context begin dup @ while swap 1+ swap cell+ repeat drop
 ; 
 
-  forth-wordlist ,
+  forth-wl ,
 : get-order ( -- wid1 ... widn n )
   w/o dup 0= if exit then 
   dup >r cells context +
   begin 1 cells - dup @ swap dup context = until drop r>
 ;
 
-  forth-wordlist ,
+  forth-wl ,
 : set-order ( wid1 ... widn n | -1 )
    dup #vocs > if ." order overflow" cr quit then
-   dup -1 = if drop root-wordlist forth-wordlist dup 3 then
+   dup -1 = if drop root-wl forth-wl dup 3 then
    dup >r 0 ?do i cells context + ! loop
    0 r> cells context + !  \ zero terminated order
 ;
 
 
-  forth-wordlist ,
+  forth-wl ,
 : set-current ( wid -- ) current ! ;
 
-  forth-wordlist ,
+  forth-wl ,
 : get-current ( -- wid ) current @ ;
 
 
 \ We have to redefine all defining words of the Mecrisp Core to make them add
 \ a wordlist tag when creating a new word:
 \ ------------------------------------------------------------------------------
-  forth-wordlist ,
+  forth-wl ,
 : : ( "name" -- ) wtag, : ;
 
-  forth-wordlist set-current
+  forth-wl set-current
 
 : constant  wtag, constant ;
 : 2constant wtag, 2constant ;
@@ -301,7 +304,7 @@ forth-wordlist variable c2r-current
   ['] find-in-dictionary hook-find !
 ;
 
-root-wordlist set-current
+root-wl set-current
 
 wlst-init
 
@@ -317,11 +320,11 @@ get-order nip \voc-wl swap set-order
 \voc-wl set-current
 
 \ VOC context pointer for the compiletoflash mode.
-  root-wordlist variable c2f-voc-context
+  root-wl variable c2f-voc-context
 
 
 \ VOC context pointer for the compiletoram mode.
-  root-wordlist variable c2r-voc-context
+  root-wl variable c2r-voc-context
 
 
 \ VOC context pointer
@@ -352,7 +355,7 @@ get-order nip \voc-wl swap set-order
     if ( lfa ) \ found
       \ *** for context switching debugging only
       \ ."  found: " dup .header 
-      ( lfa ) dup forth-wordlist >   \ tagged word ?
+      ( lfa ) dup forth-wl >   \ tagged word ?
       if ( lfa ) 
         dup lfa>wtag ( lfa wtag ) 1 and   \ word with ctag ?
         if dup lfa>ctag ( csr ) _csr_ ! then ( lfa )
@@ -389,23 +392,23 @@ get-order nip \voc-wl swap set-order
 \ Search the VOCs search order (voc-context) at a-addr for a match with the
 \ string c-addr,len. If found return the address (lfa) of the dictionary entry,
 \ otherwise return 0.
-: search-in-vocs ( c-addr len a-addr -- lfa|0 )
+: ??-vocs ( c-addr len a-addr -- lfa|0 )
   @
   begin
    \ dup .
-   >r 2dup r@ search-in-wordlist dup if nip nip r> drop exit then drop
+   >r 2dup r@ ??-wl dup if nip nip r> drop exit then drop
    r> vocnext dup 0= 
   until
-  drop root-wordlist search-in-wordlist
+  drop root-wl ??-wl
 ;
 
-\ The search-in-order defined in wordlists only searches the top wordlist of
+\ The ??-order defined in wordlists only searches the top wordlist of
 \ every search order entry. To seach all wordlists except root of every entry
-\ search-in-order must be overwriten as follows:
+\ ??-order must be overwriten as follows:
 
-: search-in-vocs-without-root ( c-addr len a-addr -- lfa|0 )
+: ??-vocs-no-root ( c-addr len a-addr -- lfa|0 )
   begin
-   >r 2dup r@ search-in-wordlist dup if nip nip r> drop exit then drop
+   >r 2dup r@ ??-wl dup if nip nip r> drop exit then drop
    r> vocnext dup 0= 
   until
   nip nip
@@ -416,16 +419,16 @@ get-order nip \voc-wl swap set-order
 \ Search the word with name c-addr,u in the search order at a-addr. If found
 \ return the words lfa otherwise retun 0.
 \ Note: Based on mecrisps case insensitive non-ANS compare.
-: search-in-order ( c-addr u a-addr -- lfa|0 )
+: ??-order ( c-addr u a-addr -- lfa|0 )
   dup >r ( c-addr u a-addr )  \ a-addr = top of the search order
   begin
     @ ( c-addr u wid|0 ) dup
   while
-    >r 2dup r> dup root-wordlist =
+    >r 2dup r> dup root-wl =
     if \ ."  swl "
-      search-in-wordlist
+      ??-wl
     else \ ."  svoc "
-      search-in-vocs-without-root
+      ??-vocs-no-root
     then
     dup 
 
@@ -440,12 +443,12 @@ get-order nip \voc-wl swap set-order
 \ Search the dictionary for a match with the given string. If found return the
 \ lfa of the dictionary entry, otherwise return 0.
 \ Note: Based on mecrisps case insensitive non-ANS compare  !!!!!
-: search-in-dictionary ( c-addr len -- lfa|0 )
+: ??-dictionary ( c-addr len -- lfa|0 )
   _sop_ @ dup context =
   if   \ ."  in order "  dup @ .id
-    search-in-order
+    ??-order
   else  \ ."  in voc "  dup @ .id
-    search-in-vocs
+    ??-vocs
   then
 ;
 
@@ -457,12 +460,12 @@ get-order nip \voc-wl swap set-order
   if
     _?csr_
     \  ." voc-find,_indic_ = -1 "              \ *** for debugging only
-    search-in-dictionary ( lfa )
+    ??-dictionary ( lfa )
     dup _!csr_
     \  ."  csr=" _csr_ @ . cr     \ *** for debugging only
   else ( lfa )
     \ ." voc-find,_indic_ = 0 "              \ *** for debugging only
-    -1 _indic_ ! current @ search-in-wordlist
+    -1 _indic_ ! current @ ??-wl
   then
   lfa>xt,flags
 ;
@@ -475,7 +478,7 @@ get-order nip \voc-wl swap set-order
   @ (dovoc
 ;
 
-root-wordlist set-current   \ Some tools needed in VOC contexts
+root-wl set-current   \ Some tools needed in VOC contexts
 
 \ Switch back from a VOC search order (voc-context) to the FORTH search order.
 : .. ( -- )
@@ -495,11 +498,11 @@ root-wordlist set-current   \ Some tools needed in VOC contexts
 ;
 
 2 wflags !
-: root ( -- )   root-wordlist   (dovoc  immediate ;
+: root ( -- )   root-wl   (dovoc  immediate ;
 2 wflags !
 : \voc ( -- ) \voc-wl (dovoc  immediate ;
 2 wflags !
-: forth ( -- )  forth-wordlist  (dovoc  immediate ;
+: forth ( -- )  forth-wl  (dovoc  immediate ;
 
 
 \voc-wl set-current
@@ -530,7 +533,7 @@ root-wordlist set-current   \ Some tools needed in VOC contexts
 ;
 
 
-root-wordlist set-current
+root-wl set-current
 
 : first ( -- )
 \ overwrite the top of the permanent search order with the top wid
@@ -576,13 +579,13 @@ root-wordlist set-current
   does> dovoc 
 ;
 
-root-wordlist set-current
+root-wl set-current
 
 \ Make the next created word a sticky one.
 : sticky ( -- ) align 1 , 1 wflags ! ;
 
 
-root-wordlist set-current   \ Some tools needed in VOC contexts
+root-wl set-current   \ Some tools needed in VOC contexts
 
 \ Create a VOC that extends (inherits from) the actual VOC context.
 : voc: ( "name" -- )
@@ -607,7 +610,7 @@ get-order nip \voc-wl swap set-order
     1 wflags !
 ;
 
-root-wordlist set-current   \ Some tools needed in VOC contexts
+root-wl set-current   \ Some tools needed in VOC contexts
 
 \ Print the data stack and stay in the current context.
 sticky
@@ -626,14 +629,14 @@ sticky
 \ \voc-wl also
 get-order nip \voc-wl swap set-order
 
-root-wordlist set-current
+root-wl set-current
 
 : init ( -- ) voc-init ;
 
-\ forth-wordlist first
-get-order nip forth-wordlist swap set-order
+\ forth-wl first
+get-order nip forth-wl swap set-order
 
-forth-wordlist set-current
+forth-wl set-current
 
 init  \ now vocs can be used.
 
@@ -644,7 +647,7 @@ init  \ now vocs can be used.
 root definitions  \voc only
 
 : (' ( "name" -- lfa )
-  token 2dup search-in-dictionary ?dup if -rot 2drop exit then
+  token 2dup ??-dictionary ?dup if -rot 2drop exit then
   ."   " type ."  not found." abort
 ;  
 

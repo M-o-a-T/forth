@@ -21,7 +21,7 @@ compiletoflash
 #endif
 
 #if-flag debug
-#include debug/vis.fs
+#include debug/voc.fs
 #endif
 
 #include sys/abort.fs

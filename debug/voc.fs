@@ -16,8 +16,8 @@
 
 : ?wid ( wid1 -- wid1|wid2 )
   case
-    root-wordlist  of [ (' root   literal, ]  endof
-    forth-wordlist of [ (' forth  literal, ]  endof
+    root-wl  of [ (' root   literal, ]  endof
+    forth-wl of [ (' forth  literal, ]  endof
     \voc-wl        of [ (' \voc   literal, ]  endof
   dup  \ 'endcase' drops our value, but we want to keep it
   endcase
@@ -38,8 +38,8 @@
   swap not if compiletoflash then
 ;
 
-: show-wordlist-item ( lfa wid -- )
-  >r dup forth-wordlist >=   \ tagged word ?
+: show-wl-item ( lfa wid -- )
+  >r dup forth-wl >=   \ tagged word ?
   if ( lfa )
     dup lfa>wtag tag>wid r@ =     \ wid(lfa) = wid
     if ( lfa )
@@ -54,31 +54,31 @@
   r> drop
 ;
 
-: show-wordlist-item ( lfa wid -- )
-  over smudged? if show-wordlist-item else 2drop then
+: show-wl-item ( lfa wid -- )
+  over smudged? if show-wl-item else 2drop then
 ;
 
-: show-wordlist-in-ram ( wid lfa -- )
+: show-wl-in-ram ( wid lfa -- )
   drop ( wid ) >r
   ramdictstart ( lfa )
   begin
     dup _sof_ <>
   while
-    dup r@ show-wordlist-item
+    dup r@ show-wl-item
     dictionarynext if drop _sof_ then
   repeat
   r> 2drop ;
 
-: show-wordlist-in-flash ( wid lfa -- )
+: show-wl-in-flash ( wid lfa -- )
 \ List all words of wordlist wid (defined in flash) starting with word at lfa.
 \ lfa must be in flash
-\ forth-wordlist dictionarystart c2f-... lists all forth-wordlist words
-\ forth-wordlist dup             c2f-... lists forth-wordlist words starting
-\                                        with lfa(forth-wordlist)
+\ forth-wl dictionarystart c2f-... lists all forth-wl words
+\ forth-wl dup             c2f-... lists forth-wl words starting
+\                                        with lfa(forth-wl)
 \ wid dup                        c2f-... lists all words of wordlist wid
   swap >r  ( lfa ) ( R: wid )
   begin ( lfa )
-    dup r@ show-wordlist-item
+    dup r@ show-wl-item
     dictionarynext
   until
   r> 2drop
@@ -88,10 +88,10 @@ forth definitions
 
 
 \ Show all words of the wordlist wid.
-: show-wordlist ( wid -- )
-  dup forth-wordlist =
-  if dup _sof_ else dup forth-wordlist then show-wordlist-in-flash
-  0 show-wordlist-in-ram
+: show-wl ( wid -- )
+  dup forth-wl =
+  if dup _sof_ else dup forth-wl then show-wl-in-flash
+  0 show-wl-in-ram
 ;
 
 \voc definitions
@@ -101,16 +101,16 @@ forth definitions
 \  context @
 \  swap if
    if ( wid )
-    \ Show words in flash starting with FORTH-WORDLIST.
-    dup forth-wordlist
+    \ Show words in flash starting with FORTH-wl.
+    dup forth-wl
   else
     \ Show words in flash starting with the first word in flash.
-    dup  dup forth-wordlist = if _sof_ else forth-wordlist then
+    dup  dup forth-wl = if _sof_ else forth-wl then
   then
   over cr ." << FLASH: " .wid
-  show-wordlist-in-flash
+  show-wl-in-flash
   dup cr ." >> RAM:   " .wid
-  0 show-wordlist-in-ram
+  0 show-wl-in-ram
   cr
 ;
 
@@ -142,7 +142,7 @@ root definitions
 
 : core? ( lfa -- f )
 \ true if lfa is in the mecrisp core
-  _sof_ @ u>= over forth-wordlist u< and
+  _sof_ @ u>= over forth-wl u< and
 ;
 
 \ Given a words lfa print its name with allVOCabulary prefixes. If it's  a
@@ -152,14 +152,14 @@ root definitions
   0 swap
   begin
     dup lfa>wtag tag>wid
-    dup forth-wordlist =
+    dup forth-wl =
     if
-      over dup forth-wordlist u>= swap root-wordlist u<= and if drop then -1
+      over dup forth-wl u>= swap root-wl u<= and if drop then -1
     else
       dup wid?
     then
   until
-  over if dup forth-wordlist = if drop then then
+  over if dup forth-wl = if drop then then
   begin
     dup
   while
@@ -213,7 +213,7 @@ forth definitions
 \ Show all context switching items which are actually defined in the dictionary.
 : items ( -- )
   cr ." FLASH:"  \ show items defined in FLASH
-  forth-wordlist
+  forth-wl
   begin
     dup ?item
     dictionarynext
@@ -240,7 +240,7 @@ forth definitions
 \ Show all the VOCs that are actually defined in the dictionary.
 : vocs ( -- )
   cr ." FLASH: "   \ show VOCs defined in FLASH
-  forth-wordlist
+  forth-wl
   begin
     dup ?voc dictionarynext
   until
@@ -259,7 +259,7 @@ forth definitions
 \voc definitions
 
 : show-word-name ( lfa wid -- )
-  >r dup forth-wordlist >=   \ tagged word ?
+  >r dup forth-wl >=   \ tagged word ?
   if ( lfa )
     dup lfa>wtag tag>wid r@ =     \ wid(lfa) = wid
     if ( lfa )
@@ -291,9 +291,9 @@ forth definitions
 : show-word-in-flash ( wid lfa -- )
 \ List all words of wordlist wid (defined in flash) starting with word at lfa.
 \ lfa must be in flash
-\ forth-wordlist dictionarystart c2f-... lists all forth-wordlist words
-\ forth-wordlist dup             c2f-... lists forth-wordlist words starting
-\                                        with lfa(forth-wordlist)
+\ forth-wl dictionarystart c2f-... lists all forth-wl words
+\ forth-wl dup             c2f-... lists forth-wl words starting
+\                                        with lfa(forth-wl)
 \ wid dup                        c2f-... lists all words of wordlist wid
   swap >r  ( lfa ) ( R: wid )
   begin ( lfa )
@@ -307,8 +307,8 @@ forth definitions
 
 \ Show all words of the wordlist wid.
 : list-words ( wid -- )
-  dup forth-wordlist =
-  if dup _sof_ else dup forth-wordlist then show-word-in-flash
+  dup forth-wl =
+  if dup _sof_ else dup forth-wl then show-word-in-flash
   compiletoram? if 0 show-word-in-ram else drop then
 ;
 
@@ -317,11 +317,11 @@ forth definitions
 : ?list ( wid f -- )
 \ If f = -1 do not list the mecrisp core words.
    if ( wid )
-    \ Show words in flash starting with FORTH-WORDLIST.
-    dup forth-wordlist
+    \ Show words in flash starting with FORTH-wl.
+    dup forth-wl
   else
     \ Show words in flash starting with the first word in flash.
-    dup dup forth-wordlist = if _sof_ else forth-wordlist then
+    dup dup forth-wl = if _sof_ else forth-wl then
   then
   over cr ." << FLASH: " .wid
   show-word-in-flash

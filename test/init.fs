@@ -2,7 +2,7 @@
 
 compiletoflash \ essential for testing, unfortunately
 #if undefined ??
-#include debug/vis.fs
+#include debug/voc.fs
 #endif
 
 compiletoram

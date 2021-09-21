@@ -90,7 +90,7 @@ voc: class-root
 \ Begin or extend an instance definition in a class definition.
 : __data ( -- magic 0|inherited-size ) 
   ivr-sys current @ dup _csr_ ! 
-  s" u/i" 2dup 4 pick search-in-wordlist
+  s" u/i" 2dup 4 pick ??-wl
   if ." instance is sealed" abort exit then
   voc-eval ( magic size )
   nip
