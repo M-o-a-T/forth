@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -eu
 
 F="debug"
 
@@ -9,7 +9,7 @@ while read FLG ; do
 
 echo TEST $FLG
 
-PYTHONPATH=. scripts/mf-cmd -x tt $A  -b -q -g ok. ../mecrisp-stellaris/linux-ra/mecrisp-stellaris-linux
+PYTHONPATH=. scripts/mf-cmd -x tt $FLG  -b -q -g ok. ../mecrisp-stellaris/linux-ra/mecrisp-stellaris-linux
 
 done < <(scripts/permute $F)
 
