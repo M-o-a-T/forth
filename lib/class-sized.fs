@@ -2,7 +2,9 @@
 #include lib/class.fs
 #endif
 
-#if undefined vars>
+forth only
+
+#if undefined var>
 #include lib/vars.fs
 #endif
 
