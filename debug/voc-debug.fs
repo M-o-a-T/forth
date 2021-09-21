@@ -5,7 +5,7 @@
 \ copies of VOC stuff, with debug info
 
 
-: search-wl-in-ram-dbg ( c-addr u wid -- lfa|0 )
+: ~search-wl-in-ram ( c-addr u wid -- lfa|0 )
   >r dictionarystart
   begin ( c-addr u lfa )
     dup _sof_ <>
@@ -24,7 +24,7 @@
 ;
 
 
-: search-wl-in-flash-dbg ( c-addr u wid -- lfa|0 )
+: ~search-wl-in-flash ( c-addr u wid -- lfa|0 )
   dup 0 >r >r forth-wl = if _sof_ else forth-wl @  then
    begin
     dup forth-wl >           \ tagged word ?
@@ -50,43 +50,43 @@
 ;
 
 
-: ??-wl-dbg ( c-addr u wid -- lfa|0 )
+: ~??-wl ( c-addr u wid -- lfa|0 )
   cr ." ?> " dup .wid
   >r compiletoram?
   if
-    2dup r@ search-wl-in-ram-dbg ?dup if nip nip r> drop exit then
+    2dup r@ ~search-wl-in-ram ?dup if nip nip r> drop exit then
   then
-  r> search-wl-in-flash-dbg
+  r> ~search-wl-in-flash
 ;
 
-: ??-vocs-dbg ( c-addr len a-addr -- lfa|0 )
+: ~??-vocs ( c-addr len a-addr -- lfa|0 )
   @
   begin
    \ dup .
-   >r 2dup r@ ??-wl-dbg dup if nip nip r> drop exit then drop
+   >r 2dup r@ ~??-wl dup if nip nip r> drop exit then drop
    r> vocnext dup 0=
   until
-  drop root-wl ??-wl-dbg
+  drop root-wl ~??-wl
 ;
 
-: ??-vocs-without-root-dbg ( c-addr len a-addr -- lfa|0 )
+: ~??-vocs-without-root ( c-addr len a-addr -- lfa|0 )
   begin
-   >r 2dup r@ ??-wl-dbg dup if nip nip r> drop exit then drop
+   >r 2dup r@ ~??-wl dup if nip nip r> drop exit then drop
    r> vocnext dup 0=
   until
   nip nip
 ;
 
-: ??-order-dbg ( c-addr u a-addr -- lfa|0 )
+: ~??-order ( c-addr u a-addr -- lfa|0 )
   dup >r ( c-addr u a-addr )  \ a-addr = top of the search order
   begin
     @ ( c-addr u wid|0 ) dup
   while
     >r 2dup r> dup root-wl =
     if ."  swl "
-      ??-wl-dbg
+      ~??-wl
     else ."  svoc "
-      ??-vocs-without-root-dbg
+      ~??-vocs-without-root
     then
     dup
 
@@ -97,16 +97,16 @@
 ;
 
 
-: ??-dictionary-dbg ( c-addr len -- lfa|0 )
+: ~??-dictionary ( c-addr len -- lfa|0 )
   _sop_ @ dup context =
   if   ."  in order "  dup @ .id
-    ??-order-dbg
+    ~??-order
   else   ."  in voc "  dup @ .id ." -- ctx " context @ .id
-    ??-vocs-dbg
+    ~??-vocs
   then
 ;
 
-: _!csr-dbg_ ( lfa -- )
+: _!~csr_ ( lfa -- )
     0 _csr_ ! dup
     if ( lfa ) \ found
       ."  found: " dup .header
@@ -120,7 +120,7 @@
 ;
 
 \ Process the last saved context switching request.
-: _?csr-dbg_ ( -- )
+: _~?csr_ ( -- )
     cr _csr_ @ ." _csr_=" .  \ debugging
 
     \ is this a postponed context switch request?
@@ -138,26 +138,26 @@
 
 forth definitions
 
-: find-dbg ( c-addr len -- xt|0 flags )
+: ~find ( c-addr len -- xt|0 flags )
   ??
   _indic_ @
   if
-    _?csr-dbg_
+    _~?csr_
      ." voc-find,_indic_ = -1 "              \ *** for debugging only
-    ??-dictionary-dbg ( lfa )
-    dup _!csr-dbg_
+    ~??-dictionary ( lfa )
+    dup _!~csr_
      ."  csr=" _csr_ @ . cr     \ *** for debugging only
   else ( lfa )
     ." voc-find,_indic_ = 0 "              \ *** for debugging only
-    -1 _indic_ ! current @ ??-wl-dbg
+    -1 _indic_ ! current @ ~??-wl
   then
   lfa>xt,flags
 ;
 
 
-: eval-dbg  ( addr n -- )
+: ~eval  ( addr n -- )
 \ given a word, find and run it.
-  2dup find-dbg drop ?dup if
+  2dup ~find drop ?dup if
     -rot 2drop execute
   else
     space type ."  not found"
@@ -165,9 +165,36 @@ forth definitions
   then
 ;
 
-: voc-eval-dbg  ( addr n -- )
+: ~voc-eval  ( addr n -- )
 \ given a word in the current vocabulary, find and run it.
-  1 \voc _csr_ bis! eval-dbg
+  1 \voc _csr_ bis! ~eval
 ;
 
-only decimal compiletoram
+: ~dovoc ( a -- )
+  ."  DV: " dup hex. @ dup hex.
+  (dovoc
+;
+
+0 variable ~hf
+
+\voc definitions
+: ~voc-extend ( "name" wid -- )
+  ."   EXT:" dup hex. dup .wid space
+  align ,
+  2 wflags !
+  here ( addr of names wtag ) cell+ ( lfa of name )
+  ." A:" h.s
+  <builds
+    here dup ~hf ! ." H:" hex.
+    dup ,
+    ." HA " ~hf @ @ hex.
+    (dovoc (def [ ' also call, ' immediate call, ]
+    ." HB " ~hf @ @ hex.
+  does> ~dovoc
+;
+
+root definitions
+
+: ~voc: ( "name" -- )
+  _sop_ @ context = if ." C:-" 0 else VOC-context @ dup ." C:" .wid then ~voc-extend
+;
