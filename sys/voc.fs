@@ -689,12 +689,6 @@ root definitions
 
 forth definitions
 
-: offset: ( "name" n -- )
-\ Simple building block for register maps and similar
-  <BUILDS ,
-  DOES> @ +
-;
-
 : forgetram 
   compiletoram? compiletoram
 

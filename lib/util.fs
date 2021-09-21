@@ -87,6 +87,14 @@ forth definitions
 ;
 #endif
 
+#if undefined offset:
+: offset: ( "name" n -- )
+\ Simple building block for register maps and similar
+  <BUILDS ,
+  DOES> @ +
+;
+#endif
+
 
 \ clean up
 #if ( compiletoram-flag  -- )
