@@ -1,8 +1,8 @@
+forth definitions
+
 #if undefined var>
 #include lib/vars.fs
 #endif
-
-forth definitions
 
 var> also
 
