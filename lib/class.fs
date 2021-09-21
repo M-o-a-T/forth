@@ -148,15 +148,14 @@ class-root definitions
 \ If you want subclasses, use "foo class: bar".
 
 : class: ( "name" -- )
-  _sop_ @ context = if
-    context @
+  _sop_ @ dup @ swap context = if ( voc )
     dup (ign
     current @ over = if
       dup lfa>wtag tag>wid current !
     then ( voc )
     vocnext
   else
-    VOC-context @ ..
+    ..
   then
   voc-extend
 ;
