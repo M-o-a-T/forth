@@ -687,19 +687,6 @@ root definitions
   DOES> @ +
 ;
 
-\ Brief recap of register map usage:
-\
-\ voc: gpio  gpio definitions
-\ $00 reg: in ( a1 -- a2 )
-\ $02 reg: out
-\ $04 reg: dir
-\ : port: ( "name" a -- ) item constant ;
-\ $40004C00 gpio port: p1 ( -- a1 )
-\
-\ We can now do
-\ … p1 in ( -- c-addr )
-\
-
 forth definitions
 
 : forgetram 

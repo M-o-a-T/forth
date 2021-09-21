@@ -48,6 +48,22 @@ sticky ( -- )  Make the next created word a sticky one.
 @voc ( -- )  Make the current compilation context the actual search context.
 
 
+A brief recap of register map usage::
+
+    voc: gpio
+    $00 reg: in ( a1 -- a2 )
+    $02 reg: out
+    $04 reg: dir
+
+    : port: ( "name" a -- ) item constant ;
+    $40004C00 gpio port: p1 ( -- a1 )
+
+    We can now do
+    … p1 in ( -- a2 )
+
+    This avoids long names and the combinatorial explosion you get when you
+    have five GPIO registers with five accessors each.
+
 
 
 ---------
@@ -152,12 +168,46 @@ History
 
 This code and documentation is based on version 0.8.4 by Manfred Mahlow.
 
+Changes, so far:
+
+* Debugging has been split off.
+
 * The vocabulary-defining word ``voc`` has been renamed to ``voc:``.
 
-* The vocabulary for this extension itself has been renamed from ``inside``
-  to ``\\voc``.
+* The vocabulary container for this extension itself has been renamed from
+  ``inside`` to ``\\voc``; the word list is now ``\\voc-wl`` instead of
+  ``inside-wordlist``.
 
-* Some minor optimizations and clean-ups, at least in this author's opinion.
+* ``voc:`` auto-switches the current vocabulary to itself, as the
+  previously-required dance of ``voc foobar foobar definitions`` is rather
+  tedious.
+
+* ``only`` adds the current voc on top, not forth twice. The common idiom
+  of ``forth only`` is thus unaffected, but you now can write ``foobar
+  only`` instead of ``only foobar first``.
+
+* ``forgetram`` is overridden to switch back to the ``forth`` vocabulary,
+  just to protect against deleting a vocabulary the context is still
+  pointing to.
+
+* ``'`` and ``[']`` are now in the root vocabulary because otherwise you
+  couldn't take the address of something that's only reachable by a context
+  switch.
+
+* The new ``ignore`` search order modifier removes a given vocabulary from
+  the search order.
+
+* Add ``reg:`` for declaring registers and similar constants.
+
+* The built-in ``('`` now reports which word hasn't been found.
+
+* ``.s`` is now sticky so that you can use it more easily for debugging.
+
+* Some other minor optimizations and clean-ups, at least in this author's opinion.
+
+* The original code's versioning comments et al. are of no interest to anybody
+  else, and thus have been deleted.
+
 
 -------------
 Original docs
