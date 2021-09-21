@@ -43,7 +43,7 @@
   if ( lfa )
     dup lfa>wtag tag>wid r@ =     \ wid(lfa) = wid
     if ( lfa )
-       cr dup lfa>wtag dup 1 and if over lfa>ctag .ctag else #15 spaces then
+       cr dup lfa>wtag dup 3 and if over lfa>ctag .ctag else #15 spaces then
        .wtag .header
     else
       drop
@@ -57,6 +57,26 @@
 : show-wl-item ( lfa wid -- )
   over smudged? if show-wl-item else 2drop then
 ;
+
+forth definitions
+
+: .show
+    dup lfa>wtag tag>wid show-wl-item
+;
+
+root definitions
+
+sticky
+: show ( "name" )
+  token ??-dictionary
+  ?dup if
+    .show
+  else
+    ." not found"
+  then
+;
+
+\voc  definitions
 
 : show-wl-in-ram ( wid lfa -- )
   drop ( wid ) >r
