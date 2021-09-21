@@ -564,6 +564,9 @@ class Miniterm:
                     else:
                         await self.stream.send(self.tx_encoder.encode(line))
                     # sys.stderr.write('.')  # Progress indicator.
+            except AllEOFError as err:
+                # already printed above
+                raise
             except Exception as exc:
                 sys.stderr.write(f'--- in {filename} : {num}\n')
                 raise
