@@ -68,7 +68,7 @@ class Miniterm:
     log = None
     _data = b""
 
-    def __init__(self, command=None, stream=None, name=None, echo=False, eol='lf', filters=(), go_ahead = None, file=None, batch=None, logfile=None, develop=False, flags=()):
+    def __init__(self, command=None, stream=None, name=None, echo=False, eol='lf', filters=(), go_ahead = None, file=None, batch=None, logfile=None, develop=False, verbose=1, flags=()):
         if bool(command) == bool(stream):
             raise RuntimeError("Specify one of 'command' and 'stream'")
         self.command = command
@@ -87,6 +87,7 @@ class Miniterm:
         self.file = file
         self.logfile = logfile
         self.develop = develop
+        self.verbose = verbose
         if batch is None:
             batch = not sys.stdin.isatty()
         if not batch:
@@ -471,7 +472,8 @@ class Miniterm:
         if line == "#end*":
             raise AllEOFError
         if line == "#echo":
-            sys.stderr.write("\n")
+            if self.verbose:
+                sys.stderr.write("\n")
             return
         if line.startswith("#ok "):
             res = await self.chat(f"{line[4:]} .", timeout=True)
@@ -490,7 +492,8 @@ class Miniterm:
             sys.stderr.write(val+"\n")
             return
         if line.startswith("#echo "):
-            sys.stderr.write(line[6:]+"\n")
+            if self.verbose:
+                sys.stderr.write(line[6:]+"\n")
             return
         if line.startswith("#error "):
             raise RuntimeError(line[7:])
@@ -519,7 +522,8 @@ class Miniterm:
     async def send_file(self, filename):
         """Send a file. Runs in write thread."""
         async with await anyio.open_file(filename, 'r') as f:
-            sys.stderr.write(f'--- Sending file {filename} ---\n')
+            if self.verbose:
+                sys.stderr.write(f'--- Sending file {filename} ---\n')
             num = 0
             try:
                 while True:
@@ -530,15 +534,18 @@ class Miniterm:
                             break
                         line = await self.preprocess(line)
                     except AllEOFError as err:
-                        sys.stderr.write(f'--- END {filename} : {num}\n')
+                        if self.verbose:
+                            sys.stderr.write(f'--- END {filename} : {num}\n')
                         self.layer = self.layer_ = 0
                         raise
                     except EarlyEOFError as err:
-                        sys.stderr.write(f'--- END {filename} : {num}\n')
+                        if self.verbose:
+                            sys.stderr.write(f'--- END {filename} : {num}\n')
                         self.layer = self.layer_ = 0
                         break
                     except EOFError as err:
-                        sys.stderr.write(f'--- EOF {filename} ---\n')
+                        if self.verbose:
+                            sys.stderr.write(f'--- EOF {filename} ---\n')
                         if self.layer_:
                             self.layer = self.layer_ = 0
                             raise RuntimeError(f"{line[9:]}: '#if…' without corresponding '#endif'")

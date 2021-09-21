@@ -22,6 +22,7 @@ from mf.term import Miniterm, key_description
 @click.option("--exit-char", type=int, help="Code of special character to exit, default 0x1D, ^]", default=0x1d)
 @click.option("--menu-char", type=int, help="Code of special character to control the terminal, default 0x14, ^T", default=0x14)
 @click.option("-q", "--quiet", is_flag=True, help="suppress non-error messages")
+@click.option("-v", "--verbose", is_flag=True, help="be more chatty")
 @click.option("-g", "--go-ahead", help="Continuation signal")
 @click.option("-x", "--exec", type=click.Path(), help="run this file")
 @click.option("-F", "--flag", type=str, multiple=True, help="set this flag")
@@ -29,8 +30,10 @@ from mf.term import Miniterm, key_description
 @click.option("-b", "--batch", is_flag=True, help="don't start a console")
 @click.option("-D", "--develop", is_flag=True, help="show Python traceback on error")
 @click.argument("command", nargs=-1)
-async def main(command, echo, encoding, filter, eol, raw, exit_char, menu_char, quiet, develop, go_ahead, exec, batch, log, flag):
+async def main(command, echo, encoding, filter, eol, raw, exit_char, menu_char, quiet, verbose, develop, go_ahead, exec, batch, log, flag):
     """Command line tool, entry point"""
+
+    verbose = 1+verbose-quiet
 
     if batch and develop:
         raise click.UsageError("Batch and development mode don't like each other.")
@@ -50,14 +53,14 @@ async def main(command, echo, encoding, filter, eol, raw, exit_char, menu_char, 
     else:
         filters = ['direct']
 
-    term = Miniterm(command=command, echo=echo, eol=eol.lower(), filters=filters, go_ahead=go_ahead, file=exec, batch=batch, logfile=log, develop=develop, flags=flag)
+    term = Miniterm(command=command, echo=echo, eol=eol.lower(), filters=filters, go_ahead=go_ahead, file=exec, batch=batch, logfile=log, develop=develop, flags=flag, verbose=verbose)
     term.exit_character = chr(exit_char)
     term.menu_character = chr(menu_char)
     term.raw = raw
     term.set_rx_encoding(encoding)
     term.set_tx_encoding(encoding)
 
-    if not quiet:
+    if verbose and not batch:
         print(f'--- Terminal: {" ".join(term.command)} ---', file=sys.stderr)
         print('--- Quit: {} | Menu: {} | Help: {} + {} ---'.format(
             key_description(term.exit_character),
@@ -68,7 +71,7 @@ async def main(command, echo, encoding, filter, eol, raw, exit_char, menu_char, 
     try:
         await term.run()
     except KeyboardInterrupt:
-        if not quiet:
+        if verbose:
             print('\n--- exit ---\n',file=sys.stderr)
         sys.exit(1)
     except Exception as exc:

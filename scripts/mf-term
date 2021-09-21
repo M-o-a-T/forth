@@ -23,6 +23,7 @@ from mf.term import Miniterm, key_description
 @click.option("--exit-char", type=int, help="Code of special character to exit, default 0x1D, ^]", default=0x1d)
 @click.option("--menu-char", type=int, help="Code of special character to control the terminal, default 0x14, ^T", default=0x14)
 @click.option("-q", "--quiet", is_flag=True, help="suppress non-error messages")
+@click.option("-v", "--verbose", is_flag=True, help="be more chatty")
 @click.option("-r", "--reset", is_flag=True, help="Send reset sequence")
 @click.option("-R", "--inv-reset", is_flag=True, help="Is the reset wire inverted?")
 @click.option("-g", "--go-ahead", help="Continuation signal")
@@ -32,8 +33,10 @@ from mf.term import Miniterm, key_description
 @click.option("-b", "--batch", is_flag=True, help="don't start a console")
 @click.option("-D", "--develop", is_flag=True, help="show Python traceback on error")
 @click.argument("port", nargs=-1)
-async def main(port, echo, encoding, filter, eol, raw, exit_char, menu_char, quiet, develop, reset, go_ahead, exec, batch, log, inv_reset, flag):
+async def main(port, echo, encoding, filter, eol, raw, exit_char, menu_char, quiet, verbose, develop, reset, go_ahead, exec, batch, log, inv_reset, flag):
     """Command line tool, entry point"""
+
+    verbose=1+verbose-quiet
 
     baud=115200
     if batch and develop:
@@ -59,7 +62,7 @@ async def main(port, echo, encoding, filter, eol, raw, exit_char, menu_char, qui
 
 
     async with Serial(port, baud) as stream:
-        term = Miniterm(stream=stream, echo=echo, eol=eol.lower(), filters=filters, go_ahead=go_ahead, file=exec, batch=batch, logfile=log, develop=develop, flags=flag)
+        term = Miniterm(stream=stream, echo=echo, eol=eol.lower(), filters=filters, go_ahead=go_ahead, file=exec, batch=batch, logfile=log, develop=develop, flags=flag, verbose=verbose)
         term.exit_character = chr(exit_char)
         term.menu_character = chr(menu_char)
         term.raw = raw
@@ -71,7 +74,7 @@ async def main(port, echo, encoding, filter, eol, raw, exit_char, menu_char, qui
             await anyio.sleep(0.1)
         stream.rts = bool(inv_reset)
 
-        if not quiet:
+        if verbose:
             print(f'--- Terminal: {term.name} ---', file=sys.stderr)
             print('--- Quit: {} | Menu: {} | Help: {} + {} ---'.format(
                 key_description(term.exit_character),
@@ -82,7 +85,7 @@ async def main(port, echo, encoding, filter, eol, raw, exit_char, menu_char, qui
         try:
             await term.run()
         except KeyboardInterrupt:
-            if not quiet:
+            if verbose or not batch:
                 print('\n--- exit ---\n',file=sys.stderr)
             sys.exit(1)
         except Exception as exc:
