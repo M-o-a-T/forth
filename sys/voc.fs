@@ -215,6 +215,8 @@ forth-wl variable c2r-current
 ;
 
 
+compiletoram
+
   \voc-wl ,
 \ Search the word with name c-addr,u in the search order at a-addr. If found
 \ return the words lfa otherwise retun 0.
@@ -236,10 +238,11 @@ forth-wl variable c2r-current
 \ Search the dictionary for the word with the name c-addr,u. Return xt and flags
 \ if found, 0 and invalid flags otherwise.
 \ Note: Based on mecrisps case insensitive non-ANS compare.
-: find-in-dictionary ( c-addr u -- xt|0 flags )
+: find-in-dict ( c-addr u -- xt|0 flags )
   context ??-order ( lfa ) lfa>xt,flags
 ;
 
+compiletoflash
 
   \voc-wl ,
 \ Return the number of wordlists (wids) in the search order.
@@ -297,16 +300,17 @@ forth-wl variable c2r-current
 \voc-wl set-current
 
 : wlst-init ( -- )
-  compiletoram? 
   compiletoram -1 set-order
   compiletoflash -1 set-order
-  if compiletoram then
-  ['] find-in-dictionary hook-find !
 ;
 
 root-wl set-current
 
 wlst-init
+
+\ This is only needed for compiling the rest. VOC-INIT replaces the hook.
+compiletoram ' find-in-dict hook-find !
+compiletoflash
 
 \ ===================================
 \ Here's the actual "vocabulary" part
