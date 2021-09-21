@@ -1,3 +1,6 @@
+#if undefined offset:
+#include lib/util.fs
+#endif
 
 voc: gpio
 $00 offset: in ( a1 -- a2 )
@@ -10,3 +13,5 @@ $2340 gpio port: p2 ( -- a1 )
 
 #ok p1 out $1232 =
 #ok p2 dir $2344 =
+
+forth only definitions

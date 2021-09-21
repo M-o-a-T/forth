@@ -1,5 +1,5 @@
 forth only definitions
-compiletoram decimal
+decimal
 
 #if undefined dump
 #include lib/dump.fs

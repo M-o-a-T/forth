@@ -2,8 +2,12 @@
 
 compiletoflash
 
+#if-flag debug
+compiletoflash
+
 #if undefined ??
 #include debug/voc.fs
+#endif
 #endif
 
 compiletoflash
@@ -12,16 +16,28 @@ compiletoflash
 #include lib/class.fs
 #endif
 
-compiletoram
+compiletoflash
+
+#if undefined var>
+#include lib/vars.fs
+#endif
+
+test-ram
 
 #if undefined p1
 #include test/offset.fs
 #endif
 
+test-drop
+test-ram
+
 #if undefined p1
 #include test/class.fs
-forgetram
 #endif
+
+test-drop
+
+compiletoflash
 
 
 \ Testing multicast on real hardware requires IRQ-based input
@@ -35,28 +51,38 @@ forgetram
 compiletoflash
 #include sys/multitask.fs
 #endif
-#endif
+\ if-flag multi
 
 #if undefined ring
 #include lib/ring.fs
 #endif
 
-compiletoram
+test-ram
+
 #if undefined rr
 #include test/ring.fs
-forgetram
 #endif
 
+test-drop
+
 #if-flag multi
-compiletoram
+
+test-ram
+
+#if-flag debug
 #if undefined tasks
 #include debug/multitask.fs
 #endif
+#endif
+
+test-ram
 
 #if undefined timetask
 #include test/multitask.fs
-forgetram
-#endif
 #endif
 
+#endif
+\ if-flag multi
 
+
+test-drop

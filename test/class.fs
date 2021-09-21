@@ -1,8 +1,11 @@
 forth definitions
 
 #if undefined var>
+compiletoflash
 #include lib/vars.fs
 #endif
+
+test-ram
 
 var> also
 
@@ -17,7 +20,9 @@ i1 _addr_  hex.
 int class: uint
 : show ( a-addr -- ) __ @ u. ;
 
+#if defined ??
 __ ?? ..
+#endif
 
 
 forth definitions
