@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+
+F="debug"
+
+trap 'echo "ERROR $FLG"; exit 1' ERR
+
+while read FLG ; do
+
+echo TEST $FLG
+
+PYTHONPATH=. scripts/mf-cmd -x tt $A  -b -q -g ok. ../mecrisp-stellaris/linux-ra/mecrisp-stellaris-linux
+
+done < <(scripts/permute $F)
+
+echo OK
