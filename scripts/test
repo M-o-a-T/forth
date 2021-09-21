@@ -9,7 +9,11 @@ while read FLG ; do
 
 echo TEST $FLG
 
-PYTHONPATH=. scripts/mf-cmd -x test/main.fs  $FLG  -b -q -g ok. ../mecrisp-stellaris/linux-ra/mecrisp-stellaris-linux
+if ! env PYTHONPATH=. scripts/mf-cmd -x test/main.fs  $FLG  -b -q -g ok. ../mecrisp-stellaris/linux-ra/mecrisp-stellaris-linux
+then
+	env PYTHONPATH=. scripts/mf-cmd -x test/main.fs  $FLG -D -g ok. ../mecrisp-stellaris/linux-ra/mecrisp-stellaris-linux </dev/tty >/dev/tty 2>&1
+	exit 1
+fi
 
 done < <(scripts/permute $F)
 
