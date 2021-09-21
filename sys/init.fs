@@ -7,7 +7,7 @@
 \ We need to load the "vis" extension first, (a) because it doesn't upcall
 \ 'init', second because currently (2021-09) there's a bug in Mecrisp(?)
 \ that prevents it from working when it's not loaded first.
-#include lib/vis.fs
+#include sys/voc.fs
 #endif
 
 compiletoflash
