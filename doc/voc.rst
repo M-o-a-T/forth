@@ -29,26 +29,33 @@ voc: ( "name" -- )
 
 Create a stand-alone vocabulary prefix; it extends the root vocabulary.
 
-<voc> voc ( "name" -- )  Create a vocabulary prefix that extends (inherits
-                         from) the given voc.
+<voc> voc ( "name" -- )
+-----------------------
 
-<voc> ?? ( -- )   Show all words of the actual VOC search order and stay in
-                  that VOC context.
+Create a vocabulary prefix that extends, i.e. inherits words from, the given voc.
 
-.. ( -- )  Switch back from a VOC search order to the default Forth search
-           order.
+<voc> ?? ( -- )
+---------------
 
-<voc> definitions ( -- )  Make <voc> the current compilation context.
+Show all words of the actual VOC search order and stay in that VOC context.
 
-<voc> item ( -- )  Make the next created word a context switching one, i.e.
-                   #123 int item variable int1  \ int1 ( -- a ; NS: int )
-
-sticky ( -- )  Make the next created word a sticky one.
-
-@voc ( -- )  Make the current compilation context the actual search context.
+\.. ( -- )
+----------
 
 
-A brief recap of register map usage::
+Switch back from a VOC search order to the default Forth search order.
+
+<voc> definitions ( -- )
+------------------------
+
+Make <voc> the current compilation context.
+
+<voc> item ( -- )
+-----------------
+
+Make the next created word a context switching one.
+
+One use of this is for describing register maps::
 
     voc: gpio
     $00 offset: in ( a1 -- a2 )
@@ -58,12 +65,30 @@ A brief recap of register map usage::
     : port: ( "name" a -- ) item constant ;
     $40004C00 gpio port: p1 ( -- a1 )
 
-    We can now do
-    … p1 in ( -- a2 )
+We can now write ``p1 out ( -- a2 )``. This will compile to a single
+integer address if you use an optimizing Forth compiler.
 
-    This avoids long names and the combinatorial explosion you get when you
-    have five GPIO registers with five accessors each.
+This avoids the long constant names and the combinatorial explosion you get
+when you have five GPIO registers with five accessors each.
 
+``offset:`` is defined in ``fs/lib/util.fs``.
+
+sticky ( -- )
+-------------
+
+Make the next created word a sticky one.
+
+Normally, a side effect of looking up a word clears the context switching
+associated with the previous word. A sticky word prevents that.
+
+One main use is for debugging: ``??`` and ``.s`` are sticky so you can
+add them to your code freely (assuming that the word before them doesn't
+consume the next token).
+
+@voc ( -- )
+-----------
+
+Make the current compilation context the actual search context.
 
 
 ---------
@@ -73,8 +98,9 @@ Internals
 Storage
 +++++++
 
-In front of every word defined after (and including) ``forth-wordlist``
-there's a cell ``wtag`` with the address of the word list it points to.
+In front of every word defined after (and including) ``forth-wordlist``,
+i.e. in higher memory addresses, there's a cell ``wtag`` with the address
+of the word list which the word is a member of.
 
 A word list is identified by the fact that it's a constant which contains
 its own lfa. Thus ``forth-wordlist lfa>wtag`` is equal to ``forth-wordlist``.
@@ -113,16 +139,24 @@ Variables
 context
 -------
 
-a list of ``#vocs`` cells (+1, guard) with voabularies to search "normally".
+A list of ``#vocs`` cells (+1, guarding zero) with voabularies to search "normally".
 
 Access via ``get-order`` and ``set-order``.
 
 current
 -------
 
-the vocabulary where the next definition is to be added to
+The vocabulary where the next definition is to be added to.
 
-Access via ``get-current``and ``set-current``
+Access via ``get-current`` and ``set-current``
+
+_sop_
+-----
+
+The search order pointer.
+
+The SOP addresses either the ``context`` or ``voc-context`` variable. The
+latter happens when a context switching word has been looked up.
 
 _csr_
 -----
@@ -156,11 +190,11 @@ A flag. If true, context switching is supported, otherwise only the
 compilation context is searched.
 
 The reason for this is that Forth scans the dictionary when you define new
-words, and prints a redefinition warning if it finds it. Obviously this
-warning should only be emitted when the word is in the same dictionary.
-Also, the lookup would otherwise trigger our context switching support,
-but we're defining a new word, so the context switch attributes of the old
-word must not apply.
+words. It prints a redefinition warning if it finds an old version.
+Obviously this warning should only be emitted when the new word is in the
+current dictionary itself.
+
+Also, this lookup must not trigger our context switching support.
 
 -------
 History
