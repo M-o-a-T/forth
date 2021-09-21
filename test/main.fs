@@ -33,7 +33,7 @@ forgetram
 #if-flag multi
 #if undefined \multi
 compiletoflash
-#include lib/multicast.fs
+#include sys/multitask.fs
 #endif
 #endif
 
