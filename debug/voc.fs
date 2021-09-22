@@ -199,19 +199,18 @@ root definitions
 root definitions
 \ Display the search order and the compilation context.
 : order ( -- )
-  cr ." context: " context @ .wid
   voc-context @ context <> if
     cr ."     VOC: " voc-context @ .wid
+    _sop_ @ context <> if
+      ." :SOP: "
+    then
   then
-  _sop_ @ @ context @ <> if
-    cr ."     SOP: " _sop_ @ @ .wid
-  then
-  _csr_ @ context @ <> if
-    cr ."  switch: " _csr_ @ 1 bic ?dup if .wid else ." ---" then
-    _csr_ @ 1 and if ."  switch" then
-  then
-  cr ."   order: " get-order 0 ?do .wid space loop
-  cr ." current: " current @ .wid
+\  _csr_ @ context @ <> if
+\    cr ."  switch: " _csr_ @ 1 bic ?dup if .wid else ." ---" then
+\    _csr_ @ 1 and if ."  switch" then
+\  then
+  cr ."  search: " get-order 0 ?do .wid space loop
+  cr ." compile: " current @ .wid
   ."  >" compiletoram? if ." ram" else ." flash" then
 ;
 
@@ -377,10 +376,10 @@ forth definitions
 root definitions
 
 sticky : ??? ( -- )
-  -1 \??? order ."   base: " base @ dup decimal u. base !  cr 2 spaces .s ;
+  -1 \??? order ."   base:" base @ dup decimal u. base !  cr 2 spaces .s ;
 
 sticky : ?? ( -- )
-  -1 \?? order ."   base: " base @ dup decimal u. base !  cr 2 spaces .s ;
+  -1 \?? order ."   base:" base @ dup decimal u. base !  cr 2 spaces .s ;
 
 : list ( -- ) list ;
 
