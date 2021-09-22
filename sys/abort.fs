@@ -25,8 +25,8 @@ compiletoflash
 #if undefined aborthandler
 
 #if defined \multi
-#include sys/multi.fs
-\ multi.fs will re-import us
+#include sys/multitask.fs
+\ multitask.fs will re-import us
 #end
 #endif
 
