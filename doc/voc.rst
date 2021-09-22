@@ -25,9 +25,9 @@ After loading this extension there are three pre-defined vocabularies:
     Mecrips is case insensitive (in ASCII); so is this extension,
     as it uses Mecrisp's COMPARE.
 
------
-Usage
------
+-----------
+Basic Usage
+-----------
 
 voc: ( "name" -- )
 ++++++++++++++++++
@@ -95,6 +95,48 @@ consume the next token).
 
 Make the current compilation context the actual search context.
 
+-----------
+Word search
+-----------
+
+Unless you're in a context switch, Forth has a list of vocabularies to look
+up all words in.
+
+The words in this section are all immediate and have no stack effect.
+
+<voc>
++++++
+
+Look up the next word in <voc>.
+
+<voc> only
+++++++++++
+
+Reset the search order to ``<voc>``, FORTH and ROOT.
+If you want Forth only, use ``FORTH ONLY``.
+
+As a special case, ``ROOT ONLY`` causes Forth not to be added.
+
+<voc> also
+++++++++++
+
+Add ``<voc>`` to the search list.
+
+<voc> first
++++++++++++
+
+Add ``<voc>`` to the search list.
+
+Currently there is no difference between ALSO and FIRST. FIRST is intended
+to replace the top word; you can achieve this effect by ``<voc> IGNORE``.
+
+<voc> ignore
+++++++++++++
+
+Remove ``<voc>`` from the search list.
+
+Removing FORTH probably isn't what you want. Removing ROOT is not
+possible.
 
 ---------
 Internals
@@ -103,12 +145,12 @@ Internals
 Storage
 +++++++
 
-In front of every word defined after (and including) ``forth-wordlist``,
+In front of every word defined after (and including) ``forth-wl``,
 i.e. in higher memory addresses, there's a cell ``wtag`` with the address
 of the word list which the word is a member of.
 
 A word list is identified by the fact that it's a constant which contains
-its own lfa. Thus ``forth-wordlist lfa>wtag`` is equal to ``forth-wordlist``.
+its own lfa. Thus ``forth-wl lfa>wtag`` is equal to ``forth-wl``.
 
 If either bit 0 or 1 of ``wtag`` are set *or* if the word is a wordlist,
 another word before it may contain a context pointer. If bit 0 is set it's a
@@ -215,7 +257,8 @@ Changes, so far:
 
 * The vocabulary container for this extension itself has been renamed from
   ``inside`` to ``\\voc``; the word list is now ``\\voc-wl`` instead of
-  ``inside-wordlist``.
+  ``inside-wordlist``. Likewise, ``forth-wordlist`` is now ``forth-wl``.
+  Several other internal words have been shortened.
 
 * ``voc:`` auto-switches the current vocabulary to itself, as the
   previously-required dance of ``voc foobar foobar definitions`` is rather

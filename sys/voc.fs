@@ -254,7 +254,7 @@ compiletoflash
   forth-wl ,
 : set-order ( wid1 ... widn n | -1 )
    dup #vocs > if ." order overflow" cr quit then
-   dup -1 = if drop root-wl forth-wl dup 3 then
+   dup -1 = if drop root-wl forth-wl 2 then
    dup >r 0 ?do i cells context + ! loop
    0 r> cells context + !  \ zero terminated order
 ;
@@ -313,7 +313,7 @@ compiletoflash
 decimal
 
 \ \voc-wl first
-get-order nip \voc-wl swap set-order
+get-order \voc-wl swap 1+ set-order
 
 \voc-wl set-current
 
@@ -510,16 +510,17 @@ root-wl set-current   \ Some tools needed in VOC contexts
 ;
 
 : (ign ( voc -- ) \ remove this vocabulary from the search list
+  dup root-wl = if drop exit then  \ root cannot be removed
   >r get-order r>
   ( voc… n ign )
-  over 1 = if ."  ? search order underflow " abort then
   over 0 do
     i 2 + pick
     ( voc… n ign voc-N )
     over =
     if
       drop  ( voc… n )
-      i 1+ roll drop 1- set-order
+      i 1+ roll drop  ( voc-1… n )
+      1- set-order
       unloop exit
     then
   loop
@@ -527,29 +528,44 @@ root-wl set-current   \ Some tools needed in VOC contexts
   drop 0 do drop loop
 ;
 
+: (also) ( voc -- )
+\ Add VOC to the search order, ensuring that it's not in there twice.
+  dup >r (ign
+  get-order dup #vocs = if ."  ? search order overflow " abort then
+  r> swap 1+ set-order ;
+
 
 root-wl set-current
 
 : first ( -- )
-\ overwrite the top of the permanent search order with the top wid
-\ of the current temporary search order.
-  _sop_ @ @ context !  [ ' .. call, ] immediate ;
+\ in theory, overwrite the top of the permanent search order with the top
+\ wid of the current temporary search order.
+\ TODO: FOO FIRST  BAR FIRST  currently does not drop FOO.
+\ Use FOO IGNORE to ensure that this happens.
+  voc-context @ (also) immediate ;
 
 : only ( -- )
 \ use only the base vocabulary (forth+root)
 \ plus whatever is current
-  [ root .. voc-context @ literal, forth .. voc-context @ literal, ]
   voc-context @
-  3 set-order  immediate ;
+  [ root .. voc-context @ literal, ]  ( new root )
+  2dup = if drop 1 set-order exit then
+  \ if "root only", don't add forth
+  [ forth .. voc-context @ literal, ]  ( new root forth )
+  2 set-order ( new )
+  (also)  \ takes care of filtering "forth only"
+  immediate ;
 
 : also ( -- ) 
 \ add the current temp vocabulary to the search list
-  get-order dup #vocs = if ."  ? search order overflow " abort then
-  over swap 1+ set-order  [ ' first call, ] immediate ;
+  voc-context @ (also) immediate ;
 
 : previous ( -- )
 \ remove the last-added vocabulary from the search list
-  get-order dup 1 = if ."  ? search order underflow " abort then
+  get-order dup 1 = if ."  search order underflow" abort then
+  over root-wl = if
+    r> swap >r
+  then  \ if the root is on top, drop the voc below it
   nip 1- set-order immediate ;
 
 : ignore ( -- )
@@ -570,7 +586,9 @@ root-wl set-current
     \ - store the address so "dovoc" can get it
     \ - set definitions
     \ - add the word to the search order
-    dup , (dovoc (def [ ' also call, ' immediate call, ] 
+    dup , dup (also) set-current
+    [ ' immediate call, ] 
+    \ mark the new word as immediate
   does> dovoc 
 ;
 
