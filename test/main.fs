@@ -51,6 +51,7 @@ compiletoflash
 compiletoflash
 #include sys/multitask.fs
 #endif
+#endif
 \ if-flag multi
 
 #if undefined ring
