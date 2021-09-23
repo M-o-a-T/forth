@@ -24,6 +24,7 @@ int class: uint
 __ ?? ..
 #endif
 
+#ok depth 0=
 
 forth definitions
 
@@ -33,9 +34,17 @@ __data
   int field: y
 __seal
 
+: setup ( obj -- )
+  dup __ setup
+  -1 over __ x !
+  -1 swap __ y !
+;
 
 point object: p1
 point object: p2
+
+#ok p1 x @ -1 = 
+#ok p2 y @ -1 =
 
 #100 p1 x !  #200 p1 y !
 #102 p2 x !  #202 p2 y !
@@ -43,6 +52,7 @@ point object: p2
 p1 x ?
 p1 y ?
 
+#ok depth 0=
 #ok p1 x @ #100 =
 #ok p1 y @ #200 =
 #ok p2 x @ #102 =
@@ -60,7 +70,7 @@ p1 show
 
 p1 show
 
-p1 get .s
+p1 get .s 2drop
 #ok p1 get #1 = swap #2 = and
 
 #ok depth 0=

@@ -8,10 +8,6 @@ forth definitions only
 #include lib/class.fs
 #endif
 
-#if \cls undefined sized
-#include lib/class-sized.fs
-#endif
-
 #if undefined var>
 #include lib/vars.fs
 #endif
@@ -28,25 +24,29 @@ __data
   var> hint field: limit
   var> hint field: start
   var> hint field: end
+  \ var> hint field: offset
 #if defined \multi
   var> int  field: task
 #endif
 __seal
 
-0 constant size
-: size@ s" size" voc-eval ;
+\ xx constant elems
+: elems@ s" elems" voc-eval ;
 
 : setup ( ring -- )
 \ initialize our variables
   dup __ setup
-  size@ over limit !
-  0 over start !
-  0 over end !
+  __ elems@ over __ limit !  \ XXX depends on no overriding
+  \ __ \offset @ size + offset !
+  0 over __ start !
+  0 over __ end !
 #[if] defined \multi
-  0 over task !
+  0 over __ task !
 #endif
   drop
 ;
+
+: size size elems@ + ;
 
 \ ************************************************************
 \ Words defined after this point only work after calling SETUP
@@ -112,7 +112,7 @@ __seal
   dup 3 -roll ( end endn item end )
 #endif
 
-  r@ dup __ \offset @ + + c!  ( endn )
+  r@ dup __ \offset @ + + c!  ( endn )  \ ! should be offset
   r@ __ end !
 
 #[if] defined \multi
@@ -141,7 +141,7 @@ __seal
 #endif
   ( start |r: ring )
   dup
-  r@ dup __ \offset @ + + c@
+  r@ dup __ \offset @ + + c@  \ ! should be offset
   swap 1+ r@ __ mask r@ __ start !
 
 #[if] defined \multi

@@ -2,6 +2,8 @@
 #include lib/class.fs
 #endif
 
+forth definitions only
+
 voc: var>
 
 class: int

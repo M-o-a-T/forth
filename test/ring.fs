@@ -4,14 +4,14 @@ decimal
 #if undefined dump
 #include lib/dump.fs
 #endif
+#ok depth 0=
 
 ring class: r4
-4 constant size
+4 constant elems
 
 forth only definitions
 
 r4 object: rr
-rr setup
 rr 40 dump 
 
 #echo ## TEST

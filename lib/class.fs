@@ -29,30 +29,32 @@ voc: \cls
 ;
 
 
-forth definitions
+\cls definitions
 \ A root VOC for all classes.
 
-voc: class-root
+voc: root-cls
 
-0 constant u/i   \ class-root has no instance data defined
+0 constant u/i   \ root-cls has no instance data defined
+0 constant size  \ root-cls has no additional data defined
 
 \ retrieve a possibly-subclassed u/i
-: u/i@ s" u/i" voc-eval ;  
+: u/i@ s" u/i" voc-eval ;
+: size@ s" size" voc-eval ;
+: setup@ s" setup" voc-eval ;
 
 
 \ Return an object's data address.
 : _addr_ ( oid -- addr )
-  class-root ['] .. execute immediate
+  root-cls ['] .. execute immediate
 ;
 
-
 \ Begin or extend an instance definition in a class definition.
-: __data ( -- magic 0|inherited-size ) 
-  ivr-sys current @ dup _csr_ ! 
-  s" u/i" 2dup 4 pick ??-wl
+: __data ( -- magic 0|inherited-size )
+  ivr-sys current @ dup >r voc-context !
+  s" u/i" 2dup r> ??-wl
   if ." instance is sealed" abort exit then
   voc-eval ( magic size )
-  nip
+  ." SIZE:" dup .
 ;
 
 
@@ -67,17 +69,18 @@ voc: class-root
   get-current _csr_ ! immediate
 ;
 
+
 \cls definitions
 
-\ Assign the actual class context to the next created word and return the 
+\ Assign the actual class context to the next created word and return the
 \ instance size of the class on the stack.
 : class-item ( -- u/i )
   \ get the instance size
-  u/i@ item  \ compile the next word as vocabulary setter
+  u/i@ size@ + item  \ compile the next word as vocabulary setter
 ;
 
 
-class-root definitions
+root-cls definitions
 
 \ Create an instance variable in the current class definition.
 : field: ( "name" magic n1 -- magic n2 )
@@ -96,54 +99,86 @@ class-root definitions
 
 \ Create an instance of a class.
 : object: ( "name" -- )
+  \ XXX the next line depends heavily on VOC internals
+  align here 2 cells +  ( lfa of future word )
   class-item buffer:
+  \ now we go to the newly-created word's xt and run it
+  \voc lfa>xt ( xt ) execute ( obj )
+  \ calling the object sets SOP, which we need to undo
+  [ ' .. call, ]
+  \ find and run its setup method
+  setup@
 ;
 
-\ Create a class that inherits from / extends the actual class context. 
-\ This is just a subvocabulary.
+\ \ Create a class that only inherits from / extends the root class.
+\ : class: ( "name" -- )
+\   [ ' root-cls call, ] voc:
+\   postpone ..
+\ ;
+
+\ This is the "unsized" externally visible root class
+forth definitions
+
+root-cls voc: class-root
+
+: setup ( object -- )
+  __ size@ abort" Not sized"
+  __ setup
+;
+
+\cls also
+\voc also
+
+\ Create a class that inherits from / extends a class context.
 
 \ When we declare "class: foo" followed by "class: bar", we want them to be
 \ (a) siblings and (b) declared in the same vocabulary.
-\ If you want subclasses, use "foo class: bar".
+\ If you want a subclass, use "foo class: bar".
+
+root definitions
 
 : class: ( "name" -- )
-  _sop_ @ dup @ swap context = if ( voc )
-    dup (ign
-    current @ over = if
-      dup lfa>wtag tag>wid current !
-    then ( voc )
-    vocnext
-  else
+  _sop_ @ dup @ swap context =
+  if ( voc ) \ no prefix
+    \ check if the current compile context is a class
+    s" u/i@" context @ ??-vocs-no-root
+    if
+      \ drop it from search
+      dup (ign
+      current @ over = if
+        dup lfa>wtag tag>wid current !
+      then ( voc )
+      vocnext
+    else
+      drop [ class-root .. voc-context @ literal, ]
+    then
+  else ( voc ) \ with this prefix
     ..
   then
   voc-extend
 ;
 
+forth definitions
+
+#if undefined var>
+#include lib/vars.fs
+#endif
 
 forth definitions
 
-\ Create a class that only inherits from / extends class-root.
-: class: ( "name" -- )
-  [ ' class-root call, ] \voc voc:
+\cls root-cls class: sized
+__data
+  var> hint field: \offset
+__seal
+
+: setup ( object -- )
+  dup __ setup
+  __ u/i@
+  swap __ \offset !
 ;
 
+
+
 forth definitions only
-
-\ \index  class  object  compiletoram  compiletoflash
-
-\ ------------------------------------------------------------------------------
-\ Last Revision: MM-170729 Code review, some comments changed
-\                          new version 0.7.0-FR
-\                MM-170725 _addr_ redefined, failed with RA 2.3.x
-\                          new version 0.6.4-FR
-\
-\                MM-170712 definitions redefined, _ccm_ deleted
-\                MM-170709 casted-u/i --> class-item and moved to inside
-\                          new version 0.6.3
-\                MM-170705 quit replaced with abort , obj --> object 
-\                          _addr_ added , _size_ --> u/i
-\                MM-170704 code review, code partly refactored, comments added
-\                MM-170701 oop.txt splittet in vocs.txt and class.txt
-\                          code partly rewritten
 
 #ok depth 0=
