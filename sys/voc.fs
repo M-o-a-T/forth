@@ -252,10 +252,14 @@ compiletoflash
 
   forth-wl ,
 : set-order ( wid1 ... widn n | -1 )
-   dup #vocs > if ." order overflow" cr quit then
-   dup -1 = if drop root-wl forth-wl 2 then
-   dup >r 0 ?do i cells context + ! loop
-   0 r> cells context + !  \ zero terminated order
+  dup -1 = if
+    drop root-wl forth-wl 2
+  else
+    dup #vocs > over 1 < or if ." order overflow" cr quit then
+  then
+
+  dup >r 0 do  i cells context + !  loop
+  0 r> cells context + !  \ zero terminated order
 ;
 
 
@@ -536,6 +540,7 @@ forth-wl set-current
 
 : (also) ( voc -- )
 \ Add VOC to the search order, ensuring that it's not in there twice.
+  dup root-wl = if drop exit then  \ root can't be added
   dup >r (ign
   get-order dup #vocs = if ."  ? search order overflow " abort then
   r> swap 1+ set-order ;
@@ -553,13 +558,13 @@ root-wl set-current
 : only ( -- )
 \ use only the base vocabulary (forth+root)
 \ plus whatever is current
-  voc-context @
-  [ root .. voc-context @ literal, ]  ( new root )
-  2dup = if drop 1 set-order exit then
-  \ if "root only", don't add forth
-  [ forth .. voc-context @ literal, ]  ( new root forth )
-  2 set-order ( new )
-  (also)  \ takes care of filtering "forth only"
+  voc-context @ root-wl = ( new root )
+  if root-wl 1 set-order exit then
+  root-wl forth-wl dup voc-context @ = if
+    2
+  else
+    voc-context @ 3 
+  then set-order
   immediate ;
 
 : also ( -- ) 
