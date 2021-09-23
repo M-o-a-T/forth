@@ -149,13 +149,14 @@ data, you need to reset the search context::
 
 Single-value objects are of course boring, but you can combine them::
 
-	class-root class: point
+	class: point
 	__data
+	  haligned  \ no-op
 	  hint field: x
 	  hint field: y
 	__seal
 
-You might waant to initialize things::
+You might want to initialize things::
 
 	: setup ( obj -- )
 	  dup __ setup
@@ -174,6 +175,31 @@ You might waant to initialize things::
 	#102 p2 x !  #202 p2 y !
 
 	#ok p1 x @ 100 =
+
+The words ``__data`` and ``__seal`` must frame your field definition, to
+ensure that the required buffer is calculated and stored in your object.
+You don't need them if your subclass doesn't contain any data of its own.
+
+Field alignment
++++++++++++++++
+
+The field definition of a basic object doesn't know about its own alignment
+requirements, so you have to do that yourself.
+
+Basic rule: write HALIGNED before the first HINT field, and ALIGNED before
+the first INT field.
+
+Whether you can get away with less strict alignment requirements and/or
+whether using misaligned fields incurs a performance penalty depends on
+your CPU.
+
+Since it's easy enough to do this manually if required, and forwarding
+alignment to surrounding objects is nontrivial, this library doesn't
+include support for automagically fixing these issues.
+
+The basic (empty) object is always fully aligned. A sized object currently
+contains one HINT, thus starts with half-word alignment, though it's best
+not to depend on that.
 
 -------------------
 Using sized classes

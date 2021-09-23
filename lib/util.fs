@@ -51,6 +51,12 @@ forth definitions
 \voc ignore
 #endif
 
+#if undefined haligned
+: haligned ( c-addr -- h-addr )
+\ like "aligned" but for halfwords
+  1 cells 2/ 1- tuck + swap bic
+;
+#endif
 
 \ mecrisp-without-RA doesn't have these
 
