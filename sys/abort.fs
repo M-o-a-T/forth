@@ -111,3 +111,5 @@ forth definitions
 \voc ' abort-quit hook-quit !
 
 forth only
+
+#ok depth 0=

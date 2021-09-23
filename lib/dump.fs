@@ -53,3 +53,4 @@ forth only definitions
   drop
 ;
 
+#ok depth 0=

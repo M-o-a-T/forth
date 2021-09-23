@@ -87,3 +87,6 @@ test-ram
 
 
 test-drop
+
+#ok depth 0=
+#echo END OF TEST. SUCCESS.

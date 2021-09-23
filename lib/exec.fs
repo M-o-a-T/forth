@@ -26,3 +26,5 @@ sticky  \ dropped by postpone
 immediate ;
 
 #endif
+
+#ok depth 0=

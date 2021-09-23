@@ -482,3 +482,4 @@ sticky
 
 forth only definitions
 
+#ok depth 0=

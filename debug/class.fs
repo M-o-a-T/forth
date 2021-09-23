@@ -41,3 +41,5 @@ forth definitions
 ;
 
 only
+
+#ok depth 0=

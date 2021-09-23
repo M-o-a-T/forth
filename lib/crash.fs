@@ -72,3 +72,5 @@ forth definitions only
 ct-init
 
 #endif
+
+#ok depth 0=

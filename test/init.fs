@@ -46,3 +46,5 @@ test-ram
 #if undefined see
 #include lib/disasm.fs
 #endif
+
+#ok depth 0=

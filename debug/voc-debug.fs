@@ -198,3 +198,5 @@ root definitions
 : ~voc: ( "name" -- )
   _sop_ @ context = if ." C:-" 0 else VOC-context @ dup ." C:" .wid then ~voc-extend
 ;
+
+#ok depth 0=

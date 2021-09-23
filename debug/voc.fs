@@ -384,3 +384,5 @@ sticky : ?? ( -- )
 : list ( -- ) list ;
 
 forth definitions only decimal compiletoram
+
+#ok depth 0=
