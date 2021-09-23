@@ -246,8 +246,7 @@ compiletoflash
 
   forth-wl ,
 : get-order ( -- wid1 ... widn n )
-  w/o dup 0= if exit then 
-  dup >r cells context +
+  w/o dup >r  cells context +  ( past-end |R: len )
   begin 1 cells - dup @ swap dup context = until drop r>
 ;
 
