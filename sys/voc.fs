@@ -595,10 +595,14 @@ root-wl set-current
   <builds
     \ we want to:
     \ - store the address so "dovoc" can get it
+    \ - set the (silent) VOC context
     \ - set definitions
     \ - add the word to the search order
-    dup , dup (also) set-current
-    [ ' immediate call, ] 
+    dup ,
+    dup voc-context !
+    dup (also)
+    set-current 
+    [ ' .. call, ' immediate call, ] 
     \ mark the new word as immediate
   does> dovoc 
 ;
