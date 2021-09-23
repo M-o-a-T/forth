@@ -385,4 +385,5 @@ sticky : ?? ( -- )
 
 forth definitions only decimal compiletoram
 
+\ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=

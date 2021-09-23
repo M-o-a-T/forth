@@ -199,4 +199,5 @@ root definitions
   _sop_ @ context = if ." C:-" 0 else VOC-context @ dup ." C:" .wid then ~voc-extend
 ;
 
+\ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=

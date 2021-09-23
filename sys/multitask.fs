@@ -544,4 +544,5 @@ only
 \ get a serial IRQ with input buffer, or teach the terminal
 \ to wait for the echo.
 
+\ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=

@@ -50,4 +50,5 @@ stop \ Idle the boot task
 #endif
 \ multitask
 
+\ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=

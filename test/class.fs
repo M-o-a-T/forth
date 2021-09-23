@@ -73,4 +73,5 @@ p1 show
 p1 get .s 2drop
 #ok p1 get #1 = swap #2 = and
 
+\ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=

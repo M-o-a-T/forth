@@ -16,4 +16,5 @@ $2340 gpio port: p2 ( -- a1 )
 
 forth only definitions
 
+\ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=
