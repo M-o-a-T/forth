@@ -11,47 +11,6 @@ voc: \cls
 
 \voc also
 
-\ classes.txt        Source Code Library for Mecrisp-Stellaris        MM-170628
-\ ------------------------------------------------------------------------------
-\     Classes, based on VOCs, to define objects with early binding methods.
-
-\                      Supports single inheritance.
-
-\                             Version 0.7.0-FR
-
-\                     Copyright (C) 2017 Manfred Mahlow
-
-\        This is free software under the GNU General Public License v3.
-\ ------------------------------------------------------------------------------
-\ Please see the VOC-HOWTO-Classes-x.txt files how to create and use classes. 
-
-\ Glossary:
-
-\ class ( "name" -- )  Create a vocabulary prefix (see vocs.txt) to be used as
-\                      a class context. Inherits from class-root.
-
-\ <class> class ( "name" -- )  Create a class that inherits from (extends) the
-\                              given <class>.
-
-\ <class> definitions ( -- )  Make <class> the current compilation context.
-
-\ __data ( -- ivsys 0|inherited-size ) Begin or extend an instance definition
-\                                      in the current class compilation context.
-
-\ __seal ( ivsys size -- )  Terminate an instance definition in the current 
-\                           class compilation context. Creates u/i.
-
-\ __ ( -- )  Make the current class compilation context the actual search order.
-
-\ <class> ivar ( "name" ivsys n1 -- ivsys n2 )  Create an object of <class>
-\                                               inside an instance definition.
-
-\ <class> object ( "name" -- )  Create an object of <class>.
-
-\ <class> u/i ( -- u )  Return the instance data size of <class>.
-
-\ ------------------------------------------------------------------------------
-
 
 #1234567890 constant ivr-sys
 
