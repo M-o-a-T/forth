@@ -26,7 +26,7 @@ align 0 , forth-wl , here constant \voc-wl
 align 0 , forth-wl , here constant root-wl
 
 
-  forth-wl ,
+  \voc-wl ,
 \ Return a wordlist identifier for a new empty wordlist.
 : wordlist ( -- wid )
   align here [ here @ not literal, ] ,
@@ -480,8 +480,12 @@ root-wl set-current   \ Some tools needed in VOC contexts
   0 _csr_ !  _?csr_  immediate
 ;
 
+\voc-wl set-current
+
 : (def ( -- )
   _sop_ @ @ set-current ;
+
+root-wl set-current   \ Some tools needed in VOC contexts
 
 : definitions ( -- ) 
   (def [ ' .. call, ] immediate ;
@@ -495,9 +499,12 @@ root-wl set-current   \ Some tools needed in VOC contexts
 2 wflags !
 : root ( -- )   root-wl   (dovoc  immediate ;
 2 wflags !
-: \voc ( -- ) \voc-wl (dovoc  immediate ;
-2 wflags !
 : forth ( -- )  forth-wl  (dovoc  immediate ;
+
+forth-wl set-current
+
+2 wflags !
+: \voc ( -- ) \voc-wl (dovoc  immediate ;
 
 
 \voc-wl set-current
