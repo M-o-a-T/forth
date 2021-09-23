@@ -35,3 +35,4 @@
   base !
 ;
 
+#ok depth 0=

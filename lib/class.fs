@@ -146,3 +146,4 @@ forth definitions only
 \                MM-170701 oop.txt splittet in vocs.txt and class.txt
 \                          code partly rewritten
 
+#ok depth 0=

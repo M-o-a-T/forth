@@ -718,3 +718,4 @@ root definitions
 
 forth definitions only decimal compiletoram
 
+#ok depth 0=

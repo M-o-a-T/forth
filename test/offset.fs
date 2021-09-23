@@ -15,3 +15,5 @@ $2340 gpio port: p2 ( -- a1 )
 #ok p2 dir $2344 =
 
 forth only definitions
+
+#ok depth 0=

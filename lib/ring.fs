@@ -173,13 +173,15 @@ ring
 \ init only part of a buffer.
 
 class: r32
-32 constant size
+32 constant elems
 
 class: r80
-80 constant size
+80 constant elems
 
 class: r16
-16 constant size
+16 constant elems
 
 
 forth definitions only
+
+#ok depth 0=

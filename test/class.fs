@@ -63,3 +63,4 @@ p1 show
 p1 get .s
 #ok p1 get #1 = swap #2 = and
 
+#ok depth 0=

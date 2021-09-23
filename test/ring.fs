@@ -40,3 +40,5 @@ rr 20 dump
 #ok rr @ 1 =
 #ok rr @ 12 =
 #ok rr @ 23 =
+
+#ok depth 0=

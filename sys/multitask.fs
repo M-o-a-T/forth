@@ -544,3 +544,4 @@ only
 \ get a serial IRQ with input buffer, or teach the terminal
 \ to wait for the echo.
 
+#ok depth 0=
