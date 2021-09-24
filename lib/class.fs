@@ -54,7 +54,6 @@ voc: root-cls
   s" u/i" 2dup r> ??-wl
   if ." instance is sealed" abort exit then
   voc-eval ( magic size )
-  ." SIZE:" dup .
 ;
 
 
