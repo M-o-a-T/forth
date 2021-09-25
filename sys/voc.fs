@@ -493,6 +493,10 @@ root-wl set-current   \ Some tools needed in VOC contexts
 : definitions ( -- ) 
   (def [ ' .. call, ] immediate ;
 
+: defs ( -- ) 
+\ I'm typing my fingers off with "definitions"
+  (def [ ' .. call, ] immediate ;
+
 
 \ Make the current compilation context the new search context.
 : @voc ( -- )
