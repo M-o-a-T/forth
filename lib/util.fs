@@ -60,6 +60,7 @@ forth definitions
 
 \ mecrisp-without-RA doesn't have these
 
+#if-flag roll
 #if undefined roll
 : roll ( xu xu-1 … x0 u -- xu-1 … x0 xu )
   ?dup if  \ zero is no-op
@@ -93,6 +94,7 @@ forth definitions
     repeat
   then
 ;
+#endif
 #endif
 
 #if undefined offset:
