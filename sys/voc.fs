@@ -687,13 +687,17 @@ root definitions  \voc only
   token (')
 ;
 
+forth definitions
+
+\ Those words cannot be in root because normally the forth context is used
+\ first, so the old definition would be found.
 
 : ' ( "name" -- xt ) (' lfa>xt ;
 
 : ['] ( "name" -- ) ' literal, immediate ;
 
-\ postpone needs to be redefined because the core word has an internal tick
-\ dependency, that is not fullfilled, when the new find is used.
+\ postpone needs to be redefined because the core word uses the internal
+\ tick which doesn't go through HOOK-FIND.
 
 : postpone ( "name" -- )
   (' lfa>xt,flags $10 and if
@@ -709,6 +713,13 @@ root definitions  \voc only
   <BUILDS ,
   DOES> @ +
 ;
+root definitions
+
+\ These words need to be in root, so that they work
+\ when called from within a context switch.
+: postpone postpone postpone immediate ;
+: ' ' ;
+: ['] postpone ['] immediate ;
 
 forth definitions
 
