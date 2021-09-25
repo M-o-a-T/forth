@@ -708,11 +708,6 @@ forth definitions
   immediate
 ;
 
-: offset ( "name" n -- )
-\ Simple building block for register maps
-  <BUILDS ,
-  DOES> @ +
-;
 root definitions
 
 \ These words need to be in root, so that they work
