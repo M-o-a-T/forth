@@ -7,7 +7,7 @@ decimal
 #ok depth 0=
 
 ring class: r4
-4 constant elems
+3 constant elems
 
 forth only definitions
 
@@ -39,7 +39,36 @@ rr 20 dump
 : push ' \push catch . ;
 #ok rr @ 1 =
 #ok rr @ 12 =
-#ok rr @ 23 =
+
+\ leave one in on purpose, to test whether initialization works.
+\ If compiling into RAM it may or may not work *shrug*
+#if-flag !ram
+#ok rr empty? not
+\voc call-%init
+\ #ok rr empty?
+#endif
+
+\ now let's do another of these with half words
+.s
+
+#set-flag ring-var hint
+#include lib/ring.fs
+ring-hint class: ring-h3
+.s
+3 constant elems
+forth only definitions
+ring-h3 object: rh3
+.s
+
+12345 rh3 !
+23456 rh3 !
+-1 rh3 !
+.s
+#ok rh3 @ 12345 =
+#ok rh3 @ 23456 =
+#ok rh3 @ $FFFF =
+.s
+
 
 \ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=

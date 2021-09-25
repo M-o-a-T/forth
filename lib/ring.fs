@@ -17,16 +17,33 @@ forth definitions only
 #endif
 
 forth definitions only
-\cls also
+var> also
 
-sized class: ring
+\ Predefined flags:
+\ ring-var: what to store in the ring. Must have '@' and '!' words.
+\ i.e. '@' will set the search context for the next word.
+
+#if-flag !ring-var
+#set-flag ring-var cint
+#set-flag ring-name ring
+#else
+#set-flag ring-name ring-{ring-var}
+#read-flag ring-esize {ring-var} u/i
+#endif
+
+#if defined {ring-name}
+\ already known
+#end
+#endif
+
+#send sized class: {ring-name}
 __data
-  var> hint field: limit
-  var> hint field: start
-  var> hint field: end
-  \ var> hint field: offset
-#if defined \multi
-  var> int  field: task
+  hint field: limit
+  hint field: start
+  hint field: num
+  \ hint field: offset
+#if-flag multi
+  int  field: task
 #endif
 __seal
 
@@ -39,14 +56,34 @@ __seal
   __ elems@ over __ limit !  \ XXX depends on no overriding
   \ __ \offset @ size + offset !
   0 over __ start !
-  0 over __ end !
-#[if] defined \multi
+  0 over __ num !
+#if-flag multi
   0 over __ task !
 #endif
   drop
 ;
 
-: size size elems@ + ;
+: *esize ( elem-offset -- byte-offset )
+#if-flag !ring-esize=1
+#if-flag ring-esize=2
+  1 lshift
+#else
+#if-flag ring-esize=4
+  2 lshift
+#else
+#if-flag ring-esize=8
+  3 lshift
+#send {ring-esize} *
+#endif
+#endif
+#endif
+#endif
+  inline ;
+
+: size  ( -- bytes )
+  size elems@ *esize
+  +
+;
 
 \ ************************************************************
 \ Words defined after this point only work after calling SETUP
@@ -56,7 +93,7 @@ __seal
   __ limit @ over = if drop 0 then
 ;
 
-#if defined \multi
+#if-flag multi
 : wait ( ring -- )
   dup __ task @ abort" Dup wait"
   \multi this-task  swap __ task !
@@ -65,7 +102,7 @@ __seal
 ;
 #endif
 
-#if defined \multi
+#if-flag multi
 : wake (  ring -- )
   dup __ task @
   ?dup if
@@ -79,21 +116,21 @@ __seal
 #endif
 
 : empty? ( ring -- bool )
-  dup __ end @ swap __ start @ =
+  __ num @ 0=
 ;
 
 : full? ( ring -- bool )
-  dup __ end @ 1+ over __ mask swap __ start @ =
+  dup __ num @ swap __ limit @ =
 ;
 
-: ! ( item ring -- )
+: ! ( item* ring -- )
+\ store to the ring buffer.
   >r
 
-#[if] defined \multi
+#if-flag multi
   begin
-    r@ __ end @ dup 1+ r@ __ mask dup r@ __ start @ = 
+    r@ __ full?
   while 
-    2drop
     eint? if
       r@ __ wait
     else
@@ -102,57 +139,64 @@ __seal
   repeat
 #else
   r@ __ full? if r> abort" Ring full" then
-  r@ __ end @ dup 1+ r@ __ mask
 #endif
 
-  ( item end endn )
-  -rot
-  ( endn item end )
-#[if] defined \multi
-  dup 3 -roll ( end endn item end )
+  \ now compute where to store the next bit
+  r@ __ start @ r@ __ num @ + r@ __ mask  __ *esize
+  r@ __ \offset @ r@ + +
+#send {ring-var} !
+  r@ __ num @
+#if-flag multi
+  dup
 #endif
+  1+ r@ __ num !
+  ( num-old ) \ when \multi is on
 
-  r@ dup __ \offset @ + + c!  ( endn )  \ ! should be offset
-  r@ __ end !
-
-#[if] defined \multi
+#if-flag multi
   \ 1st char? wake up
-  r@ __ start @ = if
+  0= if
     r@ __ wake
   then
 #endif
+
   rdrop
 ;
 
 : @ ( ring -- item )
   >r
-#[if] defined \multi
+#if-flag multi
   begin
-    r@ __ start @  r@ __ end @  over =  while
+    r@ __ empty?
+  while
     eint? if
-      drop r@ __ wait
+      r@ __ wait
     else
       r> abort" Ring empty"
     then
   repeat
 #else
-  r@ __ empty? if r> abort" Ring empty" then
-  r@ __ start @
+  r@ __ empty? abort" Ring empty"
 #endif
-  ( start |r: ring )
-  dup
-  r@ dup __ \offset @ + + c@  \ ! should be offset
-  swap 1+ r@ __ mask r@ __ start !
 
-#[if] defined \multi
+  ( )
+  r@ __ start @ __ *esize
+  r@ __ \offset @ r@ + +
+#send {ring-var} @
+  r@ __ start @ 1+ r@ __ mask r@ __ start !
+  r@ __ num @ 1- r@ __ num !
+
+#if-flag multi
   \ wake up writer
-  \ We should only need that if the ring was full
-  \ but testing for it is more expensive than simply checking
+  \ We only need that if the ring was full
+  \ but testing for that is more expensive than
+  \ simply checking whether someone's waiting
   r> __ wake
 #else
   rdrop
 #endif
 ;
+
+#if-flag ring-var=cint
 
 : s! ( addr count ring )
 \ send a string to the ring
@@ -162,24 +206,17 @@ __seal
   loop
   2drop
 ;
-  
 
-forth only
-ring definitions
-
-ring
-
-\ subclasses for various sizes. We do it this way because Mecrisp cannot
-\ init only part of a buffer.
-
-class: r32
+class: rc32
 32 constant elems
 
-class: r80
+class: rc80
 80 constant elems
 
-class: r16
+class: rc16
 16 constant elems
+
+#endif
 
 
 forth definitions only
