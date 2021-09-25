@@ -76,7 +76,7 @@ integer address if you use an optimizing Forth compiler.
 This avoids the long constant names and the combinatorial explosion you get
 when you have five GPIO registers with five accessors each.
 
-``offset:`` is defined in ``fs/lib/util.fs``.
+``offset:`` is defined in ``lib/util.fs``.
 
 sticky ( -- )
 +++++++++++++

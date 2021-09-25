@@ -214,7 +214,7 @@ To do that, classes can be *sized*. An additional variable area below their
 fixed elements is allocated when an item is created. The size of the
 fixed area is stored (by ``setup``) in the field ``\offset``.
 
-See ``fs/lib/ring.fs`` for an example.
+See ``lib/ring.fs`` for an example.
 
 Sized classes can be subclassed using a class that adds new variables.
 That is no problem; ``\\offset`` is adjusted appropriately.

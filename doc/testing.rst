@@ -11,7 +11,7 @@ Test script
 ===========
 
 Automated testing is done by ``scripts/test_fs``. It calls the test suite
-in ``fs/test/main.fs`` with every possible combination of these flags:
+in ``test/main.fs`` with every possible combination of these flags:
 
 * ram
 

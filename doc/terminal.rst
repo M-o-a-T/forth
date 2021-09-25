@@ -143,7 +143,7 @@ This test checks whether the WORDs result in a Forth OK prompt.
     fail for other reasons than you expected. It's generally better to
     catch specific failures, using ``CATCH`` and ``THROW``.
 
-    See the end of ``fs/test/ring.fs`` for an example.
+    See the end of ``test/ring.fs`` for an example.
 
 #if-flag NAME…
 ++++++++++++++
