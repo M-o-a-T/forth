@@ -1,7 +1,9 @@
 
 \ A convenient memory dump helper
 
+#if token forth find drop
 forth only definitions
+#endif
 
 : u.4 ( u -- ) 0 <# # # # # #> type ;
 : u.2 ( u -- ) 0 <# # # #> type ;

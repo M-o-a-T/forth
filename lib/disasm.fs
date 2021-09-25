@@ -19,9 +19,14 @@
 \ resolves call entry points, literal pools and handles inline strings.
 \ Usage: Specify your target address in disasm-$ and give disasm-step some calls.
 
+#if token forth find drop
 forth definitions  decimal
+#endif
 
+#if token voc: find drop
 voc: \disasm
+\voc also
+#endif
 
 \ ---------------------------------------
 \  Memory pointer and instruction fetch
@@ -48,7 +53,12 @@ voc: \disasm
   dictionarystart
   begin
 \   dup 6 + dup skipstring r@ = if ."   --> " ctype else drop then
-    dup 6 + skipstring  r@ = if ."   -->  " dup \voc .nid then  \ MM-200522
+    dup 6 + skipstring  r@ =
+    if ."   -->  "
+#[if] token .nid find drop
+      dup .nid
+#then
+    then  \ MM-200522
     dictionarynext
   until
   drop
@@ -459,7 +469,9 @@ drop \ Forget opcode
 \  Disassembler for definitions
 \ ------------------------------
 
-  root definitions
+#if token root find drop
+root definitions
+#endif
 
 : seec ( addr -- ) \ Disassemble starting at this address
   disasm-$ !
@@ -480,7 +492,9 @@ sticky
   ' seec
 ;
 
+#if token forth find drop
 forth only definitions
+#endif
 
 \ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=
