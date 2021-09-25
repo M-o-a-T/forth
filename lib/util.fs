@@ -136,7 +136,7 @@ forth definitions
 
 \voc also
 
-#if undefined call-%init
+#if undefined %init!
 \voc definitions
 : ?setup ( lfa -- )
 \ check if this word is
@@ -163,7 +163,7 @@ forth definitions
   cr
 ;
 
-: call-%init ( -- )
+: %init! ( -- )
 \ run everything named "%init"
 \ also setup all objects
 \ ignore RAM here, this is called during init
@@ -185,7 +185,7 @@ forth definitions
   [ ' forth call, ' .. call, ]
 ;
 forth definitions
-: init init call-%init ;
+: init init %init! ;
 \voc ignore
 
 #endif
