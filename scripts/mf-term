@@ -8,7 +8,7 @@ from anyio_serial import Serial
 
 import asyncclick as click
 
-from mf.term import Miniterm, key_description
+from mf.term import Miniterm, key_description, Errors
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -88,9 +88,7 @@ async def main(port, echo, encoding, filter, eol, raw, exit_char, menu_char, qui
             if verbose or not batch:
                 print('\n--- exit ---\n',file=sys.stderr)
             sys.exit(1)
-        except Exception as exc:
-            if develop:
-                raise
+        except Errors as exc:
             if verbose > 1:
                 print(f"\nError: {exc !r}", file=sys.stderr)
             sys.exit(1)

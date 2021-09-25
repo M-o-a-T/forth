@@ -14,12 +14,14 @@ from __future__ import absolute_import
 
 import codecs
 import os
+import re
 import stat
 import sys
 import anyio
 import subprocess
 from contextlib import asynccontextmanager
 from anyio.streams.stapled import StapledByteStream
+from asyncclick.exceptions import UsageError
 
 from serial.tools import hexlify_codec
 
@@ -38,6 +40,11 @@ class EarlyEOFError(EOFError):
     pass
 class AllEOFError(EOFError):
     pass
+class ForthError(RuntimeError):
+    pass
+class ScriptError(RuntimeError):
+    pass
+Errors = (ForthError,ScriptError,UsageError,TimeoutError)
 
 class AsyncDummy:
     def __init__(self,val):
@@ -69,9 +76,16 @@ class Miniterm:
     _data = b""
     _exc = None
 
+    _subst = re.compile('{\S+}')
+
+    def subst_flags(self, line):
+        def sub(m):
+            return self.flags[m.group(0)[1:-1]]
+        return self._subst.sub(sub, line)
+
     def __init__(self, command=None, stream=None, name=None, echo=False, eol='lf', filters=(), go_ahead = None, file=None, batch=None, logfile=None, develop=False, verbose=1, flags=()):
         if bool(command) == bool(stream):
-            raise RuntimeError("Specify one of 'command' and 'stream'")
+            raise UsageError("Specify one of 'command' and 'stream'")
         self.command = command
         self.stream = stream
         self.name = name or '?'
@@ -94,7 +108,7 @@ class Miniterm:
         if not batch:
             self.console = Console()
         elif not file:
-            raise RuntimeError("You need a file to send if you send a batch job")
+            raise UsageError("You need a file to send if you send a batch job")
         self.flags = {}
         for fl in flags:
             try:
@@ -125,7 +139,7 @@ class Miniterm:
                             await self.send_file(self.file)
                         except AllEOFError as err:
                             pass
-                        except Exception as e:
+                        except Errors as e:
                             sys.stderr.write(f'\n--- ERROR: {e !r} ---\n')
                             if not self.develop:
                                 raise
@@ -144,9 +158,9 @@ class Miniterm:
             if proc.returncode is None:
                 proc.kill()
             elif proc.returncode < 0:
-                raise RuntimeError(f"SIGNAL {-proc.returncode}")
+                raise ForthError(f"SIGNAL {-proc.returncode}")
             elif proc.returncode > 0:
-                raise RuntimeError(f"EXIT {proc.returncode}")
+                raise ForthError(f"EXIT {proc.returncode}")
         if self._exc is not None:
             exc,self._exc = self._exc,None
             raise exc
@@ -236,7 +250,7 @@ class Miniterm:
     async def chat(self, text, timeout=False):
         """Send a line, return whatever was printed"""
         if not self.go_ahead:
-            raise RuntimeError("I need a go-ahead string")
+            raise UsageError("I need a go-ahead string")
         if not text.endswith("\n"):
             text += "\n"
 
@@ -390,137 +404,187 @@ class Miniterm:
         else:
             sys.stderr.write('--- unknown menu character {} --\n'.format(key_description(c)))
 
-    async def preprocess(self, line):
+    async def preprocess(self, line, fn,li):
         """Filter lines read from a file.
         """
         line = line.strip()
         if line == "" or line == "\\" or line.startswith("\\ "):
             return
-        if line.startswith("#if "):
-            self.layer_ += 1
-            if self.layer:
-                self.layer += 1
-                return
-            res = await self.chat(f"{line[4:]} .", timeout=True)
-            if not int(res.strip()):
-                self.layer = 1
-            return
-        if line.startswith("#[if] "):
-            self.layer_ += 1
-            if self.layer:
-                self.layer += 1
-                return
-            res = await self.chat(f"[ {line[6:]} . ]", timeout=True)
-            if not int(res.strip()):
-                self.layer = 1
-            return
-        if line.startswith("#if-ok "):
-            self.layer_ += 1
-            if self.layer:
-                self.layer += 1
-                return
+
+        oline = line
+        if line[0] == '#':
+
             try:
-                res = await self.chat(f"{line[7:]} .", timeout=True)
+                code,line = line.split(None, 1)
+            except ValueError:
+                code = line
+                line = ""
+            code = code[1:]
+        else:
+            code = "-"
+
+        if code == "if":
+            self.layer_ += 1
+            if self.layer:
+                self.layer += 1
+                return
+            line = self.subst_flags(line)
+            res = await self.chat(f"{line} .", timeout=True)
+            if not int(res.strip()):
+                self.layer = 1
+            return
+        if code == "[if]":
+            self.layer_ += 1
+            if self.layer:
+                self.layer += 1
+                return
+            line = self.subst_flags(line)
+            res = await self.chat(f"[ {line} . ]", timeout=True)
+            if not int(res.strip()):
+                self.layer = 1
+            return
+        if code == "if-ok":
+            self.layer_ += 1
+            if self.layer:
+                self.layer += 1
+                return
+            line = self.subst_flags(line)
+            try:
+                res = await self.chat(f"{line} .", timeout=True)
             except TimeoutError:
                 self.layer = 1
             return
-        if line.startswith("#if-ram "):
+        if code == "if-ram":
             self.layer_ += 1
             if self.layer:
                 self.layer += 1
                 return
             res = await self.chat(f"compiletoram? compiletoram .", timeout=True)
             ram = int(res.strip())
-            res = await self.chat(f"{line[8:]} .", timeout=True)
+            res = await self.chat(f"{line} .", timeout=True)
             if not int(res.strip()):
                 self.layer = 1
             if not ram:
                 await self.chat(f"compiletoflash", timeout=True)
             return
-        if line.startswith("#if-flag "):
+        if code == "if-flag":
             self.layer_ += 1
             if self.layer:
                 self.layer += 1
                 return
-            for f in line[9:].split():
+            for f in line.split():
                 if f[0] == "!":
-                    if f[1:] in self.flags:
-                        break
+                    try:
+                        f,v = f[1:].split("=",1)
+                    except ValueError:
+                        if f[1:] in self.flags:
+                            break
+                    else:
+                        if self.flags.get(f,"") == v:
+                            break
                 else:
-                    if f not in self.flags:
-                        break
+                    try:
+                        f,v = f[1:].split("=",1)
+                    except ValueError:
+                        if f not in self.flags:
+                            break
+                    else:
+                        if self.flags.get(f,"") != v:
+                            break
             else:  # no "break" was hit, all match
                 return
             # some "break" was hit, mismatch
             self.layer = 1
             return
 
-        if line == "#else":
+        if code == "else":
             if not self.layer_:
-                raise RuntimeError(f"'#else' without corresponding '#if…'")
+                raise ScriptError(f"'#else' without corresponding '#if…'")
             if self.layer <= 1:
                 self.layer = 1-self.layer
             return
-        if line == "#endif" or line == "#then":
+        if code == "endif" or code == "then":
             if self.layer:
                 self.layer -= 1
             if self.layer_:
                 self.layer_ -= 1
             else:
                 self.layer = self.layer_ = 0
-                raise RuntimeError(f"'{line}' without corresponding '#if…'")
+                raise ScriptError(f"'#{code}' without corresponding '#if…'")
             return
 
         if self.layer:
             return
 
-        if line == "#end":
+        if code == "end":
             raise EarlyEOFError
-        if line == "#end*":
+        if code == "end*":
             raise AllEOFError
-        if line == "#echo":
+        if code == "echo":
             if self.verbose:
-                sys.stderr.write("\n")
+                sys.stderr.write(f"{line}\n")
             return
-        if line.startswith("#ok "):
-            res = await self.chat(f"{line[4:]} .", timeout=True)
+        if code == "ok":
+            res = await self.chat(f"{line} .", timeout=True)
             if not int(res.strip()):
-                raise RuntimeError("Check failed")
+                raise ForthError("Check failed")
             return
-        if line.startswith("#-ok "):
+        if code == "-ok":
             try:
-                res = await self.chat(f"{line[4:]} .", timeout=True)
+                res = await self.chat(f"{line} .", timeout=True)
             except TimeoutError:
                 return
             else:
-                raise RuntimeError("Did not fail")
-        if line.startswith("#send "):
-            val = self.flags.get(line[6:],"0")
-            sys.stderr.write(val+"\n")
+                raise ForthError("Did not fail")
+        if code == "send":
+            line = self.subst_flags(line)
+            res = await self.chat(f"{line}", timeout=True)
             return
-        if line.startswith("#echo "):
+        if code == "echo":
+            line = self.subst_flags(line)
             if self.verbose:
-                sys.stderr.write(line[6:]+"\n")
+                sys.stderr.write(line+"\n")
             return
-        if line.startswith("#error "):
-            raise RuntimeError(line[7:])
-        if line.startswith("#delay "):
-            self.goahead_delay = float(line[7:])
+        if code == "error":
+            raise ForthError(f"Error: {line}")
+        if code == "read-flag":
+            flag,expr = line.split(None, 1)
+            self.flags[flag] = (await self.chat(f"[ {expr} . ]", timeout=True)).strip()
             return
-        if line.startswith("#include "):
-            layer_,self.layer_ = self.layer_,0
-            await self.send_file(line[9:])
-            if self.layer_:
-                self.layer = self.layer_ = 0
-                raise RuntimeError(f"{line[9:]}: '#if…' without corresponding '#endif'")
-            self.layer_ = layer_
+        if code == "set-flag":
+            flag,expr = line.split(None, 1)
+            if expr == "-":
+                del self.flags[flag]
+            else:
+                self.flags[flag] = self.subst_flags(expr)
             return
+        if code == "delay":
+            self.goahead_delay = float(self.subst_flags(line))
+            return
+        if code == "include":
+            await self.send_file(line)
+            return
+        if code == "require":
+            try:
+                word,fn = line.split(None, 1)
+            except ValueError:
+                word = line
+                fn = f"lib/{word}.fs"
+            else:
+                if fn[-1] == '/':
+                    fn += f"{word}.fs"
+            res = await self.chat(f"token {word} find drop 0= .", timeout=True)
+            if int(res.strip()):
+                await self.send_file(fn)
 
+        # code not recognized: ordinary Forth word
+        line = oline
         if line.endswith("  \\"):
-            line = line[:-3]
+            line = line[:-1]
         i = line.find(' \\ ')
         if i > -1:
-            line = line[:i].strip()
+            line = line[:i]
+        line = line.strip()
         if not line:
             return
 
@@ -529,6 +593,8 @@ class Miniterm:
     async def send_file(self, filename):
         """Send a file. Runs in write thread."""
         async with await anyio.open_file(filename, 'r') as f:
+            layer,self._layer = self.layer_,0
+
             if self.verbose:
                 sys.stderr.write(f'--- Sending file {filename} ---\n')
             num = 0
@@ -539,7 +605,7 @@ class Miniterm:
                         line = await f.readline()
                         if line == "":
                             break
-                        line = await self.preprocess(line)
+                        line = await self.preprocess(line,filename,num)
                     except AllEOFError as err:
                         if self.verbose:
                             sys.stderr.write(f'--- END {filename} : {num}\n')
@@ -548,14 +614,15 @@ class Miniterm:
                     except EarlyEOFError as err:
                         if self.verbose:
                             sys.stderr.write(f'--- END {filename} : {num}\n')
-                        self.layer = self.layer_ = 0
+                        self.layer, self.layer_ = 0,layer
                         break
                     except EOFError as err:
                         if self.verbose:
                             sys.stderr.write(f'--- EOF {filename} ---\n')
                         if self.layer_:
                             self.layer = self.layer_ = 0
-                            raise RuntimeError(f"{line[9:]}: '#if…' without corresponding '#endif'")
+                            raise ScriptError(f"{line[9:]}: '#if…' without corresponding '#endif'")
+                        self.layer_ = layer
                         break
                     if not line:
                         continue
@@ -583,10 +650,12 @@ class Miniterm:
                     sys.stderr.write(f'\n--- File {filename} sent ---\n')
                 except AllEOFError as err:
                     pass
-                except Exception as e:
+                except Errors as e:
                     if not self.develop:
                         raise
                     sys.stderr.write(f'\n--- ERROR on file {filename}: {e !r} ---\n')
+                finally:
+                    self.layer_,self.layer = 0,0
 
     def change_filter(self):
         """change the i/o transformations"""

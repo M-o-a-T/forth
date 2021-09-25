@@ -151,6 +151,9 @@ This test checks whether the WORDs result in a Forth OK prompt.
 This statements is true if every named flag is set, or cleared when prefixed with
 a ``!``.
 
+If NAME has the form WORD=VALUE, the check applies to whether the flag's
+value is equal to VALUE (or not).
+
 #[if] WORD…
 +++++++++++
 
@@ -195,22 +198,45 @@ The contents of the file at ``PATH`` are processed.
 
 Execution resumes after completion.
 
+#require WORD PATH
+++++++++++++++++++
+
+The existence of WORD is checked using ``token WORD find drop 0=``. 
+If it is not found, PATH is interpreted as a file name and included.
+
+if PATH is missing, ``lib/WORD.fs`` is used. If it ends with a slash,
+``PATH/WORD.fs`` is substituted.
+
 #end
 ++++
 
-Processing this file is terminated. This is not an error; the terminal
-resumes at the point where it was included / returns to the interactive
-prompt.
+Processing this file is terminated. This is not an error even if ``#end``
+is inside a conditional. The terminal resumes at the point where the
+current file was included.
 
-#end
-++++
+#end*
++++++
 
 Processing of all files is terminated. This is not an error; the terminal
 immediately returns to the prompt / exits.
 
 This is useful for debugging.
 
-There is no way to resume uploading. (Yet?)
+There is no way to resume uploading. (Yet.)
+
+#set-flag FLAG DATA
++++++++++++++++++++
+
+The flag FLAG is set to DATA.
+
+If the data is ``-``, the flag is deleted.
+
+#read-flag FLAG CODE
+++++++++++++++++++++
+
+CODE is sent to Forth.
+
+The flag FLAG is set to whatever output it generates.
 
 #error TEXT
 +++++++++++
@@ -269,13 +295,9 @@ all, ``0`` (zero).
 
 The text is sent as a line of its own.
 
-This feature was added to send serial numbers or other parameters to your
-client processors, just by passing them on the command line (or in your
-Python code). The inablility to do more, e.g. interpolate flag values into
-the Forth source, is deliberate: this terminal is not intended to be a macro
-processor that rivals the one in C. If you need a more elaborate mechanism
-to generate variations in your code, Python offers several templating
-systems.
+If the text contains curly parentheses, the word inside them is interpreted
+as a flag and inserted into it.
+
 
 Coding hints
 ~~~~~~~~~~~~
