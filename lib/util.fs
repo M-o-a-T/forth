@@ -105,6 +105,90 @@ forth definitions
 ;
 #endif
 
+#if undefined [with]
+: (with) ( str len xt -- ? )
+\ run XT with the given string as parser input
+  source 2>r >in @ >r \ save the interpreter state
+  -rot  ( xt str len )
+  setsource 0 >in !  ( xt )
+  execute
+  r> >in ! 2r> setsource
+;
+
+: [with] ( str len "name" -- ? )
+\ Compile NAME with the given string as the next token.
+  ' literal, ['] (with) call,
+  immediate
+;
+#endif
+
+#if undefined init:
+: init: ( "name" -- )
+\ call this word, both immediately and after a reset
+\ We do the "after reset" part by compiling a word named %INIT that runs it
+  token \voc (') \voc lfa>xt  ( str len xt )
+  dup >r execute
+  s" %init" [with] :
+  r> call, postpone ;
+  immediate
+;
+#endif
+
+\voc also
+
+#if undefined call-%init
+\voc definitions
+: ?setup ( lfa -- )
+\ check if this word is
+\ - a buffer (flag 0x100)
+\ - sets some context
+\ - the context contains SETUP
+  dup ['] forth-wl <= if drop exit then
+  dup lfa>flags h@ $100 and 0= if drop exit then
+  dup lfa>nfa ctype space
+  dup lfa>wtag 1 and 0= if ." -wtag  " cr drop exit then
+  dup lfa>ctag ?dup 0= if ." -ctag  " cr drop exit then
+  ( lfa cvoc )
+  tag>wid dup voc-context !
+  s" setup" rot dup lfa>nfa ctype space ??-vocs dup 0= if ." -setup  " cr 2drop exit then
+  ( lfa SETUP )
+  swap
+  ." OBJ:" dup lfa>nfa ctype space
+  lfa>xt execute
+  ." VOC:" voc-context @ lfa>nfa ctype space
+  ( SETUP obj )
+  swap
+  ." RUN:" dup lfa>nfa ctype space
+  lfa>xt execute
+  cr
+;
+
+: call-%init ( -- )
+\ run everything named "%init"
+\ also setup all objects
+\ ignore RAM here, this is called during init
+
+  dictionarystart begin ( addr )
+    \ skip all core words
+    dup lfa>nfa count s" %init" compare if
+      ( addr )
+      \ run it in its voc context
+      dup lfa>wtag tag>wid voc-context !
+      dup lfa>xt execute
+    else  \ check whether the word is in a voc but not itself one
+      ( addr )
+      dup ?setup
+    then
+  ( addr )
+  dictionarynext until
+  drop
+  [ ' forth call, ' .. call, ]
+;
+forth definitions
+: init init call-%init ;
+\voc ignore
+
+#endif
 
 \ clean up
 #if ( compiletoram-flag  -- )
