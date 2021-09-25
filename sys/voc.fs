@@ -674,12 +674,15 @@ init  \ now vocs can be used.
 
 root definitions  \voc only
 
-: (' ( "name" -- lfa )
-  token 2dup ??-dictionary ?dup if -rot 2drop exit then
+: (') ( str len -- lfa )
+  2dup ??-dictionary ?dup if -rot 2drop exit then
   ."   " type ."  not found." abort
 ;  
 
-root definitions
+: (' ( "name" -- lfa )
+  token (')
+;
+
 
 : ' ( "name" -- xt ) (' lfa>xt ;
 
