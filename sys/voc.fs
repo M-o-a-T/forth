@@ -387,7 +387,7 @@ get-order \voc-wl swap 1+ set-order
 \ Given a vocs wid return the wid of the parent voc or zero if no voc was
 \ inherited.
 : vocnext ( wid1 -- wid2|0 )
-  2 cells - @ tag>wid ;
+  dup wid? if dup - else 2 cells - @ tag>wid then ;
 
 
 \ Search the VOCs search order (voc-context) at a-addr for a match with the
