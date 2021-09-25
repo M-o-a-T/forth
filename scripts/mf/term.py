@@ -484,7 +484,7 @@ class Miniterm:
                             break
                 else:
                     try:
-                        f,v = f[1:].split("=",1)
+                        f,v = f.split("=",1)
                     except ValueError:
                         if f not in self.flags:
                             break
@@ -549,7 +549,8 @@ class Miniterm:
             raise ForthError(f"Error: {line}")
         if code == "read-flag":
             flag,expr = line.split(None, 1)
-            self.flags[flag] = (await self.chat(f"[ {expr} . ]", timeout=True)).strip()
+            expr = self.subst_flags(expr)
+            self.flags[flag] = (await self.chat(f"{expr} .", timeout=True)).strip()
             return
         if code == "set-flag":
             flag,expr = line.split(None, 1)
