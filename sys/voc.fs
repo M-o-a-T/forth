@@ -212,6 +212,8 @@ forth-wl variable c2r-current
 
 
 compiletoram
+\ The next two words are an interim solution while compiling the vocabulary
+\ support. As they're not used after this is task completed, they live in RAM.
 
   \voc-wl ,
 \ Search the word with name c-addr,u in the search order at a-addr. If found
@@ -404,9 +406,9 @@ get-order \voc-wl swap 1+ set-order
   drop root-wl ??-wl
 ;
 
-\ The ??-order defined in wordlists only searches the top wordlist of
-\ every search order entry.
-\ This is the same code as ??-vocs except, for the last line.
+\ The ??-order defined above in wordlists only searches the top wordlist
+\ of every search order entry. However, we need to scann all of them.
+\ This is the same code as ??-vocs, except for the last line.
 \ (Calling one from the other requires too much stack acrobatics
 \  to be worth the trouble.)
 : ??-vocs-no-root ( c-addr len a-addr -- lfa|0 )
@@ -523,7 +525,8 @@ forth-wl set-current
   [ hook-quit @ literal, ] execute
 ;
 
-: (ign ( voc -- ) \ remove this vocabulary from the search list
+: (ign ( voc -- )
+\ remove this vocabulary from the search list
   dup root-wl = if drop exit then  \ root cannot be removed
   >r get-order r>
   ( voc… n ign )
@@ -608,7 +611,8 @@ root-wl set-current
     set-current 
     [ ' .. call, ' immediate call, ] 
     \ mark the new word as immediate
-  does> dovoc 
+  does>
+    dovoc 
 ;
 
 root-wl set-current
@@ -651,8 +655,6 @@ sticky
 
 \voc-wl set-current
 
-\ MM-200419  (C) message only on reset
-
 \ Initialize Mecrisp with wordlist and voc extension.
 : voc-init ( -- )
   wlst-init  ['] vocs-quit hook-quit !  ['] vocs-find hook-find !
@@ -672,9 +674,9 @@ forth-wl set-current
 
 init  \ now vocs can be used.
 
-#if compiletoram?
-#error duh
-#endif
+compiletoflash
+\ this is necessary to clean ecerything up.
+\ TODO this is a bug; figure out why the *censored* this is.
 
 root definitions  \voc only
 

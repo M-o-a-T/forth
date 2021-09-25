@@ -42,11 +42,10 @@ Create a vocabulary prefix that extends, i.e. inherits words from, the given voc
 <voc> ?? ( -- )
 +++++++++++++++
 
-Show all words of the actual VOC search order and stay in that VOC context.
+Show all words of the actual VOC search order and stay in that VOC's context.
 
 \.. ( -- )
 ++++++++++
-
 
 Switch back from a VOC search order to the default Forth search order.
 
@@ -138,6 +137,7 @@ Remove ``<voc>`` from the search list.
 Removing FORTH probably isn't what you want. Removing ROOT is not
 possible.
 
+
 ---------
 Internals
 ---------
@@ -177,6 +177,110 @@ The main word is ``vocs-find``. It is hooked to ``hook-find`` by ``init``.
 
 \ * If an error occures, the search context is reset to the systems default
 \   search order.
+
+
+Support words
++++++++++++++
+
+lfa>flags ( lfa -- h-addr )
+---------------------------
+
+Retrieves the flag half-cell of a word.
+
+See the Mecrisp documentation for their meaning.
+
+lfa>nfa ( lfa -- cstr )
+-----------------------
+
+Retrieves a word's name, printable via ``ctype`` and convertible to a
+counted string via ``count``.
+
+lfa>xt ( lfa -- xt )
+--------------------
+
+Retrieves the word's executable token, i.e. the address you'd get with
+``' NAME``.
+
+lfa>wtag ( lfa -- wtag )
+------------------------
+
+Retrieves the word's vocabulary tag, consisting of the vocabulary's address
+and two possible flag bits.
+
+tag>wid ( wtag -- wid )
+-----------------------
+
+Removes the flags from the vocabulary tag, leaving its word list ID.
+This is identical to its lfa, as described above.
+
+lfa>xt,flags ( a-addr -- xt|0 flags )
+-------------------------------------
+
+A shortcut to retrieve both executable token and flags of a lfa.
+
+This accepts a lfa of zero for convenience.
+
+??-wl ( c-addr u wid -- lfa|0 )
+-------------------------------
+
+Searches a single word list.
+
+vocnext ( wid1 -- wid2|0 )
+--------------------------
+
+Return the parent word list, i.e. the list which ``wid1`` inherits from.
+
+??-vocs ( c-addr len a-addr -- lfa|0 )
+--------------------------------------
+
+Search a word list and its ancestors.
+
+This search includes the root word list; it is used when context switching.
+
+??-vocs-no-root ( c-addr len a-addr -- lfa|0 )
+----------------------------------------------
+
+Search a word list and its ancestors.
+
+This search does not include the root word list; it is used during normal
+search, as the root list must be searched last.
+
+??-order ( c-addr u a-addr -- lfa|0 )
+-------------------------------------
+
+Search a number of word lists and their ancestors, depth-first.
+
+``a-addr`` must point to the first cell in the ``context`` list, described
+above. The list must contain the root vocabulary and a zero-valued cell at
+the end.
+
+??-dictionary ( c-addr len -- lfa|0 )
+-------------------------------------
+
+Search the dictionary according to the current state of the interpreter,
+i.e. call ``??-vocs`` when context switching is in effect and ``??-order``
+otherwise.
+
+Return zero if not found.
+
+(') ( str len -- lfa )
+----------------------
+
+Look up the LFA of a word. Print an error message and abort if not found.
+
+(' ( "name" -- lfa )
+--------------------
+
+Look up the LFA of a word.
+
+``(' NAME`` (interpreter mode) is equivalent to ``s" NAME" (')`` (compiler
+mode).
+
+(dovoc ( wid -- )
+-----------------
+
+Tell the interpreter to start a context switch, using ``wid`` as the
+(initial) context.
 
 
 
