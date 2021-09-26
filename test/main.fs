@@ -39,6 +39,8 @@ test-drop
 
 compiletoflash
 
+#require d-list-head lib/linked-list.fs
+#require th test/linked-list.fs
 
 \ Testing multicast on real hardware requires IRQ-based input
 \ which requires ring buffers, but ring buffers require abort
