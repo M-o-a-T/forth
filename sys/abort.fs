@@ -24,7 +24,7 @@ compiletoflash
 \voc definitions
 #if undefined aborthandler
 
-#if defined \multi
+#if-flag multi
 #include sys/multitask.fs
 \ multitask.fs will re-import us
 #end
