@@ -55,16 +55,20 @@ forth definitions
 
 #if undefined voc-eval  defined \voc  and
 \voc also
-: voc-eval  ( addr n -- )
-\ given a word in the current vocabulary, find and run it.
+: voc-lfa ( addr n )
+\ given a word in the current vocabulary, find it.
   2dup \ remember for possible error message
   voc-context ??-vocs
   ?dup if
-    -rot 2drop lfa>xt execute
+    -rot 2drop
   else
     space type ."  not found"
     -3 abort
   then
+;
+: voc-eval  ( addr n -- )
+\ given a word in the current vocabulary, find and run it.
+  voc-lfa lfa>xt execute
 ;
 \voc ignore
 #endif
