@@ -541,11 +541,6 @@ class Miniterm:
             line = self.subst_flags(line)
             res = await self.chat(f"{line}", timeout=True)
             return
-        if code == "echo":
-            line = self.subst_flags(line)
-            if self.verbose:
-                sys.stderr.write(line+"\n")
-            return
         if code == "error":
             raise ForthError(f"Error: {line}")
         if code == "read-flag":
