@@ -19,6 +19,9 @@ sticky  \ deleted by "find" in "defined"
 
 forth definitions
 
+
+#if undefined unused
+$deadbeef constant unused
 #endif
 
 
