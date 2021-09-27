@@ -132,7 +132,7 @@ forth definitions
 root-cls voc: class-root
 
 : setup ( object -- )
-  __ size@ abort" Not sized"
+  __ size@ if ."  Not sized" abort then
   __ setup
 ;
 
