@@ -6,6 +6,12 @@ decimal
 #endif
 #ok depth 0=
 
+#if-flag ram
+compiletoram
+#else
+compiletoflash
+#endif
+
 ring class: r4
 3 constant elems
 
@@ -44,8 +50,12 @@ rr 20 dump
 \ If compiling into RAM it may or may not work *shrug*
 #if-flag !ram
 #ok rr empty? not
-\voc call-%init
-\ #ok rr empty?
+1 variable foo
+init:
+  #2 foo ! ;
+\voc %init!
+#ok rr empty?
+#ok foo @ 2 =
 #endif
 
 \ now let's do another of these with half words
