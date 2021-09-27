@@ -522,6 +522,7 @@ class Miniterm:
             raise AllEOFError
         if code == "echo":
             if self.verbose:
+                line = self.subst_flags(line)
                 sys.stderr.write(f"{line}\n")
             return
         if code == "ok":
