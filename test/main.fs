@@ -56,6 +56,8 @@ compiletoflash
 #endif
 \ if-flag multi
 
+compiletoflash
+
 #if undefined ring
 #include lib/ring.fs
 #endif
