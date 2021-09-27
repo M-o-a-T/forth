@@ -665,16 +665,21 @@ sticky
 \ \voc-wl also
 get-order nip \voc-wl swap set-order
 
-root-wl set-current
-
-: init ( -- ) voc-init ;
+forth-wl set-current
+: init ( -- )
+#[if] token init find drop
+  init
+#endif
+  voc-init
+;
 
 \ forth-wl first
-get-order nip forth-wl swap set-order
 
 forth-wl set-current
 
-init  \ now vocs can be used.
+voc-init  \ now vocs can be used.
+
+get-order nip forth-wl swap set-order
 
 compiletoflash
 \ this is necessary to clean ecerything up.
