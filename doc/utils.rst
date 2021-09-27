@@ -34,10 +34,25 @@ This is particularly useful in SETUP words because you can use this to
 easily find constants (possibly declared in a subclass) that can be used to
 initialize generic data.
 
+voc-lfa  ( str len -- )
+=======================
+
+Usse this if you need the LFA of a word, instead of immediately executing
+it.
+
 haligned ( c-addr -- h-addr )
 =============================
 
 Fix alignment to store half-words.
+
+post-def
+========
+
+This hook, if set, is executed (and cleared) after a word definition has
+completed.
+
+You can use this hook to define complex word-generating behaviors. See
+``sys/multitask.fs`` for a non-trivial example.
 
 roll, -roll
 ===========

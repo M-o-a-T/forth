@@ -17,13 +17,28 @@ sticky  \ deleted by "find"
 sticky  \ deleted by "find" in "defined"
 : undefined ( "token" -- flag ) defined not ;
 
-forth definitions
+#endif
+
+forth only definitions
 
 
 #if undefined unused
 $deadbeef constant unused
 #endif
 
+#if \voc undefined post-def
+
+\voc definitions
+0 variable post-def
+forth definitions
+
+: ; ( -- )
+\ call (and clear) the POST-DEF
+  postpone ;
+  \voc post-def @ ?dup if 0 \voc post-def !  execute  then
+  immediate
+;
+#endif
 
 #if undefined eval
 
