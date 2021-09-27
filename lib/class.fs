@@ -62,6 +62,17 @@ voc: root-cls
   ?ivr-sys s" constant u/i" evaluate drop
 ;
 
+: ;class
+\ end a class definition, go back to previous state
+  get-current
+  dup lfa>wtag 2 and if
+    ?wid
+    dup lfa>xt execute postpone ignore
+    lfa>wtag tag>wid ?wid lfa>xt execute
+  else
+    drop postpone forth postpone only
+  then postpone definitions
+;
 
 \ Make the current class compilation context the actual search context.
 : __ ( -- )
@@ -139,20 +150,7 @@ root definitions
 : class: ( "name" -- )
   _sop_ @ dup @ swap context =
   if ( voc ) \ no prefix
-    \ check if the current compile context is a class
-    s" u/i@" context @ ??-vocs-no-root
-    if
-      \ drop it from search
-      dup (ign
-      current @ over = if
-        dup lfa>wtag tag>wid current !
-      then ( voc )
-      vocnext
-    else
-      drop [ class-root .. voc-context @ literal, ]
-    then
-  else ( voc ) \ with this prefix
-    ..
+    drop [ class-root .. voc-context @ literal, ]
   then
   voc-extend
 ;

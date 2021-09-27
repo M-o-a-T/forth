@@ -93,6 +93,19 @@ __ ( -- )
 
 Only search the next word in the current class's context.
 
+;class ( -- )
++++++++++++++
+
+Go back to the vocabulary state before the class was declared.
+
+That state is not recorded, but inferred from the class. In particular,
+
+* the class is removed from the current search context
+
+* the vocabulary in which the class has been defined is set as the current
+  vocabulary
+
+
 -------------
 Using classes
 -------------
@@ -110,9 +123,10 @@ We'll start with a simple example: a class that stores a half-cell word.
 	: ! ( n a -- ) h! inline ;
 	: ? ( a -- )  h@ . ;
 
+	;class
+
 This looks almost boring. Usage::
 
-	forth definitions
 	hint object: i1
 
 	12345 i1 !
@@ -163,8 +177,8 @@ You might want to initialize things::
 	  -1 over __ x !
 	  -1 swap __ y !
 	;
+	;class
 
-	forth definitions
 	point object: p1
 	point object: p2
 

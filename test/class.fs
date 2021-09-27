@@ -26,7 +26,8 @@ __ ?? ..
 
 #ok depth 0=
 
-forth definitions
+;class
+
 
 class-root class: point
 __data
@@ -39,6 +40,7 @@ __seal
   -1 over __ x !
   -1 swap __ y !
 ;
+;class
 
 point object: p1
 point object: p2
@@ -58,11 +60,13 @@ p1 y ?
 #ok p2 x @ #102 =
 #ok p2 y @ #202 =
 
+point definitions also
 : get ( a-addr -- x y ) dup __ y @  swap __ x @ ;
 
 : set ( x y a-addr -- ) dup >r __ y ! r> __ x ! ;
 
 : show ( a-addr -- )    dup __ x ? __ y ? ;
+forth only definitions
 
 p1 show
 

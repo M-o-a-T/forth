@@ -196,6 +196,8 @@ __seal
 #endif
 ;
 
+;class
+
 #if-flag ring-var=cint
 
 : s! ( addr count ring )
@@ -207,14 +209,17 @@ __seal
   2drop
 ;
 
-class: rc32
+ring class: rc32
 32 constant elems
+;class
 
-class: rc80
+ring class: rc80
 80 constant elems
+;class
 
-class: rc16
+ring class: rc16
 16 constant elems
+;class
 
 #endif
 

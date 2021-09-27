@@ -16,6 +16,7 @@ __seal
 : ! ( n a -- ) ! inline ;
 : ? ( a -- )  @ . ;
 
+;class
 
 class: cint
 
@@ -27,6 +28,7 @@ __seal
 : ! ( n a -- ) c! inline ;
 : ? ( a -- )  c@ base @ swap hex  0 <# # # #> type space  base ! ;
 
+;class
 
 class: hint
 
@@ -38,8 +40,8 @@ __seal
 : ! ( n a -- ) h! inline ;
 : ? ( a -- )  h@ . ;
 
+;class
 
-forth definitions only
 
 \ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=
