@@ -147,8 +147,9 @@ If you do any stack manipulation, though, you have to be more careful::
 	  __ @ swap __ @ ( @h2 @h1 )
 	  over - 2/ + ;
 
-This assumes that you're declaring the word in the class. Otherwise, use
-the class name instead.
+The ``__`` assumes that you're declaring the word as part of the class.
+Otherwise, i.e. from code that's external to the class, use the class name
+instead.
 
 If you just want the address of an object instead of then accessing its
 data, you need to reset the search context::
@@ -191,14 +192,14 @@ You might want to initialize things::
 	#ok p1 x @ 100 =
 
 The words ``__data`` and ``__seal`` must frame your field definition, to
-ensure that the required buffer is calculated and stored in your object.
+ensure that the required buffer size is calculated and stored in your object.
 You don't need them if your subclass doesn't contain any data of its own.
 
 Field alignment
 +++++++++++++++
 
 The field definition of a basic object doesn't know about its own alignment
-requirements, so you have to do that yourself.
+requirements, so unfortunately you have to do that yourself.
 
 Basic rule: write HALIGNED before the first HINT field, and ALIGNED before
 the first INT field.
