@@ -39,8 +39,7 @@ forth definitions
   begin
     2dup <>
   while ( head this )
-    r@ ( head this xt )
-    rot >r ( this xt |R> xt head )
+    r@ rot >r ( this xt |R> xt head )
     over __ next @ >r ( this xt |R: xt head next )
     execute
     r> r> swap ( head next )

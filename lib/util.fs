@@ -5,11 +5,11 @@
 compiletoram?
 compiletoflash
 
-
 #if token defined find drop 0=
 \ We want to use "#if defined X" instead of the above dance.
 
-only root definitions
+forth only
+root definitions
 
 sticky  \ deleted by "find"
 : defined   ( "token" -- flag ) token find drop 0<> ; 
@@ -35,7 +35,11 @@ forth definitions
 : ; ( -- )
 \ call (and clear) the POST-DEF
   postpone ;
-  \voc post-def @ ?dup if 0 \voc post-def !  execute  then
+  \voc post-def @
+  ?dup if
+    0 \voc post-def !
+    execute
+  then
   immediate
 ;
 #endif
@@ -66,6 +70,7 @@ forth definitions
     -3 abort
   then
 ;
+
 : voc-eval  ( addr n -- )
 \ given a word in the current vocabulary, find and run it.
   voc-lfa lfa>xt execute
@@ -170,6 +175,7 @@ forth definitions
 \ - is a buffer (flag 0x100)
 \ - sets a context
 \ - the context in question contains SETUP
+
   dup ['] forth-wl <= if drop exit then
   dup lfa>flags h@ $100 and 0= if drop exit then
   dup lfa>wtag 1 and 0= if drop exit then
