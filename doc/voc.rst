@@ -220,6 +220,11 @@ A shortcut to retrieve both executable token and flags of a lfa.
 
 This accepts a lfa of zero for convenience.
 
+last-lfa
+--------
+
+A variable that points to the most-recently-created word.
+
 ??-wl ( c-addr u wid -- lfa|0 )
 -------------------------------
 

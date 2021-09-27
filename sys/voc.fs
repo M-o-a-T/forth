@@ -93,13 +93,15 @@ forth-wl variable c2r-current
 \ false for searching the compilation context only without context switching.
 -1 variable _indic_ 
 
+  \voc-wl ,
+0 variable last-lfa
 
   \voc-wl ,
 \ Compile a wordlist tag ( wtag).
 : wtag, ( -- )
   align current @ wflags @ or ,  0 wflags !  0 _indic_ !
+  here last-lfa !
 ;
-
 
   \voc-wl ,
 : lfa>flags ( a-addr1 -- a-addr2 ) cell+  inline ;

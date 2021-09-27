@@ -149,7 +149,8 @@ forth definitions
 #if undefined init:
 \voc definitions
 : (init:) ( -- )
-  \voc last-lfa lfa>xt execute
+  \voc last-lfa @
+  lfa>xt execute
 ;
 
 forth definitions
