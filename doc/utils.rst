@@ -98,29 +98,63 @@ it won't find it.
 Also, objects stored in Flash must be re-initialized after a reset, but
 writing a new INIT override for every object out there gets ugly quickly.
 
-Thus we propose a new system that's less error-prone and more composable.
+Thus we introduce a new system that's less error-prone and more composable
+by basically hiding all the setup code.
 
-init: ( "name" )
-================
+Our ``init`` scans the dictionary. It executes all words named ``%init``,
+no matter which vocabulary they're defined in. Also, for all named objects
+their ``setup`` word will be executed.
 
-``name`` is a word that should be called to set something up. Call this
-word. Also, declare a word (named ``%init``) which calls your word when the
-system starts up.
+The defining word for initialisation code auto-runs itself when complete,
+and the object allocator auto-runs its ``setup`` word.
 
-That's it. Everything else happens behind the scenes:
+This method ensures that every piece of setup code runs in the exact
+same order when you restart a system from Flash as when you defined it
+originally.
 
-* we register a "final" override to INIT (well, except for your main
-  program, if you have one) which calls every word named ``%init``, in
-  order, when the system reboots.
 
-* interspersed with that: for all named objects we call its ``setup``
-  word.
+init:
+=====
 
-The result is that after a reset, your setup and init words run in the
-correct order, i.e. the same order in which you initially declared them.
+Introduce code that will be called to set something up. It is a synonym to
+``: %init``, except that the word thus declared will auto-run itself as
+soon as it is completed.
 
-Usually you don't call the words you pass to ``init:``, or the ``setup``
-words of your object, directly. The system does that for you. Of course
-there may be occasions where that is useful, most notably with error
-recovery.
+Thus, you should replace all occurrences of::
+
+    : init
+      init
+      \ whatever you need
+    ;
+
+with a more concise::
+
+    :init
+      \ whatever you need
+    ;
+
+Of course there may be occasions where it is useful to directly call your
+``%init`` or ``setup`` words, most notably with error recovery. As
+``%init`` words can now safely be stored in vocabularies and no longer need
+to call up to any previous INIT, this sequence::
+
+    foo definitions
+    : foo-init 
+      \ whatever
+    ;
+    : on-error
+      foo-init
+    ;
+    forth definitions
+    : init init foo-init ;
+
+now simplifies to::
+
+    foo definitions
+    :init 
+      \ whatever
+    ;
+    : on-error
+      %init
+    ;
 

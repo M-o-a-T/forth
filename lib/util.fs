@@ -144,45 +144,41 @@ forth definitions
 ;
 #endif
 
+\voc also
+
 #if undefined init:
-: init: ( "name" -- )
-\ call this word, both immediately and after a reset
-\ We do the "after reset" part by compiling a word named %INIT that runs it
-  token \voc (') \voc lfa>xt  ( str len xt )
-  dup >r execute
+\voc definitions
+: (init:) ( -- )
+  \voc last-lfa lfa>xt execute
+;
+
+forth definitions
+: init: ( code … -- )
+\ run this code, both immediately and after a reset
+  ' (init:) post-def !
   s" %init" [with] :
-  r> call, postpone ;
-  immediate
 ;
 #endif
 
-\voc also
 
 #if undefined %init!
 \voc definitions
 : ?setup ( lfa -- )
-\ check if this word is
-\ - a buffer (flag 0x100)
-\ - sets some context
-\ - the context contains SETUP
+\ check if this word
+\ - is a buffer (flag 0x100)
+\ - sets a context
+\ - the context in question contains SETUP
   dup ['] forth-wl <= if drop exit then
   dup lfa>flags h@ $100 and 0= if drop exit then
-  dup lfa>nfa ctype space
-  dup lfa>wtag 1 and 0= if ." -wtag  " cr drop exit then
-  dup lfa>ctag ?dup 0= if ." -ctag  " cr drop exit then
+  dup lfa>wtag 1 and 0= if drop exit then
+  dup lfa>ctag ?dup 0= if drop exit then
   ( lfa cvoc )
   tag>wid dup voc-context !
-  s" setup" rot dup lfa>nfa ctype space ??-vocs dup 0= if ." -setup  " cr 2drop exit then
+  s" setup" rot ??-vocs dup 0= if 2drop exit then
   ( lfa SETUP )
-  swap
-  ." OBJ:" dup lfa>nfa ctype space
-  lfa>xt execute
-  ." VOC:" voc-context @ lfa>nfa ctype space
+  swap lfa>xt execute
   ( SETUP obj )
-  swap
-  ." RUN:" dup lfa>nfa ctype space
-  lfa>xt execute
-  cr
+  swap lfa>xt execute
 ;
 
 : %init! ( -- )
