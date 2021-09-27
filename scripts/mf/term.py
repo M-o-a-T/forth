@@ -578,6 +578,7 @@ class Miniterm:
             res = await self.chat(f"token {word} find drop 0= .", timeout=True)
             if int(res.strip()):
                 await self.send_file(fn)
+            return
 
         # code not recognized: ordinary Forth word
         line = oline
