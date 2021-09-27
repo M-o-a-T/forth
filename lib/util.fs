@@ -156,7 +156,8 @@ forth definitions
 forth definitions
 : init: ( code … -- )
 \ run this code, both immediately and after a reset
-  ' (init:) post-def !
+  ['] (init:)
+  post-def !
   s" %init" [with] :
 ;
 #endif
