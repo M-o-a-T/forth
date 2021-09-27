@@ -689,6 +689,18 @@ root definitions  \voc only
   token (')
 ;
 
+\voc definitions
+
+: ?wid ( wid1 -- wid1|wid2 )
+\ replaces root/forth-wl with root/forth
+  case
+    root-wl  of [ (' root   literal, ]  endof
+    forth-wl of [ (' forth  literal, ]  endof
+    \voc-wl        of [ (' \voc   literal, ]  endof
+  dup  \ 'endcase' drops our value, but we want to keep it
+  endcase
+;
+
 forth definitions
 
 \ Those words cannot be in root because normally the forth context is used

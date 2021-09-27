@@ -14,15 +14,6 @@
   dup wid? if u. else .id then
 ;
 
-: ?wid ( wid1 -- wid1|wid2 )
-  case
-    root-wl  of [ (' root   literal, ]  endof
-    forth-wl of [ (' forth  literal, ]  endof
-    \voc-wl        of [ (' \voc   literal, ]  endof
-  dup  \ 'endcase' drops our value, but we want to keep it
-  endcase
-;
-
 : .wid ( wid -- ) ?wid .wid ;
 
 
