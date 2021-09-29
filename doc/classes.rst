@@ -75,18 +75,36 @@ If your object is parameterized using explicit stack values (as opposed to
 subclassing), ``size`` may access these via the stack. It must not consume
 or otherwise disturb them; that's the job of ``setup``.
 
-setup ( *args object -- )
-+++++++++++++++++++++++++
+setup ( object -- )
++++++++++++++++++++
 
 This method is automatically called when you create a new class.
 
-Your method *must* start with ``dup __ setup``, which calls the setup word
-from the superclass, before doing anything else.
+Your method *must* start with ``dup __ setup``, calling the ``setup`` word
+in the superclass, before doing anything else.
+
+This word is called as your object is created, or from INIT after reboot.
+*Never call it yourself.*
+
+>setup ( object -- )
+++++++++++++++++++++
+
+If you have a complex sub-field in your object, you need to initialize it
+yourself.
+
+Call ``dup __ FIELD >setup`` from your object's SETUP word, with your
+object's address on the stack.
+
+You can also use this word to re-initialize an object, if that should ever
+be necessary.
 
 \offset
 +++++++
 
-Sized classes contain this variable. It is filled by ``setup``.
+Sized classes contain this variable. It is filled by ``setup`` and contains
+the starting offset of the variable-sized part of the object.
+
+
 
 __ ( -- )
 +++++++++

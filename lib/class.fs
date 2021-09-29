@@ -107,6 +107,21 @@ root-cls definitions
   drop
 ;
 
+\cls definitions
+: (>setup) ( obj fn voc -- )
+  \voc voc-context @ >r
+  \voc voc-context !
+  execute
+  r> \voc voc-context !
+;
+
+root-cls definitions
+: >setup
+  s" setup" voc-lfa \voc lfa>xt literal,
+  \voc voc-context @ literal,
+  postpone (>setup)
+  immediate ;
+
 \ Create an instance of a class.
 : object: ( "name" -- )
   \ XXX the next line depends heavily on VOC internals
