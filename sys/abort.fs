@@ -43,13 +43,15 @@ forth definitions
 \voc also
 #endif
 
+#require r>ctx sys/base.fs
+
 : throw ( throwcode -- )
 \ Returns directly to the closest CATCH.
 \ DO NOT call with a throwcode of zero.
   aborthandler @ ?dup if
     \ restore previous state to jump to
     rp! r> aborthandler ! r> swap >r sp! drop r>
-    unloop  exit
+    r>ctx  exit
   else
     abortcode !
     quit  \ unhandled error: stop task
@@ -58,11 +60,10 @@ forth definitions
 
 : catch ( x1 .. xn xt -- y1 .. yn throwcode / z1 .. zm 0 )
 \ Call something, catching a possible call to THROW
-  [ $B430 h, ]  \ push { r4  r5 } to save I and I'
-  sp@ >r  aborthandler @ >r  rp@ aborthandler !
+  ctx>r sp@ >r  aborthandler @ >r  rp@ aborthandler !
   execute
-  r> aborthandler !  rdrop
-  0 unloop
+  r> aborthandler !  rdrop r>ctx
+  0
 ;
 
 \voc definitions
