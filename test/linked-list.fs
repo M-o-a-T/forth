@@ -12,13 +12,13 @@ d-list-item object: x3
 #ok th next @ th .. =
 #ok th prev @ th .. =
 
-x1 .. th enq
+x1 .. th insert
 #ok th next @ x1 .. =
 #ok x1 next @ th .. =
 #ok th prev @ x1 .. =
 #ok x1 prev @ th .. =
 
-x2 .. th enq
+x2 .. th insert
 #ok th next @ x1 .. =
 #ok x1 next @ x2 .. =
 #ok x2 next @ th .. =
@@ -31,10 +31,10 @@ x2 .. th enq
 ' process th (run)
 #ok n @ 2 =
 
-x1 deq
+x1 remove
 #if-flag debug
-#ok x1 prev @ unused =
-#ok x1 next @ unused =
+#ok x1 prev @ poisoned =
+#ok x1 next @ poisoned =
 #endif
 ' process th (run)
 #ok n @ 3 =
@@ -44,7 +44,7 @@ x1 deq
 #ok th prev @ x2 .. =
 #ok x2 prev @ th .. =
 
-x2 deq
+x2 remove
 #ok th next @ th .. =
 #ok th prev @ th .. =
 ' process th (run)

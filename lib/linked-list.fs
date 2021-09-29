@@ -15,7 +15,7 @@ __data
   int field: next
 __seal
 
-: enq ( new this -- )
+: insert ( new this -- )
 \ add new item before me
   tuck __ prev @ ( this new prev )
   2dup __ next ! over __ prev ! ( this new )
@@ -47,6 +47,12 @@ forth definitions
   r> 2drop drop
 ;
 
+: run: ( head "name" -- )
+\ run NAME with each item
+  ' literal, postpone swap postpone (run)
+  immediate
+;
+
 forth definitions
 \voc \d-list class: d-list-item
 : setup ( ptr -- )
@@ -55,13 +61,13 @@ forth definitions
   0 swap __ next !
 ;
 
-: deq ( this -- )
+: remove ( this -- )
 \ remove from the list, zero the pointers.
 \ You can't remove a list head, so this is here.
   dup __ prev @ over __ next @ ( this prev next )
   2dup __ prev ! swap __ next ! ( this )
 #if-flag debug
-  unused over __ prev ! unused swap __ next !
+  poisoned over __ prev ! poisoned swap __ next !
 #else
   drop
 #endif
