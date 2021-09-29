@@ -35,7 +35,12 @@ align 0 , forth-wl , here constant root-wl
   \voc-wl ,
 \ Return true if lfa|wid is the wid of a wordlist.
 : wid? ( lfa|wid -- f )
-  @ [ here @ not literal, ] =
+  dup forth-wl <
+  if
+    drop 0
+  else
+    @ [ here @ not literal, ] =
+  then
 ;
 
   \voc-wl ,
