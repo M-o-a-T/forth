@@ -48,6 +48,9 @@ forth definitions
 : throw ( throwcode -- )
 \ Returns directly to the closest CATCH.
 \ DO NOT call with a throwcode of zero.
+#if-flag debug
+  dup ." THR:" hex. cr cr
+#endif
   aborthandler @ ?dup if
     \ restore previous state to jump to
     rp! r> aborthandler ! r> swap >r sp! drop r>
