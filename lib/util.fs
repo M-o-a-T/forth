@@ -22,8 +22,8 @@ sticky  \ deleted by "find" in "defined"
 forth only definitions
 
 
-#if undefined unused
-$deadbeef constant unused
+#if undefined poisoned
+$deadbeef constant poisoned
 #endif
 
 #if \voc undefined post-def
