@@ -44,7 +44,7 @@ class ForthError(RuntimeError):
     pass
 class ScriptError(RuntimeError):
     pass
-Errors = (ForthError,ScriptError,UsageError,TimeoutError)
+Errors = (ForthError,ScriptError,UsageError,TimeoutError,EnvironmentError)
 
 class AsyncDummy:
     def __init__(self,val):
