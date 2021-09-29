@@ -1,8 +1,8 @@
 \ This is the bare minimum abort implementation.
 #if token forth find drop
 forth definitions only
-#endif
 compiletoflash
+#endif
 
 #if token abort find drop 0=
 : abort ( -- ) cr quit ;
@@ -14,14 +14,16 @@ compiletoflash
 #endif
 
 \ If \voc is undefined, we defer the rest for later
+#if-flag !plain
 #if token \voc find drop 0=
 #end
+#endif
+\voc definitions also
 #endif
 
 \ at this point the basics are known to be loaded,
 \ thus we can use "#if defined".
 
-\voc definitions
 #if undefined aborthandler
 
 #if-flag multi
@@ -38,9 +40,11 @@ compiletoflash
 0 variable abortmsg
 0 variable abortcode
 
+#if token forth find drop
 forth definitions
 #if undefined aborthandler
 \voc also
+#endif
 #endif
 
 #require r>ctx sys/base.fs
@@ -69,27 +73,34 @@ forth definitions
   0
 ;
 
-\voc definitions
-: abort-print
-  cr
+: .abort
+  0
   abortcode @ ?dup if
     0 abortcode !
-	hex.
+    hex
+    drop 1
   then
   abortmsg @ ?dup if
-    ." : " ctype cr
+    ." : " ctype
     0 abortmsg !
+    drop 1
   then
+  if cr then
 ;
+
+#if-flag !plain
+\voc definitions
+#endif
 
 : abort-quit ( * -- does-not-return )
 \ hook for QUIT
   aborthandler @ if
     \ if there's a handler, go to that instead
-    -1 throw
+    -56 throw
   then
+
   \ spit out any errors
-  abort-print
+  .abort
   \ and then call the original QUIT
   [ hook-quit @ call, ]
 ;
@@ -101,20 +112,23 @@ forth definitions
   else drop then
 ;
 
+#if-flag !plain
 forth definitions
+#endif
 
 : abort" postpone c" ( " )  ['] (abort) call, immediate ;
 
-\ Two reminders here.
-: init
-  \ (a) ALWAYS call the old INIT *first*.
-  init
-  \voc ' abort-quit hook-quit !
+#if-flag plain
+' abort-quit hook-quit !
+#else
+init:
+  ['] abort-quit hook-quit !
 ;
-\ (b) At runtime do *not* call INIT, just do your own thing.
-\voc ' abort-quit hook-quit !
 
+#if token forth find drop
 forth only
+#endif
+#endif
 
 \ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=

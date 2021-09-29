@@ -405,7 +405,7 @@ sticky : ?? ( -- )
 
 : list ( -- ) list ;
 
-forth definitions only decimal compiletoram
+forth definitions only decimal
 
 \ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=

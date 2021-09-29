@@ -22,7 +22,6 @@ compiletoflash
 #include lib/vars.fs
 #endif
 
-test-ram
 
 #if undefined p1
 #include test/offset.fs
