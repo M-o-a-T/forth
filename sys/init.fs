@@ -22,8 +22,15 @@ compiletoflash
 
 #if-flag debug
 #include debug/voc.fs
+
+#if undefined dump
+compiletoflash
+#include lib/dump.fs
 #endif
 
+#endif
+
+compiletoflash
 #include sys/abort.fs
 
 #if-flag multi
