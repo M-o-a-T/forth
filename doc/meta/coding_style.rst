@@ -160,12 +160,17 @@ to the ``test`` subdirectory that does the testing, judiciously use ``#ok``
 tests, trigger a couple of errors and ``catch`` the result to verify that
 the system is left in a reasonable state, and all that.
 
-Your code must be able to run both from RAM and from Flash. The latter
-probably requires require extending ``init``. *Always* add your new
-``init`` to the FORTH directory and *always* call the previous INIT before
-doing anything else. Don't add code to INIT that crashes the system, or
-calls ``abort`` or ``quit``, just because some peripheral isn't present.
+Your code must be able to run both from RAM and from Flash. Use ``init:``
+markers (in general code) and ``setup`` words (in objects) to set up your
+data; don't override ``init``.
+
+Don't add startup code that crashes the system, or calls ``abort`` or
+``quit``, just because some peripheral isn't present. Setup code beyond
+basic hardware or variable initialization should be delegated to a task.
 
 Bonus points for testing some interface or device: Fake it! We have
-multitasking and queues and all that, so why not just
+multitasking and queues and all that, so why not just declare an area of
+RAM to be some hardware thing in disguise and let another task mimic its
+responses?
+
 
