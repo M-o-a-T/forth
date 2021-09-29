@@ -14,6 +14,26 @@
   dup wid? if u. else .id then
 ;
 
+: (idd) ( lfa -- )
+  dup forth-wl > if
+    dup lfa>wtag tag>wid
+    ?dup if
+      recurse
+    then
+    .id
+  else
+    drop
+  then
+;
+
+: .idd ( lfa -- )
+  dup forth-wl > if
+    (idd)
+  else
+    .id
+  then
+;
+
 : .wid ( wid -- ) ?wid .wid ;
 
 
