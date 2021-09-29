@@ -386,11 +386,22 @@ forth definitions
 ;
 root definitions
 
+\ If multitasking, the standard .s won't work in subtasks
 sticky : ??? ( -- )
-  -1 \??? order ."   base:" base @ dup decimal u. base !  cr 2 spaces .s ;
+  -1 \??? order ."   base:" base @ dup decimal u. base !  cr
+#if-flag multi
+#else
+  2 spaces .s
+#endif
+;
 
 sticky : ?? ( -- )
-  -1 \?? order ."   base:" base @ dup decimal u. base !  cr 2 spaces .s ;
+  -1 \?? order ."   base:" base @ dup decimal u. base !  cr
+#if-flag multi
+#else
+  2 spaces .s
+#endif
+;
 
 : list ( -- ) list ;
 
