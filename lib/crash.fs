@@ -5,9 +5,11 @@
 
 forth definitions only
 
+#require .idd debug/voc.fs
+
 0 variable closest-found
 
-: addr>woff ( address -- cstr offset addr | 0 )
+: addr>woff ( address -- offset lfa | 0 )
   1 bic \ Thumb has LSB of address set.
   dup flashvar-here u>= if drop 0 exit then \ Flash variables or peripheral registers cannot be resolved this way.
   0 closest-found ! \ Address zero (vector table) is more far away than all other addresses
@@ -26,18 +28,24 @@ forth definitions only
   drop
 
   closest-found @ ?dup if
-    6 + dup skipstring r> over - swap
+    dup \voc lfa>xt r> swap - swap
   else
     rdrop 0
   then
 ;
 
-: .word ( Address -- )
-  addr>woff if swap ctype ?dup if ( len ) [char] + emit base @ swap . base ! then space then
+: .word-off ( address -- )
+  addr>woff
+  ?dup if ( off lfa )
+    \voc .idd
+    ?dup if ( off )
+      [char] + emit base @  16 base ! swap .   base !
+    then
+  then
 ;
 
-: .word-off ( address -- )
-  addr>woff if drop ctype space then
+: .word ( address -- )
+  addr>woff ?dup if \voc .idd space drop then
 ; 
 
 \ Call trace on return stack.
