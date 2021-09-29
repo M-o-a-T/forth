@@ -7,7 +7,7 @@
 : .ctag ( ctag -- ) ." ctag: " hex. ;
 
 : .id ( lfa -- )
-  lfa>nfa count type space
+  lfa>nfa ctype space
 ;
 
 : .wid ( lfa|wid -- )
