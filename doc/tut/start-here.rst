@@ -1,23 +1,23 @@
-Let's start off with …
+So, where do we start?
 ======================
 
-… actually writing the documentation before we try to collect it into a
-coherent whole, shall we?
+We'll start from the bottom up, because that's how you build a Forth
+system. Ours is no different. You might want to skim over the stuff you
+think you don't need, but chances are that you'll need it anyway. 😛
 
-There are a few TODOish holes in this file.
+Actually, this documentation skips the bottom two rungs of the ladder.
 
-Sorry about that.
-
-Anyway. I'll not teach you how to code in Forth in general. An old but
+It will not teach you how to write Forth programs in general. An old but
 still very good primer is `Starting FORTH
 <https://www.forth.com/starting-forth/>`_, by Leo Brodie.
 
-I'll also not teach you about `Mecrisp Stellaris
+It also won't wax eloquently you about `Mecrisp Stellaris
 <https://mecrisp.sourceforge.net/>`_, the Forth variant this
-library is (mostly) based on. You can read more there.
+library is (mostly) based on. You can read more there, including how to
+tell your favorite STM-32 microcontroller to run it.
 
-Instead, let's talk about the stuff we're doing here, and why we're doing
-it. I'll start from the ground up.
+Instead, let's talk about what we're building on top of that foundation,
+and why.
 
 Vocabularies
 ++++++++++++
@@ -33,6 +33,7 @@ Mahlow that's included in the Mecrisp Stellaris distribution.
 
 Object-oriented Forth
 ---------------------
+
 An extension to that vocabulary idea gives us something like classes and
 objects. They're admittedly far from a perfect implementation of these
 particular concepts, but this author thinks that our code work well enough
