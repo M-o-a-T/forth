@@ -26,10 +26,11 @@ Let's face it, Forth is good at abstracting things but abysmal at
 separating different abstractions from each other, because it only has one
 flat vocabulary.
 
-Thus we split that up, mostly by using somewhat-mangled code from Manfred
-Mahlow that's included in the Mecrisp Stellaris distribution.
+Thus we split that up, mostly by using somewhat-mangled code by Manfred
+Mahlow (clarification: this project somewhat-mangles Manfred's code) that's
+included in the Mecrisp Stellaris distribution.
 
-`Check here </doc/voc.rst>`_ how to use (our version of) vocabulary code.
+`Check here </doc/voc.rst>`_ how to use it.
 
 Object-oriented Forth
 ---------------------
@@ -103,6 +104,18 @@ but you'd run out of RAM, and they'd block each other anyway), much less
 every incoming byte (tasks can finish out of order, so that would be bad),
 so we give you a `ring buffer </doc/ring.rst>`_ to handle them.
 
+Error handling
+++++++++++++++
+
+Programs fail. You want code that fails (say, your 1wire bus has a short in it)
+not to take out the rest of the system (the 1wire handler loops / crashes
+the system and you can't talk to it to figure out what's wrong / doesn't
+free the buffer you need to do that).
+
+Thus we include a couple of words that help with `non-local error handling
+</doc/errors.rst>`_. Yes, they work when you're multitasking.
+
+
 The nitty-gritty
 ++++++++++++++++
 
@@ -120,4 +133,14 @@ The answer is a terminal program. One that is reasonably intelligent so
 that you can teach it to assemble your main program just by a couple of
 flags, or perhaps a configuration file. Learn about ours `here
 </doc/terminal.rst>`_.
+
+Stop here
+=========
+
+… unless you want to read boring stuff like which `license
+</doc/license.rst>`_ this code is released under, what to keep in mind
+if/when you decide to `contribute </doc/meta/coding_style.rst>`_ to this
+project (including things nobody ever does, like `testing your code
+</doc/testing.rst>`_), or this author's opinion about some
+`mostly-irrelevant stuff <doc/meta/opinion.rst>`_.
 
