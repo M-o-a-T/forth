@@ -6,8 +6,9 @@ This library implements cooperative multitasking.
 
 There is no provision (yet) for more than one CPU.
 
+++++++++++++++++
 Task declaration
-================
+++++++++++++++++
 
 Declaring a (simple) task is very easy.
 Just write ``task:`` instead of ``:``::
@@ -21,6 +22,10 @@ Just write ``task:`` instead of ``:``::
 
 Your task will initially be "idle" state, i.e. it won't not run until
 you tell it to.
+
++++++
+Words
++++++
 
 Affecting other tasks
 =====================
@@ -108,8 +113,9 @@ If there's a pending signal, the task handler will re-throw it every time
 your task is scheduled. Your ``catch`` code needs to clear it when it has
 handled the signal or error.
 
++++++++++++++
 Task creation
-=============
++++++++++++++
 
 ``task:`` does basically this, behind the scenes::
 
@@ -143,21 +149,22 @@ NB: Smaller stacks are generally not recommended. In debug mode you can
 check a task's maximum stack using ``TASK ?``.
 
 
++++++++++++
 Task states
-===========
++++++++++++
 
 =new
-++++
+====
 
 The task has not been started. You can start it with ``NAME start``.
 
 =dead
-+++++
+=====
 
 The task has ended. You can restart it with ``NAME start``.
 
 =idle
-+++++
+=====
 
 The task has been started but is not doing anything. It can be continued
 with ``NAME go``. This is intentionally not the same word as above.
@@ -171,13 +178,13 @@ is currently executing the task in question with ``NAME .. task this =``.
 You can check for a pending signal with ``NAME abortcode @``.
 
 =check
-++++++
+======
 
 The task is idle, but the idle task will periodically run a check function
 to query whether to restart it.
 
 =irq
-++++
+====
 
 The task is idle. It may be made runnable by an interrupt.
 
@@ -194,7 +201,7 @@ source and then defer the actual task start to your check word.
 
 
 Waiting
-=======
++++++++
 
 A task can wait for something; when it does, it's important to not waste
 time switching to that task's context unnecessarily.

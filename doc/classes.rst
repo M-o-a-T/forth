@@ -65,8 +65,8 @@ Terminate an instance definition in the current class compilation context.
 This creates the class's ``u/i`` constant, which declares how large the
 space to allocate for an instance's static variables is.
 
-size ( *args XXX -- *args XXX bytes )
-+++++++++++++++++++++++++++++++++++++
+size ( \*args XXX -- \*args XXX bytes )
++++++++++++++++++++++++++++++++++++++++
 
 For classes that descend from ``sized``, this word states how much
 additional room beyond the "known" variables to allocate.
@@ -98,16 +98,15 @@ object's address on the stack.
 You can also use this word to re-initialize an object, if that should ever
 be necessary.
 
-\offset
-+++++++
+\\offset
+++++++++
 
 Sized classes contain this variable. It is filled by ``setup`` and contains
 the starting offset of the variable-sized part of the object.
 
 
-
-__ ( -- )
-+++++++++
+\__ ( -- )
+++++++++++
 
 Only search the next word in the current class's context.
 
@@ -128,9 +127,8 @@ That state is not recorded, but inferred from the class. In particular,
 Using classes
 -------------
 
-We'll start with a simple example: a class that stores a half-cell word.
+We'll start with a simple example: a class that stores a half-cell word::
 
-::
 	class: hint
 
 	__data

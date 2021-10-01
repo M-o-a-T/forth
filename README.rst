@@ -61,13 +61,13 @@ satellites:
   This repository is intended to contain code to support support a lot of this.
 
 I'm not interested in some strange bus!
----------------------------------------
++++++++++++++++++++++++++++++++++++++++
 
 No matter. Focus on the first (and maybe the second) part. Most of the code
 here is intended to be perfectly useable without the MoaT stuffing.
 
 Umm, so, well, I may be interested.
------------------------------------
++++++++++++++++++++++++++++++++++++
 
 Great!
 Go to `the MoaT main archive <https://github.com/M-o-a-T/moat-bus>`_.

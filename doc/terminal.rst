@@ -111,10 +111,10 @@ the Forth interpreter will send them unmodified, most likely resulting in a
 ``#if`` open at the end of your file results in an error.
 
 Conditionals
-::::::::::::
+++++++++++++
 
 #if WORD…
-+++++++++
+---------
 
 Your basic conditional statement.
 
@@ -128,7 +128,7 @@ have increased ``DEPTH`` by exactly one. We might check that.
 ``WORD…`` must not emit anything and may not cause an error.
 
 #if-ok WORD…
-++++++++++++
+------------
 
 This test checks whether the WORDs result in a Forth OK prompt.
 
@@ -146,7 +146,7 @@ This test checks whether the WORDs result in a Forth OK prompt.
     See the end of ``test/ring.fs`` for an example.
 
 #if-flag NAME…
-++++++++++++++
+--------------
 
 This statements is true if every named flag is set, or cleared when prefixed with
 a ``!``.
@@ -155,7 +155,7 @@ If NAME has the form WORD=VALUE, the check applies to whether the flag's
 value is equal to VALUE (or not).
 
 #[if] WORD…
-+++++++++++
+-----------
 
 Like ``#if``, but will be wrapped in ``[`` and ``]``, thus works in compile
 context (and only there).
@@ -163,7 +163,7 @@ context (and only there).
 It's bad form to use this across definitions.
 
 #if-ram WORD…
-+++++++++++++
+-------------
 
 Sometimes you might need to make decisions on code that's in RAM. This
 statement changes to ``compiletoram``, does the check, then switches back
@@ -173,33 +173,33 @@ There is no ``[]`` version of this: switching to RAM and back, in the
 middle of compiling something, might be detrimental to your health.
 
 #else
-+++++
+-----
 
 If you don't know what ``#else`` does, this document won't help.
 
 #endif
-++++++
+------
 
 Whatever the last preceding ``#if``-like statement did: we continue here.
 
 then
-++++
+----
 
 OK, OK, this is Forth, so here's your favorite synonym for ``#endif``. 😎
 
 
 Other processor statements
-::::::::::::::::::::::::::
+++++++++++++++++++++++++++
 
 #include PATH
-+++++++++++++
+-------------
 
 The contents of the file at ``PATH`` are processed.
 
 Execution resumes after completion.
 
 #require WORD PATH
-++++++++++++++++++
+------------------
 
 The existence of WORD is checked using ``token WORD find drop 0=``. 
 If it is not found, PATH is interpreted as a file name and included.
@@ -208,14 +208,14 @@ if PATH is missing, ``lib/WORD.fs`` is used. If it ends with a slash,
 ``PATH/WORD.fs`` is substituted.
 
 #end
-++++
+----
 
 Processing this file is terminated. This is not an error even if ``#end``
 is inside a conditional. The terminal resumes at the point where the
 current file was included.
 
 #end*
-+++++
+-----
 
 Processing of all files is terminated. This is not an error; the terminal
 immediately returns to the prompt / exits.
@@ -225,21 +225,21 @@ This is useful for debugging.
 There is no way to resume uploading. (Yet.)
 
 #set-flag FLAG DATA
-+++++++++++++++++++
+-------------------
 
 The flag FLAG is set to DATA.
 
 If the data is ``-``, the flag is deleted.
 
 #read-flag FLAG CODE
-++++++++++++++++++++
+--------------------
 
 CODE is sent to Forth.
 
 The flag FLAG is set to whatever output it generates.
 
 #error TEXT
-+++++++++++
+-----------
 
 Processing this file is terminated with the message ``TEXT``.
 
@@ -247,7 +247,7 @@ A non-interactive terminal exits with an error condition if this statement
 is encountered.
 
 #echo [TEXT]
-++++++++++++
+------------
 
 Show this text on the terminal, without sending it to Forth.
 
@@ -255,7 +255,7 @@ This is useful if you need to show statements which the user needs for
 manual debugging, or just to annotate your log.
 
 #ok WORD…
-+++++++++
+---------
 
 The words are evaluated (as in ``#if``). The statement is OK if its value
 is not zero; otherwise an error is raised (as in ``#error``).
@@ -266,7 +266,7 @@ is not zero; otherwise an error is raised (as in ``#error``).
     statement that breaks the interpreter.
 
 #-ok WORD…
-++++++++++
+----------
 
 ``WORD…`` is evaluated and *must not* result in a Forth "ok" prompt.
 
@@ -277,7 +277,7 @@ to be more deterministic. In a pinch, use this workaround::
     #then
 
 #delay TIME
-+++++++++++
+-----------
 
 Change the maximum delay between sending a line and getting an ``ok``
 back form Forth.
@@ -286,7 +286,7 @@ back form Forth.
 "good" reply.
 
 #send NAME
-++++++++++
+----------
 
 Send the text associated with the flag ``NAME``.
 
