@@ -7,7 +7,7 @@
 
 get-current
 
-task \int \task definitions also
+task %cls definitions also
 
 : find-beef ( max stack-end -- n )
   dup @ poisoned <> if 2drop -4 exit then
@@ -46,9 +46,10 @@ task \int \task definitions also
   dup __ state @ =idle > if
     dup __ link ?
   then cr
-  dup __ abortptr @ ?dup if ." Abort:" hex. then
+  \ dup __ abortptr @ ?dup if ." Abort:" hex. then
   dup __ abortcode @ ?dup if ." Sig:" hex. then
   dup __ checkfn @ ?dup if ." Check:" .word  dup __ checkarg @ hex.  then
+  \ 'checkarg' may also be a queue
   cr drop
 ;
 
@@ -60,17 +61,18 @@ forth definitions
   eint? dint >r
   0 this .. ( 0 task )
   begin
-    dup \task next @ ..
+    dup %cls next @ ..
     dup this .. =
-  until
-  ['] nop irq-tasks (run)  \ just leave them on the stack
+  until drop
+  check-tasks each: nop  \ just leave them on the stack
+  irq-tasks each: nop  \ just leave them on the stack
   r> if eint then
   ( 0 tasks… )
 
   cr begin
     ( 0 tasks… )
   ?dup while
-    task \int \task ?
+    task %cls ?
     ( 0 one-fewer-tasks… )
   repeat
 ;

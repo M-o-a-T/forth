@@ -199,22 +199,119 @@ Your interrupt handler should continue the task. If that is difficult to
 achieve, however, it is sufficient (though slower) to disable the interrupt
 source and then defer the actual task start to your check word.
 
+=wait
+=====
 
+The task has been added to a wait queue.
+
++++++++
 Waiting
 +++++++
 
 A task can wait for something; when it does, it's important to not waste
 time switching to that task's context unnecessarily.
 
-This is afforded by using a check function. That function is run by the idle
-task and will re-enable your task when it is ready.
+One basic principle of this library is to avoid busy waiting, i.e.
+tasks that loop calling ``pause`` until some condition is satisfied.
+This approach wastes power and slows down your system due to unnecessary
+context switches.
+
+Thus we need to consider different reasons why a task might want to
+continue its work.
+
+Wait queues
+===========
+
+Examples:
+
+* Task A is finished producing a result B is waiting for
+
+* Task C writes to a buffer which is full / task D reads from a buffer
+  that's empty
+
+To handle this case, we use wait queues. They can be used independently, or
+as members of another data structure::
+
+    class: ring
+    __data
+      …
+      task %queue field: waiters
+    __seal
+    : setup
+      dup __ setup
+      dup __ waiters >setup
+      …
+    ;
+
+The code to read an item from this structure might then be written like this::
+
+    : @ ( ring -- item )
+      begin
+        dup __ empty?
+      while
+        dup __ waiters wait
+      repeat
+      \ now get the actual data
+    ;
+
+while writing to it might look somewhat like this::
+
+    : ! ( item ring -- )
+      \ write the actual data
+      ( ring ) 
+      __ one \ wake up one reader
+    ;
+
+You always need to loop on the condition because it could be false again by
+the time the scheduler gets around to your task.
+
+You might need to do the same thing in reverse for the "buffer full"
+condition.
+
+Words
++++++
+
+one ( queue -- )
+----------------
+
+Wake up one task from the queue, if there is one.
+
+Currently this is the first task, but you should not depend on that.
+
+all ( queue -- )
+----------------
+
+Wake up all tasks from the queue, emptying it.
+
+This basically calls ``pop`` until the queue is empty. New tasks arriving
+during execution of this word, perhaps due to an interrupt, are also
+(re)started.
+
+wait ( queue -- )
+-----------------
+
+Insert the current task into the queue.
+
+add ( task queue -- )
+---------------------
+
+Insert some other task into the queue.
+
+External signals, no interrupt
+==============================
+
+This situation looks like busy waiting. However, it uses a separate check
+function to monitor the signal which doesn't require a separate task switch.
+
+To do this, you register a check word. That word is periodically run by the
+idle task and will re-enable your task when it is ready.
 
 A simple example::
 
-    : xkey? key? if task =sched else task =check then ;
+    : xkey? drop key? ;
     task: echo
       begin
-        task wait: xkey?
+        0 task wait: xkey?
         key emit
       again
 
@@ -222,14 +319,143 @@ A simple example::
       echo start
     ;
 
-This word must return the new task state. It will see your task structure
-on the stack, but it must leave it there.
+The check word must consume the argument (zero, in this example) and return
+a flag whether to schedule the task.
 
-Check functions might run with interrupts disabled. They must be short and to
-the point. They must never call ``throw`` and cannot wait for anything.
+Check functions must be short and to the point. They must never call
+``throw`` and cannot themselves wait for anything. However, we pass the
+address of "their" task to them, thus they may change its state
+themselves if necessary::
 
-If the check function returns ``=dead``, the task will be ``signal``\led.
+    task also
+    : deadpoll ( task arg -- task flag )
+      drop
+      42  over %cls signal
+      0
+    ;
 
-The check function is executed immediately. If it returns ``=sched`` the
-task is not suspended and ``wait:`` returns immediately.
+This is helpful e.g. when the check function reads a status register. it
+can decide whether to proceed or abort its task based on the register's
+error flags.
 
+Whenever a check function is active, the system will not be allowed to
+sleep. If possible, you should register an IRQ function instead.
+
+
+Words
++++++
+
+wait: ( arg "name" )
+--------------------
+
+Sleep until calling the named word (with the argument on the stack) results
+in non-zero.
+
+The signature of the word NAME must be ``( taskptr arg -- taskptr flag )``.
+
+NAME is called with interrupts enabled.
+
+(wait) ( arg xt )
+-----------------
+
+As ``wait:``, but expects the word's execution token on the stack instead
+of searching for it.
+
+
+External signals, interrupts
+============================
+
+This is the ideal situation for handling external signals because the
+system is able to halt the processor if no other work is going on.
+
+Interrupt handling is a multi-step process. It somewhat differs depending
+on whether the CPU has level- or edge-triggered interrupts.
+
+Level-triggered means, basically, that if you interrupt handler doesn't
+disable the interrupt somehow it will be called again immediately
+thereafter. If your handler doesn't disable the interrupt, your system will
+become unresponsive.
+
+Edge-triggered interrupts, on the other hand, only fire once. If your
+handler doesn't disable the interrupt, your system will not recognize it
+again and will become unresponsive, albeit only with respect to this
+particular event instead of in general.
+
+Interrupt handling
+++++++++++++++++++
+
+First, install an interrupt handler. Consult your CPU manual on which
+interrupt to use, set the corresponding ``irq-*`` variable to your handler,
+then set up your hardware to produce interrupts.
+
+Second, write a check word. This is particularly important for
+edge-triggered interrupts, even more so when they may have multiple
+sources.
+
+Interrupt check words are called with interrupts disabled. Their job is
+to ensure that no interrupt is missed (the interrupt handler is not called)
+and your task continues (the interrupt handler executed already).
+
+Then, your task should enable the device's interrupt and wait.
+
+Interrupt handling is fraught with race conditions.
+Consider this situation:
+
+* You install an interrupt handler.
+
+* You enable the interrupt.
+
+* The condition is met instantly, the handler runs. It does whatever needs
+  doing and disables your interrupt.
+
+* Your main code tells the system to wait for the interrupt. As that already
+  happened, your code is not scheduled.
+
+We mitigate this by teaching the check word to also return ``true`` if the
+interrupt already happened.
+
+Words
++++++
+
+irq: ( arg "name" -- flag)
+--------------------------
+
+Sleep until calling the named word (with the argument on the stack) returns
+a non-zero.
+
+The signature of the word NAME must be ``( taskptr arg -- taskptr flag )``.
+
+NAME is called with interrupts disabled.
+
+
+(irq) ( arg xt )
+-----------------
+
+As ``irq:``, but expects the word's execution token on the stack instead
+of searching for it.
+
+
+++++++++++++++++++
+Differences to F83
+++++++++++++++++++
+
+F83 has a ``task:`` word that establishes a memory range for stacks plus
+user area, and an inline ``activate`` that returns from within a word but
+starts a task for running the rest of it.
+
+That's a sub-optimal idea for a couple of reasons.
+
+* the return stack size is fixed, which wastes memory.
+
+* jumping out of a possibly-complex word is dangerous.
+
+* why would you want different words to refer to a task vs. the way you
+  start it?
+
+* structured per-task storage would be nice.
+
+* what happens when your word aborts, or runs off the end? Answer: Your
+  program crashes. Forcing every task's main word to handle that by itself
+  ends up being buggy and wastes memory.
+
+* you want to introspect which tasks are doing what.

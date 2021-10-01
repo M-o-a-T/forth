@@ -4,28 +4,20 @@
 \ --------------------------------------------------
 
 0 variable seconds
-task: timetask
-
-: time& ( -- )
+task: time&
   begin
     1 seconds +!
     seconds @ . cr
-    seconds @ 10 mod 0= if boot-task wake then
-    stop
-    yield  \ debugging
+    seconds @ 10 mod 0= if  task \int main continue then
+    task stop
   again
 ;
 
-: \st singletask ;
+: \st task !single ;
+: \mt task !single ;
 
-timetask run time&
-#if defined irq-systick
-lowpower-task run lowpower&
-#endif
+time& start
 tasks
-
-\st
-\ we overrun the serial buffer otherwise
 
 #if defined irq-systick
 
@@ -38,10 +30,10 @@ tasks
 #endif
 #end
 
-\ multitask
+\mt
 
 #if defined irq-systick
-#delay 1.3
+#delay 13
 stop \ Idle the boot task
 #delay 1
 \st

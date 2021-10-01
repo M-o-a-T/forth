@@ -8,6 +8,11 @@
 \ 
 forth definitions only  decimal
 
+#if defined task
+\ repeated
+#end
+#endif
+
 #if defined throw
 #error conflicts with single-tasked catch/throw
 #endif
@@ -34,8 +39,8 @@ forth definitions only  decimal
 voc: task
 voc: \int
 voc: sub
-task \int only definitions
-var> also
+task definitions
+sub ignore
 
 0 constant =new  \ new (not linked)
 1 constant =dead  \ dead (not linked)
@@ -43,8 +48,9 @@ var> also
 3 constant =sched \ scheduled (in task list)
 4 constant =check \ checking (in IRQ list)
 5 constant =irq \ checking, IRQ on (in IRQ list)
-\ there might be more öater
-6 constant #states
+6 constant =wait \ in some other queue
+\ there might be more later
+7 constant #states
 
 \ ********************
 \         task
@@ -53,11 +59,12 @@ var> also
 \ base class for tasks, may or may not have its own stack, thus internal
 
 
-task \int definitions
-sized class: \task
+task definitions
+
+sized class: %cls
 __data
-  cint field: pstack  \ param stack size, cells
-  cint field: rstack  \ return stack size, cells
+  var> cint field: pstack  \ param stack size, cells
+  var> cint field: rstack  \ return stack size, cells
   aligned
 
 \ Intermission: get from the link field back to the task.
@@ -71,26 +78,25 @@ task item
 
 ;class
 
-\ back to our variables
-  \task definitions
+\ back to our class variables
+  %cls definitions
 
   task-link field: link
-  int field: stackptr
-  int field: abortptr
-  int field: abortcode
+  var> int field: stackptr
+  var> int field: abortptr
+  var> int field: abortcode
 
-  int field: checkfn
-  int field: checkarg
-  cint field: state
-  cint field: newstate
+  var> int field: checkfn
+  var> int field: checkarg  \ dups as dest waitqueue
+  var> cint field: state
+  var> cint field: newstate
   aligned
 __seal
 
-var> ignore
-
-\ xx constant psize  \ minimum by ANS Forth standard
-\ xx constant rsize  \ ditto
-\ we want a guard cell above and one below.
+\ xx constant psize  \ parameter stack size
+\ xx constant rsize  \ return stack size
+\ we want a guard cell above and below; the return stack also holds the
+\ context register(s).
 : psize@ s" psize" voc-eval dup if 2 + then ;
 : rsize@ s" rsize" voc-eval dup if 2 + #ctx + then ;
 : size __ size __ psize@ __ rsize@ + cells + ;
@@ -111,8 +117,8 @@ var> ignore
 ;
 
 \ prev+next return whatever the link points to.
-\ We don't auto-convert this to a taskptr because if the task is in the IRQ
-\ list (or wherever) it may point to a d-list-head instead.
+\ We don't auto-convert this to a taskptr because if the task is not
+\ scheduled it may point to a d-list-head instead.
 task-link item
 : prev __ link prev @ .. ;
 task-link item
@@ -129,7 +135,14 @@ task-link item
   0 over __ checkarg !
   =new swap __ state !
 ;
-;class  \ \task
+;class  \ %cls
+
+
+task definitions
+var> int class: %var
+%cls item
+: @ __ @ inline ;
+;class
 
 
 \ ********************
@@ -143,7 +156,7 @@ task-link item
 task \int definitions
 
 \ The main task doesn't store stacks
-\task class: \main
+%cls class: \main
 0 constant psize
 0 constant rsize
 
@@ -169,10 +182,7 @@ task \int definitions
 \main object: main
 
 \ Back to defining TASK
-task \int definitions
-
-\ There are other lists. Specifically we need one for tasks that are waiting.
-d-list-head object: irq-tasks  \ tasks in =check and =irq
+task definitions
 
 \ pointer to the current task. Some Forths call this UP (User Pointer)
 main .. variable this-task
@@ -185,7 +195,7 @@ main .. variable this-task
 task also
 task definitions
 
-\task item
+%cls item
 : this ( -- task )
 \ Get the current task (to reduce typing, but also for future multi-CPU)
   this-task @ ..
@@ -198,15 +208,11 @@ task definitions
   this .. main .. =
 ;
 
-\task definitions
+%cls definitions
 : running?  ( task -- flag )
 \ is this task currently executing?
   this .. =
 ;
-
-#if-flag debug
-#include debug/multitask.fs
-#endif
 
 \ ********************
 \        abort
@@ -230,6 +236,79 @@ task definitions
 
 
 \ ********************
+\     Task queues
+\ ********************
+
+task also
+
+d-list-head class: %queue
+: empty?  ( q -- flag )
+  dup __ next @ .. over =
+;
+
+: pop ( q -- item|0 )
+\ get the first element
+  dup __ next @ .. tuck ( 1st q 1st )
+  = if
+    drop 0
+  else
+    dup d-list-item remove
+    %cls task-link @ ..
+  then
+;
+
+: insert ( task q -- )
+\ insert a task.
+  swap %cls link .. swap  \ address of the link
+  __ insert
+;
+
+\
+\ a few state changing words will be defined later
+
+
+
+: (adj) ( xt link -- xt )
+\ call xt with the task that contains "link"
+  %cls task-link @ .. \ adjust link so that it addresses the task
+
+  \ park the original xt on the stack during its execution
+  \ for transparency
+  swap >r 
+  r@ execute
+  r>
+;
+
+: each ( xt queue )
+\ call xt with every job
+  ['] (adj) swap
+  __ each
+  drop
+;
+
+\ duplicate from lib/linked-list.fs, unfortunately
+: each: ( head "name" -- )
+\ run NAME with each item
+  postpone .. ' literal, postpone swap postpone each  
+  immediate
+;
+
+;class
+
+\ There are other lists. Specifically we need one for tasks that are waiting.
+%queue object: irq-tasks  \ tasks in =irq
+%queue object: check-tasks  \ tasks in =check
+
+
+
+#if-flag debug
+#include debug/multitask.fs
+#endif
+
+
+
+
+\ ********************
 \    State Machine
 \ ********************
 
@@ -242,19 +321,51 @@ task \int definitions also
 0 constant _err
 1 constant _no
 2 constant _run
-3 constant _irq
+3 constant _chk
+4 constant _irq
+5 constant _enq
+6 constant _deq
 
 _table: state>q
 _no  c, \ =new
 _err c, \ =dead
 _no  c, \ =idle
 _run c, \ =sched
-_irq c, \ =check
+_chk c, \ =check
 _irq c, \ =irq
+_enq c, \ =wait
 
-\task definitions also
-task \int also
 task also
+%cls definitions also
+\int also
+
+: \new
+\ helper
+    case
+      _run of
+        dup __ link .. this link insert
+        endof
+      _irq of
+        dup irq-tasks insert
+        endof
+      _chk of
+        dup check-tasks insert
+        endof
+      _enq of
+#if-flag debug
+        dup checkarg @ 0= abort" wait without queue"
+#endif
+        dup __ link .. over __ checkarg @  %queue insert
+#if-flag debug
+        0 over __ checkarg !
+#endif
+        endof
+      _err of
+        -1 over __ abortcode !
+        nip =sched swap
+        endof
+    endcase
+;
 
 : >state ( state task -- )
 \ set task state
@@ -265,7 +376,10 @@ task also
     exit
   then
   over state>q  ( state task new_q )
-  over __ state @ state>q 
+  over __ state @ state>q
+  \ Special case: the task is in a queue and the state change sends it to 
+  \ some other queue, possibly, we need to handle that
+  dup _enq = if drop _deq then
   ( state task new_q old_q )
   2dup <> if
     \ process old state
@@ -279,18 +393,7 @@ task also
     ( state task new_q )
     
     \ process new state
-    case
-      _run of
-        dup __ link .. this link insert
-        endof
-      _irq of
-        dup __ link .. irq-tasks insert
-        endof
-      _err of
-        -1 over __ abortcode !
-        nip =sched swap
-        endof
-    endcase
+    \new
   else
     2drop
   then
@@ -299,6 +402,39 @@ task also
   __ state !
 ;
 
+
+\ more queue
+
+%queue definitions also
+
+: one ( q -- )
+\ start one task
+  __ pop ?dup if =sched swap  %cls >state then 
+;
+
+: all ( q -- )
+\ start all tasks
+  begin
+    dup __ pop
+  dup while
+    =sched swap %cls >state
+  repeat
+  2drop
+;
+
+: add ( task q -- )
+\ insert some task.
+  over %cls checkarg !
+  =wait %cls >state
+;
+
+: wait ( q -- )
+\ insert this task.
+  this .. swap __ add
+;
+
+
+%queue ignore
 
 \ ********************
 \        yield 
@@ -325,17 +461,17 @@ task definitions
 
   ( oldtask )
   this .. dup newstate @ if  \ state change? if so, do some work
-    dup \task next @ ..
+    dup %cls next @ ..
     ( oldtask newtask )
     \ ." T:" dup .word   \ debug only, not when multitasking
     dup >this swap ( newtask oldtask )
     \ "this" now contains the new task, so can safely change the old
-    dup \task newstate @ ( newtask oldtask state )
-    over 0 swap \task newstate ! \ clear new-state flag
-    swap \task >state
+    dup %cls newstate @ ( newtask oldtask state )
+    over 0 swap %cls newstate ! \ clear new-state flag
+    swap %cls >state
   else
     \ no state change, be quick
-    \task next @ .. >this
+    %cls next @ .. >this
   then
   ( newtask )
 
@@ -359,21 +495,18 @@ task definitions
 ;
 
 
-\task definitions
+%cls definitions
 
 : >state.i ( state task -- )
 \ change task state, disabling interrupts
   eint? dint -rot  ( iflag state task )
-  \task >state
+  %cls >state
   if eint then
 ;
 
 : start ( task -- )
-  ." S A" h.s
   dup __ state @ =dead > abort" Task running"
-  ." S B" h.s
   =sched swap __ >state.i
-  ." S C" h.s
 ;
 
 : continue ( task -- )
@@ -424,7 +557,7 @@ task definitions
 
 \ class for everything but the main task
 
-task \int \task class: subtask
+task %cls class: subtask
 task also
 task \int also
 
@@ -460,8 +593,10 @@ task \int also
 #else
 : (go) ( xt -- does-not-return )
   begin
-    dup catch this abortcode !
+    dup catch
+    this abortcode !
     =dead this newstate !
+    .abort
     yield
   again
 ;
@@ -471,6 +606,7 @@ task \int also
 \ Main code for tasks
   (cont) (go)
 ;
+: task@ s" (task)" voc-eval ;
 
 \ Helper: decrement a stack pointer and store data there.
 : sp+! ( data sp -- sp-1 )
@@ -507,7 +643,7 @@ task \int also
 
   over __ task-rs  ( xt task SP RSP )
   \ Store entry address to the top of RSP
-  (task) swap sp+!
+  task@ swap sp+!
   \ reserve space for noon-stack CPU state
   #ctx begin  ( xt task SP RSP N )
   ?dup while
@@ -535,6 +671,22 @@ task \int also
 
 ;class  \ subtask
 
+subtask class: looped 
+: (go) ( xt -- does-not-return )
+  begin
+    dup catch 
+    ?dup if
+      this abortcode !
+      .abort
+    then
+    yield
+  again
+;
+: (task)  ( -- go-continue )
+\ Main code for tasks
+  (cont) (go)
+;
+;class
 
 
 \ *****************
@@ -557,21 +709,27 @@ task \int definitions
 \ \ object setup is in its "setup"
 ;
 
-forth definitions
+task %cls definitions
 : task: ( "name" code… ; -- )
 \ Declare a named task:
   get-current \twid !                     \ save our current voc
   [ task \int (' sub literal, ] set-current \ voc for one-off subclasses
   token
-  \voc _sop_ @ dup \voc current <> if
-    @ \voc (dovoc 
+  \voc _sop_ @ dup \voc context <> if
+    @
+  else
+    drop [ task (' subtask literal, ]
   then
-  postpone subtask
+  \voc (dovoc
   [with] class:
   \ now the one-off subclass is current
   ['] (task:) \voc post-def !               \ second step
-  s" \main" [with] : \                      \ … start defining its "run" method
+  s" \main" [with] : \                      \ … start defining its "\main" method
 ;
+
+forth definitions
+: task: task %cls task: ;
+
 
 \ Override standard words so they work with tasks
 
@@ -631,19 +789,31 @@ init:
 \ *****************
 
 : (wait) ( arg xt )
-\ wait until ``arg xt execute`` returns =sched
+\ wait until ``arg xt execute`` returns true
   this ..
-  tuck \task checkfn !
-  tuck \task checkarg !
-  =check swap \task >state
+  tuck %cls checkfn !
+  tuck %cls checkarg !
+  =check swap %cls >state
 ;
 
 : wait: ( arg "name" )
   ' literal,  postpone (wait)
 ;
 
-\ if it's an IRQ wait: the exact same code the checkfn will return =IRQ
-\ that will correct the state with almost no overhead
+
+: (irq) ( arg xt )
+\ wait until ``arg xt execute`` returns true
+  this ..
+  tuck %cls checkfn !
+  tuck %cls checkarg !
+  =irq swap %cls >state
+;
+
+: irq: ( arg "name" )
+  ' literal,  postpone (irq)
+;
+
+
 
 \ *****************
 \     idle task
@@ -651,119 +821,72 @@ init:
 
 task \int definitions also
 
-: i-check ( n-check n-irq task-link -- n-check n-irq )
-  task-link @ .. ( task )
-  dup \task checkarg @
-  over \task checkfn @
+: i-check ( task -- )
+  dup %cls checkarg @
+  over %cls checkfn @
 #if-flag debug
   ?dup 0= if
     ." OWCH no checker in " dup hex. .word
     exit
   then
 #endif
-  execute ( n taskptr arg xt -- n taskptr state )
-  dup rot \task >state.i
-  case
-    =check of 1+ endof
-    =irq of swap 1+ swap endof
-  endcase
-;
-
-: \busy? ( this -- this flag )
-\ Checks if all other tasks are currently in idle state
-  dup \task next @ .. over <>
-;
-
-: run-irqs
-\ walks through the irq-task list
-  this ..  \ for \busy?
-
-  \ walk the list
-  0 0 ['] i-check  irq-tasks (run)  ( n-irq n-check )
-  nip  \ don't need #irq here
-  \ checkers or more work present? exit
-  if drop exit then  ( )
-  \busy? if drop exit then
-
-  ." RI C " .s
-  \ disable IRQs and walk the list again
-  dint
-  0 0 ['] i-check  irq-tasks (run)  ( n-irq n-check )
-  \ again, exit if checkers or work found
-  if eint 2drop exit then 
-  \busy? if eint 2drop exit then
-  nip \ don't need taskptr any more
-
-  ( nirq )
+  execute ( task arg xt -- task flag )
   if
-    \halt
+    =sched swap %cls >state.i
   else
-#if-flag debug
-    cr ." deadlocked" cr cr begin again
-#else
-    \ TODO: start recovery task?
-#endif
+    drop
   then
+;
+
+: busy? ( this -- this flag )
+\ Checks if all other tasks are currently in idle state
+  dup %cls next @ .. over <>
+;
+
+: run-irqs ( -- )
+\ walks through the check- and irq-task list
+  this ..  \ for busy?
+
+  \ walk the check list
+  check-tasks each: i-check  ( n )
+  \ "busy" checkers or more work present? exit
+
+  \ disable IRQs and walk the IRQ list
+  dint
+  irq-tasks each: i-check ( n )
+  \ exit if checkers present or work found
+  busy? if eint drop exit then
+  drop \ don't need taskptr any more
+  check-tasks empty? not if eint exit then
+  \halt
   eint
 ;
 
 task \int definitions
 
-: (idle)
+looped task: idle
   begin
-    yield
     run-irqs
+    busy? if yield then
   again
-;
-
-: shield  ( xt -- no-return )
-\ Run the word given by XT again and again and …
-  >r
-  begin
-    r@
-    catch
-    \voc abort-print
-  again
-  \ >r  -- not reached
-;
-
-: shield' ( "name" -- no-return )
-\ runs this word again and again and …
-  ' literal,  ['] shield call,
-  immediate
-;
-
-task: idle
-  shield' (idle)
 ;
 
 forth only definitions
-task \int sub idle item : id task \int idle .. ;
-task \int \main item : mt task \int main .. ;
-id start
-#echo task yield
-#end*
-
-task \int definitions
+task definitions also
 
 : !single ( -- ) [ hook-pause @ literal, ]  hook-pause ! ;
-: !multi  ( -- ) ['] yield hook-pause ! ;
+: !multi  ( -- ) task ['] yield hook-pause ! ;
 
 \ This task checks whether anything else in the system is running, or wants
 \ to run. Otherwise it sleeps, to conserve (some) power.
 
-task \int definitions
-
-\ setup
-
 init:
-  ['] task quit hook-quit !
-  idle start
-  !multi
+  task ['] quit hook-quit !
+  task \int idle start
+  \ !multi
 ;
 
-init: !single ;
-\ Going back to singletask is temporary: we need to either
+\ staying in singletask is temporary: we need to either
 \ get a serial IRQ with input buffer, or teach the terminal
 \ to wait for the echo.
 

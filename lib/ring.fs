@@ -43,7 +43,7 @@ __data
   hint field: num
   \ hint field: offset
 #if-flag multi
-  int  field: task
+  task %var field: waiter
 #endif
 __seal
 
@@ -58,7 +58,7 @@ __seal
   0 over __ start !
   0 over __ num !
 #if-flag multi
-  0 over __ task !
+  0 over __ waiter !
 #endif
   drop
 ;
@@ -94,21 +94,25 @@ __seal
 ;
 
 #if-flag multi
-: wait ( ring -- )
-  dup __ task @ abort" Dup wait"
-  \multi this-task  swap __ task !
-  stop
-  \ the waker clears
+: (wait) ( ring -- flag )
+\ if there's already a waiting task, hang around until the slot is free.
+\ Ideally this should not happen.
+  __ waiter @ .. if task =check else task =sched then
 ;
-#endif
 
-#if-flag multi
+: wait ( ring -- )
+  dup __ waiter @ .. abort" Dup wait"
+  task this .. swap __ waiter !
+  task stop
+  \ the waker clears the var
+;
+
 : wake (  ring -- )
-  dup __ task @
+  dup __ waiter @ ..
   ?dup if
     ( ring task )
-    0 rot __ task !
-    forth wake
+    0 rot __ waiter !
+    task %cls continue
   else
     drop
   then
@@ -187,7 +191,7 @@ __seal
 
 #if-flag multi
   \ wake up writer
-  \ We only need that if the ring was full
+  \ We only need that if the ring was full,
   \ but testing for that is more expensive than
   \ simply checking whether someone's waiting
   r> __ wake

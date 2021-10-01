@@ -32,7 +32,7 @@ forth definitions
   dup     __ next !
 ;
 
-: (run) ( xt head -- ) 
+: each ( xt head -- ) 
 \ run XT with each item.
   swap >r  ( head |R: xt )
   dup __ next @
@@ -47,9 +47,9 @@ forth definitions
   r> 2drop drop
 ;
 
-: run: ( head "name" -- )
+: each: ( head "name" -- )
 \ run NAME with each item
-  ' literal, postpone swap postpone (run)
+  ' literal, postpone swap postpone each
   immediate
 ;
 
