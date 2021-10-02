@@ -194,7 +194,7 @@ __seal
 : s! ( addr count ring )
 \ send a string to the ring
   -rot 0 do ( ring addr )
-    2dup c@ swap -- !
+    2dup c@ swap __ !
     1+
   loop
   2drop
