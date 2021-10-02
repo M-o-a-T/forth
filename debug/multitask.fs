@@ -5,6 +5,7 @@
 #include debug/linked-list.fs
 #endif
 
+#include debug/linked-list.fs
 get-current
 
 task %cls definitions also
@@ -29,12 +30,13 @@ task %cls definitions also
     =sched of ." run"  endof
     =check of ." chk"  endof
     =irq   of ." irq"  endof
+    =wait  of ." wait" endof
     ." ?" . 0
   endcase
 ;
 
 : ? ( task -- )
-  dup ." Task:$" hex.  \ should be declared somewhere
+  dup ." Task:$" dup hex. .word-off \ should be declared somewhere
   dup __ state @ ." State:" .state space
   dup __ pstack @ if
     dup __ pstack @  over __ task-ps find-beef ." S:" .
