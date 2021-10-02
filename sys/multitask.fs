@@ -246,16 +246,6 @@ d-list-head class: %queue
   dup __ next @ .. over =
 ;
 
-: pop ( q -- item|0 )
-\ get the first element
-  dup __ next @ .. tuck ( 1st q 1st )
-  = if
-    drop 0
-  else
-    dup d-list-item remove
-    %cls task-link @ ..
-  then
-;
 
 : insert ( task q -- )
 \ insert a task.
@@ -409,6 +399,16 @@ task also
 
 %queue definitions also
 
+: pop ( q -- item|0 )
+\ get the first element
+  dup __ next @ .. tuck ( 1st q 1st )
+  = if
+    drop 0
+  else
+    dup d-list-item remove
+    %cls task-link @ ..
+  then
+;
 : one ( q -- )
 \ start one task
   __ pop ?dup if =sched swap  %cls >state then 
