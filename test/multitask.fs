@@ -28,9 +28,10 @@ tasks
 \     7 $E000E010 ! \ Enable the systick interrupt.
 
 #endif
+
 #end
 
-\mt
+task !multi
 
 #if defined irq-systick
 #delay 13

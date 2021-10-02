@@ -239,7 +239,7 @@ task definitions
 \     Task queues
 \ ********************
 
-task also
+task definitions also
 
 d-list-head class: %queue
 : empty?  ( q -- flag )
@@ -329,7 +329,7 @@ task also
 %cls definitions also
 \int also
 
-: \new
+: \new  ( state task new_q -- state task )
 \ helper
     case
       _run of
@@ -383,9 +383,9 @@ task also
       over __ link remove  \ task is queued, so dequeue
     then
     ( state task new_q )
-    
     \ process new state
     \new
+    ( state task )
   else
     2drop
   then
@@ -412,7 +412,10 @@ task also
 ;
 : one ( q -- )
 \ start one task
-  __ pop ?dup if =sched swap  %cls >state then 
+  __ pop
+  ?dup if
+    =sched swap  %cls >state
+  then 
 ;
 
 : all ( q -- )
@@ -879,7 +882,7 @@ looped task: idle
   again
 ;
 
-forth only definitions
+forth only
 task definitions also
 
 : !single ( -- ) [ hook-pause @ literal, ]  hook-pause ! ;

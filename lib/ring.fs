@@ -20,8 +20,8 @@ forth definitions only
 var> also
 
 \ Predefined flags:
-\ ring-var: what to store in the ring. Must have '@' and '!' words.
-\ i.e. '@' will set the search context for the next word.
+\ ring-var: the type to store in the ring. Must context-switch
+\ to correctly-sized '@' and '!' words.
 
 #if-flag !ring-var
 #set-flag ring-var cint
@@ -154,7 +154,7 @@ __seal
   rdrop
 ;
 
-: @ ( ring -- item )
+: @ ( ring -- item* )
   >r
 #if-flag multi
   begin

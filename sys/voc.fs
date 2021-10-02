@@ -708,7 +708,7 @@ root definitions  \voc only
   case
     root-wl  of [ (' root   literal, ]  endof
     forth-wl of [ (' forth  literal, ]  endof
-    \voc-wl        of [ (' \voc   literal, ]  endof
+    \voc-wl  of [ (' \voc   literal, ]  endof
   dup  \ 'endcase' drops our value, but we want to keep it
   endcase
 ;
