@@ -355,7 +355,9 @@ task also
 #if-flag debug
         dup checkarg @ 0= abort" wait without queue"
 #endif
-        dup __ link .. over __ checkarg @  %queue insert
+        dup dup __ checkarg @
+        ( state task  task waitq )
+        %queue insert
 #if-flag debug
         0 over __ checkarg !
 #endif
