@@ -407,6 +407,7 @@ task also
   else
     dup d-list-item remove
     %cls task-link @ ..
+    =idle over %cls state !
   then
 ;
 : one ( q -- )
