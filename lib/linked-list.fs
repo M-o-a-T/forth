@@ -27,7 +27,6 @@ forth definitions
 \voc \d-list class: d-list-head
 
 : setup ( ptr -- )
-  dup setup
   dup dup __ prev !
   dup     __ next !
 ;
@@ -55,11 +54,6 @@ forth definitions
 
 forth definitions
 \voc \d-list class: d-list-item
-: setup ( ptr -- )
-  dup setup
-  0 over __ prev !
-  0 swap __ next !
-;
 
 : remove ( this -- )
 \ remove from the list, zero the pointers.

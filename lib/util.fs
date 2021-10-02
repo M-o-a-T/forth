@@ -166,9 +166,35 @@ forth definitions
 ;
 #endif
 
-
 #if undefined %init!
-\voc definitions
+
+\ #require .idd lib/crash.fs
+\voc definitions also
+
+: !setup ( cvoc obj -- )
+\ given an object, run all SETUP methods in its class dirs, in order.
+  over voc-context !
+
+  >r 0 swap ( 0 cvoc )
+  begin
+    \ dup .idd space
+    dup vocnext
+  ?dup 0= until
+  cr
+  ( 0 voc super … |R: obj )
+  begin
+    ?dup
+  while
+    s" setup" rot ??-wl
+    ?dup if
+      \ dup .idd cr
+      lfa>xt r@ swap execute
+    then
+  repeat
+  \ cr
+  rdrop
+;
+
 : ?setup ( lfa -- )
 \ check if this word
 \ - is a buffer (flag 0x100)
@@ -178,14 +204,12 @@ forth definitions
   dup ['] forth-wl <= if drop exit then
   dup lfa>flags h@ $100 and 0= if drop exit then
   dup lfa>wtag 1 and 0= if drop exit then
-  dup lfa>ctag ?dup 0= if drop exit then
-  ( lfa cvoc )
-  tag>wid dup voc-context !
-  s" setup" rot ??-vocs dup 0= if 2drop exit then
-  ( lfa SETUP )
-  swap lfa>xt execute
-  ( SETUP obj )
-  swap lfa>xt execute
+  dup lfa>ctag dup if
+    tag>wid swap lfa>xt execute
+    !setup
+  else
+    drop
+  then
 ;
 
 : %init! ( -- )

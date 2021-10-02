@@ -238,7 +238,6 @@ as members of another data structure::
       task %queue field: waiters
     __seal
     : setup
-      dup __ setup
       dup __ waiters >setup
       …
     ;

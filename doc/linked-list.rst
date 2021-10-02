@@ -146,11 +146,9 @@ Things to keep in mind:
     __seal
 
     : setup ( ptr -- )
-      \ always call the superclass SETUP first
-      dup __ setup
-      \ you need to explicitly setup embedded fields
+      \ you need to explicitly call >SETUP on embedded fields
       dup __ link >setup
-      \ set up your other data fields here
+      \ initialize your other data fields here if they're not zero
       drop
     ;
     : some-method … ;

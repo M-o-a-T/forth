@@ -36,7 +36,6 @@ __data
 __seal
 
 : setup ( obj -- )
-  dup __ setup
   -1 over __ x !
   -1 swap __ y !
 ;

@@ -78,25 +78,26 @@ or otherwise disturb them; that's the job of ``setup``.
 setup ( object -- )
 +++++++++++++++++++
 
-This method is automatically called when you create a new class.
-
-Your method *must* start with ``dup __ setup``, calling the ``setup`` word
-in the superclass, before doing anything else.
+Your object is initialized with zeroed-out data. If you want a different
+initial state, declare a word named ``setup`` in its class.
 
 This word is called as your object is created, or from INIT after reboot.
-*Never call it yourself.*
+*Never call it yourself.* Also, don't call the superclass – that too is
+done automatically.
+
+Within your ``setup`` word, you may use ``voc-eval`` to access words from
+subclasses, e.g. to read constants for parameterization. If you need to
+remember their value for later, store them in one of your object's fields.
 
 >setup ( object -- )
 ++++++++++++++++++++
 
-If you have a complex sub-field in your object, you need to initialize it
-yourself.
+If you have a complex sub-field in your object, you need to initialize it.
 
-Call ``dup __ FIELD >setup`` from your object's SETUP word, with your
-object's address on the stack.
+To do this, call ``dup __ FIELD >setup`` from your object's ``setup`` word.
 
-You can also use this word to re-initialize an object, if that should ever
-be necessary.
+You can also use this word to re-initialize a field or an object, if that
+should ever be necessary.
 
 \\offset
 ++++++++
@@ -190,7 +191,6 @@ Single-value objects are of course boring, but you can combine them::
 You might want to initialize things::
 
 	: setup ( obj -- )
-	  dup __ setup
 	  -1 over __ x !
 	  -1 swap __ y !
 	;

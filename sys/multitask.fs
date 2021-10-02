@@ -125,14 +125,9 @@ task-link item
 : next __ link next @ .. ;
 
 : setup ( object -- )
-  dup __ setup
   dup __ link >setup
   __ psize@ over __ pstack !
   __ rsize@ over __ rstack !
-  0 over __ stackptr !  \ init is superfluous; used by YIELD
-  0 over __ abortptr !
-  0 over __ checkfn !
-  0 over __ checkarg !
   =new swap __ state !
 ;
 ;class  \ %cls
@@ -161,7 +156,6 @@ task \int definitions
 0 constant rsize
 
 : setup
-  dup __ setup
   \ this is the initial+running task, so link to itself
   dup __ link .. d-list-head >setup
 
@@ -665,8 +659,6 @@ task \int also
 ;
 
 : setup ( object -- )
-  dup __ setup
-
   dup __ task-ps over __ pstack @ sfill
   dup __ task-rs over __ rstack @ sfill
 

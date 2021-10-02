@@ -52,12 +52,8 @@ __seal
 
 : setup ( ring -- )
 \ initialize our variables
-  dup __ setup
-
   __ elems@ over __ limit !  \ XXX depends on no overriding
   \ __ \offset @ size + offset !
-  0 over __ start !
-  0 over __ num !
 #if-flag multi
   dup tasks >setup
 #endif

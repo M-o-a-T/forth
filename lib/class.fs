@@ -98,7 +98,10 @@ root-cls definitions
 ;
 
 : setup  ( object -- )
-\ Initialize class variables.
+\ Initialize class storage to zero.
+  __ u/i@ 0 ?do
+    0 over c! 1+
+  loop
   drop
 ;
 
@@ -107,33 +110,37 @@ root-cls definitions
   drop
 ;
 
+\voc also
+
 \cls definitions
-: (>setup) ( obj fn voc -- )
-  \voc voc-context @ >r
-  \voc voc-context !
-  execute
-  r> \voc voc-context !
+: (>setup) ( obj cvoc -- )
+  voc-context @ >r
+  swap !setup
+  r> voc-context !
 ;
 
 root-cls definitions
 : >setup
-  s" setup" voc-lfa \voc lfa>xt literal,
-  \voc voc-context @ literal,
+  voc-context @ literal,
   postpone (>setup)
   immediate ;
 
 \ Create an instance of a class.
 : object: ( "name" -- )
   \ XXX the next line depends heavily on VOC internals
-  align here 2 cells +  ( lfa of future word )
+  align here 2 cells +
+  ( lfa of future word )
   class-item buffer:
-  \ now we go to the newly-created word's xt and run it
-  \voc lfa>xt ( xt ) execute ( obj )
-  \ calling the object sets SOP, which we need to undo
-  [ ' .. call, ]
-  \ find and run its setup method
-  setup@
+  ( lfa )
+  \ run its setup words
+  dup lfa>ctag tag>wid
+  \ .s dup .idd
+  swap lfa>xt execute
+  !setup
+  postpone ..
 ;
+
+\voc ignore
 
 \ \ Create a class that only inherits from / extends the root class.
 \ : class: ( "name" -- )
@@ -147,8 +154,8 @@ forth definitions
 root-cls voc: class-root
 
 : setup ( object -- )
+  drop
   __ size@ if ."  Not sized" abort then
-  __ setup
 ;
 
 \cls also
@@ -184,9 +191,12 @@ __data
 __seal
 
 : setup ( object -- )
-  dup __ setup
   __ u/i@
-  swap __ \offset !
+  2dup swap __ \offset !
+  \ zero the variable-size area
+  + __ size@ 0 ?do
+    0 over c! 1+
+  loop
 ;
 
 
