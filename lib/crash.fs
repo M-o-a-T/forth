@@ -7,32 +7,44 @@ forth definitions only
 
 #require .idd debug/voc.fs
 
+\voc definitions also
+
 0 variable closest-found
+0 variable closest-d
+
+: closest-chk ( word addr chk -- )
+  2dup u> if drop 2drop exit then
+  swap -
+  ( word dist )
+  dup closest-d @ u> if 2drop exit then
+  ( word dist )
+  closest-d !  closest-found !
+;
 
 : addr>woff ( address -- offset lfa | 0 )
   1 bic \ Thumb has LSB of address set.
-  dup flashvar-here u>= if drop 0 exit then \ Flash variables or peripheral registers cannot be resolved this way.
-  0 closest-found ! \ Address zero (vector table) is more far away than all other addresses
+  0 closest-found !
+  -1 closest-d !
 
   >r
   dictionarystart
   begin
-    dup r@ u< \ No need for u<= because we are scanning dictionary headers here.
-    if \ Is the address of this entry BEFORE the address which is to be found ?
-      \ Distance to current   Latest best distance
-      r@ over -               r@ closest-found @ -  <
-      if dup closest-found ! then \ Is the current entry closer to the address which is to be found ?
+    \ check the word itself
+    dup dup r@ closest-chk
+    \ is it a buffer or a "ramallot" variable?  XXX Mecrisp specific
+    dup lfa>flags h@ $180 and
+    if
+      dup dup lfa>xt execute r@ closest-chk
     then
     dictionarynext
   until
-  drop
+  drop rdrop
 
-  closest-found @ ?dup if
-    dup \voc lfa>xt r> swap - swap
-  else
-    rdrop 0
-  then
+  closest-d @ dup $1000 u> if drop 0 exit then
+  closest-found @ 
 ;
+
+forth definitions
 
 : .word-off ( address -- )
   addr>woff
