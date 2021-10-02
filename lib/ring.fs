@@ -41,9 +41,9 @@ __data
   hint field: limit
   hint field: start
   hint field: num
-  \ hint field: offset
+  aligned
 #if-flag multi
-  task %var field: waiter
+  task %queue field: tasks
 #endif
 __seal
 
@@ -53,12 +53,13 @@ __seal
 : setup ( ring -- )
 \ initialize our variables
   dup __ setup
+
   __ elems@ over __ limit !  \ XXX depends on no overriding
   \ __ \offset @ size + offset !
   0 over __ start !
   0 over __ num !
 #if-flag multi
-  0 over __ waiter !
+  dup tasks >setup
 #endif
   drop
 ;
@@ -94,28 +95,14 @@ __seal
 ;
 
 #if-flag multi
-: (wait) ( ring -- flag )
-\ if there's already a waiting task, hang around until the slot is free.
-\ Ideally this should not happen.
-  __ waiter @ .. if task =check else task =sched then
-;
-
 : wait ( ring -- )
-  dup __ waiter @ .. abort" Dup wait"
-  task this .. swap __ waiter !
-  task stop
-  \ the waker clears the var
+\ wait for wake-up
+  __ tasks wait
 ;
 
 : wake (  ring -- )
-  dup __ waiter @ ..
-  ?dup if
-    ( ring task )
-    0 rot __ waiter !
-    task %cls continue
-  else
-    drop
-  then
+\ wake up one waiting task
+  __ tasks one
 ;
 #endif
 
