@@ -2,7 +2,6 @@
 \ WARNING must be called with "forth only definitions" in effect
 
 
-compiletoram?
 compiletoflash
 
 #if token defined find drop 0=
@@ -210,17 +209,11 @@ forth definitions
   drop
   [ ' forth call, ' .. call, ]
 ;
+
 forth definitions
 : init init %init! ;
 \voc ignore
 
-#endif
-
-\ clean up
-#if ( compiletoram-flag  -- )
-compiletoram
-#else
-compiletoflash
 #endif
 
 #require \halt sys/basic.fs
