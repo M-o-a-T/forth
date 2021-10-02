@@ -28,8 +28,8 @@ var> also
 #set-flag ring-name ring
 #else
 #set-flag ring-name ring-{ring-var}
-#read-flag ring-esize {ring-var} u/i
 #endif
+#read-flag ring-esize {ring-var} u/i
 
 #if defined {ring-name}
 \ already known
@@ -74,6 +74,7 @@ __seal
 #else
 #if-flag ring-esize=8
   3 lshift
+#else
 #send {ring-esize} *
 #endif
 #endif
@@ -187,7 +188,6 @@ __seal
 #endif
 ;
 
-;class
 
 #if-flag ring-var=cint
 
@@ -199,7 +199,11 @@ __seal
   loop
   2drop
 ;
+#endif
 
+;class
+
+#if-flag ring-var=cint
 ring class: rc32
 32 constant elems
 ;class
