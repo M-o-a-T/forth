@@ -37,7 +37,15 @@ task %cls definitions also
 
 : ? ( task -- )
   dup ." Task:$" dup hex. .word-off \ should be declared somewhere
-  dup __ state @ ." State:" .state space
+  dup __ state @ ." State:" .state
+  dup __ newstate @ ?dup if
+    over __ state @
+    over <> if
+      ." >" .state
+    else 
+      drop
+    then
+  then space
   dup __ pstack @ if
     dup __ pstack @  over __ task-ps find-beef ." S:" .
   then
@@ -46,8 +54,10 @@ task %cls definitions also
   then
   space
   dup __ state @ =idle > if
-    dup __ link ?
-  then cr
+    dup __ link ?  \ emits CR
+  else
+    cr
+  then
   \ dup __ abortptr @ ?dup if ." Abort:" hex. then
   dup __ abortcode @ ?dup if ." Sig:" hex. then
   dup __ checkfn @ ?dup if ." Check:" .word  dup __ checkarg @ hex.  then
