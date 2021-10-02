@@ -428,8 +428,10 @@ task also
 : add ( task q -- )
 \ insert some task.
   over %cls checkarg !
-  =wait %cls >state
+  ( task )
+  =wait swap %cls >state
 ;
+
 
 %queue ignore
 
