@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eu
 
-F="ram forget debug"
+F="ram forget debug multi"
 
 trap 'echo "ERROR $FLG"; exit 1' ERR
 

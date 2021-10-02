@@ -17,7 +17,9 @@ task: time&
 : \mt task !single ;
 
 time& start
+#if-flag debug
 tasks
+#endif
 
 #if defined irq-systick
 
