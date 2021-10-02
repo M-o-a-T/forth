@@ -4,7 +4,7 @@
 \ --------------------------------------------------
 
 0 variable seconds
-task: time&
+:task: time&
   begin
     1 seconds +!
     seconds @ . cr

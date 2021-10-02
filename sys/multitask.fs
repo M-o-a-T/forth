@@ -706,8 +706,8 @@ task \int definitions
 ;
 
 task %cls definitions
-: task: ( "name" code… ; -- )
-\ Declare a named task:
+: :task: ( "name" code… ; -- )
+\ Declare a named task
   get-current \twid !                     \ save our current voc
   [ task \int (' sub literal, ] set-current \ voc for one-off subclasses
   token
@@ -724,7 +724,7 @@ task %cls definitions
 ;
 
 forth definitions
-: task: task %cls task: ;
+: :task: task %cls :task: ;
 
 
 \ Override standard words so they work with tasks
@@ -860,7 +860,7 @@ task \int definitions also
 
 task \int definitions
 
-looped task: idle
+looped :task: idle
   begin
     run-irqs
     busy? if yield then

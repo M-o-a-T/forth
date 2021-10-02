@@ -11,10 +11,10 @@ Task declaration
 ++++++++++++++++
 
 Declaring a (simple) task is very easy.
-Just write ``task:`` instead of ``:``::
+Just write ``:task:`` instead of ``:``::
 
     0 variable: runaway
-    task: foo
+    :task: foo
       begin
         runaway @ 1+ runaway !
         pause
@@ -118,7 +118,7 @@ handled the signal or error.
 Task creation
 +++++++++++++
 
-``task:`` does basically this, behind the scenes::
+``:task:`` does basically this, behind the scenes::
 
     task \int sub definitions
     task also
@@ -132,7 +132,7 @@ Task creation
 
 You're free to do the same thing yourself, e.g. when you need per-task variables.
 
-You can also prefix ``task:`` with your own class, subclassing the ``task
+You can also prefix ``:task:`` with your own class, subclassing the ``task
 subtask`` class. This is relevant if you need a task with larger stacks::
 
     subtask class: big-task
@@ -140,7 +140,7 @@ subtask`` class. This is relevant if you need a task with larger stacks::
     50 constant rsize
     ;class
 
-    big-task task: 
+    big-task :task: 
       begin
         do-something-very-involved
       again
@@ -309,7 +309,7 @@ idle task and will re-enable your task when it is ready.
 A simple example::
 
     : xkey? drop key? ;
-    task: echo
+    :task: echo
       begin
         0 task wait: xkey?
         key emit

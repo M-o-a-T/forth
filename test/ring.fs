@@ -84,14 +84,14 @@ ring-h3 object: rh3
 \ now let's do the multi-ring thing
 0 variable done
 
-task: t1
+:task: t1
   s" Hello Ring!" rr s!
   $0A rr ! \ cr
   0 rr !
   1 done !
 ;
 
-task: t2
+:task: t2
   begin
     rr @
     ?dup while emit repeat
