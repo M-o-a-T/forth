@@ -352,10 +352,6 @@ task also
         0 over __ checkarg !
 #endif
         endof
-      _err of
-        -1 over __ abortcode !
-        nip =sched swap
-        endof
     endcase
 ;
 
