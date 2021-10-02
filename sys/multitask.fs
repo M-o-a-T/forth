@@ -431,12 +431,6 @@ task also
   =wait %cls >state
 ;
 
-: wait ( q -- )
-\ insert this task.
-  this .. swap __ add
-;
-
-
 %queue ignore
 
 \ ********************
@@ -497,6 +491,15 @@ task definitions
   0 this abortcode !
 ;
 
+%queue definitions also
+
+: wait ( q -- )
+\ insert this task.
+  this .. swap __ add
+  yield
+;
+
+%queue ignore
 
 %cls definitions
 
