@@ -160,7 +160,7 @@ to the ``test`` subdirectory that does the testing, judiciously use ``#ok``
 tests, trigger a couple of errors and ``catch`` the result to verify that
 the system is left in a reasonable state, and all that.
 
-Your code must be able to run both from RAM and from Flash. Use ``init:``
+Your code must be able to run both from RAM and from Flash. Use ``:init``
 markers (in general code) and ``setup`` words (in objects) to set up your
 data; don't override ``init``.
 

@@ -39,8 +39,9 @@ Starting a task is easy::
 
 Alternately::
 
-    init:
-      foo start ;
+    :init
+      foo start
+    ;
 
 will also remember to start the task after a reset, if you're compiling
 into Flash.
@@ -314,7 +315,7 @@ A simple example::
         key emit
       again
 
-    init:
+    :init
       echo start
     ;
 

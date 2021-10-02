@@ -121,7 +121,7 @@ forth definitions
 #if-flag plain
 ' abort-quit hook-quit !
 #else
-init:
+:init
   ['] abort-quit hook-quit !
 ;
 

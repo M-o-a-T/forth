@@ -776,7 +776,7 @@ task definitions
   -56 throw
 ;
 
-init:
+:init
   task ['] quit hook-quit !
 ;
 
@@ -876,7 +876,7 @@ task definitions also
 \ This task checks whether anything else in the system is running, or wants
 \ to run. Otherwise it sleeps, to conserve (some) power.
 
-init:
+:init
   task ['] quit hook-quit !
   task \int idle start
   \ !multi

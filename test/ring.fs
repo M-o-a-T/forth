@@ -51,7 +51,7 @@ rr 20 dump
 #if-flag !ram
 #ok rr empty? not
 1 variable foo
-init:
+:init
   #2 foo ! ;
 \voc %init!
 #ok rr empty?

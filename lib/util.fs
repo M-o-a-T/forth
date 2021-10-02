@@ -150,17 +150,17 @@ forth definitions
 
 \voc also
 
-#if undefined init:
+#if undefined :init
 \voc definitions
-: (init:) ( -- )
+: (:init) ( -- )
   \voc last-lfa @
   lfa>xt execute
 ;
 
 forth definitions
-: init: ( code … -- )
+: :init ( code … -- )
 \ run this code, both immediately and after a reset
-  ['] (init:)
+  ['] (:init)
   post-def !
   s" %init" [with] :
 ;

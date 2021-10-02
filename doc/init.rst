@@ -26,7 +26,7 @@ same order when you restart a system from Flash as when you defined it
 originally.
 
 
-init:
+:init
 =====
 
 Introduce code that will be called to set something up. It is a synonym to
