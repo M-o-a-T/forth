@@ -446,8 +446,7 @@ task definitions
 
 \ At this point we might be tempted to check whether only one task is
 \ running, and return early. However, that is folly because it can only
-\ happen if we're the idle task, which is perfectly capable of doing that
-\ test itself.
+\ happen if we're the idle task, which does this test itself.
 
 #if-flag debug
   eint? not abort" yield while DINT"
@@ -463,7 +462,7 @@ task definitions
     ( oldtask newtask )
     \ ." T:" dup .word   \ debug only, not when multitasking
     dup >this swap ( newtask oldtask )
-    \ "this" now contains the new task, so can safely change the old
+    \ "this" now contains the new task, so we can safely change the old
     dup %cls newstate @ ( newtask oldtask state )
     over 0 swap %cls newstate ! \ clear new-state flag
     swap %cls >state
@@ -587,11 +586,9 @@ task \int also
   begin
     cr ." RUN: " dup dup hex. .word  cr this ?
     catch
-    ?dup if 
-      cr ." END:" hex. dup .word
-    else
-      cr ." END:" dup .word cr
-    then
+    cr ." END:"
+    ?dup if hex. then
+    this .. .word cr
     0 this abortcode !
     =dead this newstate !
     yield
