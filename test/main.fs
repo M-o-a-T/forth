@@ -88,8 +88,14 @@ test-ram
 #endif
 \ if-flag multi
 
-
 test-drop
+
+#if defined syscall
+
+#include lib/syscall.fs
+#include test/syscall.fs
+
+#endif
 
 \ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=
