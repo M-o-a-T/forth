@@ -42,6 +42,24 @@ __seal
 
 ;class
 
+class: dint
+
+__data
+  cell+ cell+
+__seal
+
+: @ ( a -- n ) 2@ inline ;
+: ! ( n a -- ) 2! inline ;
+: ? ( a -- )  2@ ud. ;
+
+;class
+
+dint class: fixed
+\ same as double, but fixcomma: print sensibly
+: ? ( a -- )  2@ 3 f.n ;
+
+;class
+
 
 \ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=
