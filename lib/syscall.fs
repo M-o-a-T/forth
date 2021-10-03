@@ -335,7 +335,7 @@ __seal
 
 : setup ( addr -- )
 #if-flag multi
-  dup __ waiters ?? >setup
+  dup __ waiters >setup
 #endif
   O_ CLOEXEC 357 call1 ?err
   swap __ fd !
