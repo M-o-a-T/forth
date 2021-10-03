@@ -30,6 +30,44 @@ dbuf 6 0 fill
 
 #if-flag multi
 
+rfd nonblock
+: ?rchk
+  rfd dbuf 6 call read
+  ;
+' ?rchk catch
+#ok err EAGAIN =
+
+0 variable okr
+:task: rdr
+  ." RDR A" cr
+  rfd ep wait-read
+  ." RDR B" cr
+  rfd dbuf 6 call read 4 <> abort" RDR"
+  ." RDR C" cr
+  1 okr !
+  ." RDR D" cr
+;
+
+rdr start
+:task: wrt
+  task yield
+  task yield
+  okr @ abort" early"
+  wfd ep wait-write
+  wfd bla call write 4 <> abort" WRT"
+  task yield
+  okr @ 1 <> abort" RES"
+;
+wrt start
+: pol
+  10 0 do
+    task yield
+	0, ep poll .
+	okr @ if unloop exit then
+  loop
+;
+pol
+
 #else
 
 rfd ep wait-read
