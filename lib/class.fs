@@ -118,9 +118,14 @@ root-cls definitions
 
 root-cls definitions
 : >setup
-  voc-context @ literal,
-  postpone (>setup)
-  immediate ;
+\ Call an object's SETUP. Works both interactively and compiled.
+  voc-context @
+  forth state @ if \ compile
+    literal, postpone (>setup)
+  else \ interactive
+    (>setup)
+  then
+immediate ;
 
 \ Create an instance of a class.
 : object: ( "name" -- )
