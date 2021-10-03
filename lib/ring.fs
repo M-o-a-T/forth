@@ -36,7 +36,12 @@ var> also
 #end
 #endif
 
-#send sized class: {ring-name}
+
+#if undefined ring-base
+\voc definitions also
+
+sized class: ring-base
+
 __data
   hint field: limit
   hint field: start
@@ -54,13 +59,61 @@ __seal
 : setup ( ring -- )
 \ initialize our variables
   __ elems@ over __ limit !  \ XXX depends on no overriding
-  \ __ \offset @ size + offset !
 #if-flag multi
   dup q-empty >setup
   dup q-full >setup
 #endif
   drop
 ;
+
+\ Words defined after this point only work after calling SETUP
+\ ************************************************************
+
+: mask ( offset ring -- offset&bitmask )
+  __ limit @ over = if drop 0 then
+;
+
+#if-flag multi
+: wait-empty ( ring -- )
+\ wait for wake-up
+  __ q-empty wait
+;
+
+: wake-empty (  ring -- )
+\ wake up one waiting task
+  __ q-empty one
+;
+
+: wait-full ( ring -- )
+\ wait for wake-up
+  __ q-full wait
+;
+
+: wake-full (  ring -- )
+\ wake up one waiting task
+  __ q-full one
+;
+#endif
+
+: empty? ( ring -- bool )
+  __ num @ 0=
+;
+
+: full? ( ring -- bool )
+  dup __ num @ swap __ limit @ =
+;
+
+\ no SIZE, so not directly usable
+
+;class
+
+previous 
+forth definitions
+
+#endif
+\ ring-base
+
+#send \voc ring-base class: {ring-name}
 
 : *esize ( elem-offset -- byte-offset )
 #if-flag !ring-esize=1
@@ -97,44 +150,6 @@ __seal
 #endif
 
 \ ************************************************************
-\ Words defined after this point only work after calling SETUP
-\ ************************************************************
-
-: mask ( offset ring -- offset&bitmask )
-  __ limit @ over = if drop 0 then
-;
-
-#if-flag multi
-: wait-empty ( ring -- )
-\ wait for wake-up
-  __ q-empty wait
-;
-
-: wake-empty (  ring -- )
-\ wake up one waiting task
-  __ q-empty one
-;
-
-: wait-full ( ring -- )
-\ wait for wake-up
-  __ q-full wait
-;
-
-: wake-full (  ring -- )
-\ wake up one waiting task
-  __ q-full one
-;
-
-#endif
-
-: empty? ( ring -- bool )
-  __ num @ 0=
-;
-
-: full? ( ring -- bool )
-  dup __ num @ swap __ limit @ =
-;
-
 : ! ( item* ring -- )
 \ store to the ring buffer.
   >r
@@ -215,6 +230,8 @@ __seal
 
 #if-flag ring-var=cint
 
+\ TODO this should be (a) done with MOVE (b) extended to non-char
+
 : s! ( addr count ring -- )
 \ send a string to the ring
   -rot 0 do ( ring addr )
@@ -223,6 +240,8 @@ __seal
   loop
   2drop
 ;
+
+#endif
 
 : s@ ( ring -- start count )
 \ return an address plus the max #chars accessible
@@ -255,8 +274,6 @@ __seal
 #endif
   rdrop
 ;
-
-#endif
 
 ;class
 
