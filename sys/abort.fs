@@ -48,12 +48,15 @@ forth definitions
 #endif
 
 #require r>ctx sys/base.fs
+#if-flag debug
+#require ct lib/crash.fs
+#endif
 
 : throw ( throwcode -- )
 \ Returns directly to the closest CATCH.
 \ DO NOT call with a throwcode of zero.
 #if-flag debug
-  dup ." THR:" hex. cr cr
+  dup ." THR:" hex. cr ct cr
 #endif
   aborthandler @ ?dup if
     \ restore previous state to jump to
