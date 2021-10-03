@@ -561,9 +561,10 @@ task %cls class: subtask
 task also
 task \int also
 
-32 constant psize  \ minimum by ANS Forth standard
-48 constant rsize  \ ditto
+100 constant psize  \ this is a "safe" default
+100 constant rsize  \ feel free to reduce this *after* testing.
 : main@ s" \main" voc-lfa \voc lfa>xt ;
+
 
 \ Next: setting up the stack for starting a subtask.
 
@@ -571,7 +572,6 @@ task \int also
 \ portable. Thus we pop a continuation address instead, and rely on the
 \ fact that a word consisting solely of a call to R> won't push anything
 \ else onto the return stack.
-
 
 : (cont) r> ;
 
