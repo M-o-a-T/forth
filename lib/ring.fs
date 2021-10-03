@@ -85,6 +85,17 @@ __seal
   +
 ;
 
+#if-flag debug
+: ? ( ring -- )
+  cr
+  ." N:" dup __ limit ?
+  ." E:" 1 __ *esize .
+  ." S:" dup __ start ?
+  ." #:" dup __ num ?
+  ." Buf:" dup __ \offset @ swap + hex.
+;
+#endif
+
 \ ************************************************************
 \ Words defined after this point only work after calling SETUP
 \ ************************************************************
