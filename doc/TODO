@@ -1,4 +1,12 @@
-Timers. Actually, timer waitqueues.
+Documentation generation: Sphinx and whatnot
+
+terminal input and output buffers
+
+more tests for STM32
+
+add interrupt-based terminal buffers to STM32
+
+Timers. More accurately, timer waitqueues.
 
 Minifloats.
 
