@@ -99,10 +99,7 @@ root-cls definitions
 
 : setup  ( object -- )
 \ Initialize class storage to zero.
-  __ u/i@ 0 ?do
-    0 over c! 1+
-  loop
-  drop
+  __ u/i@ 0 fill
 ;
 
 : teardown  ( object -- )
@@ -194,9 +191,7 @@ __seal
   __ u/i@
   2dup swap __ \offset !
   \ zero the variable-size area
-  + __ size@ 0 ?do
-    0 over c! 1+
-  loop
+  + size@ 0 fill
 ;
 
 
