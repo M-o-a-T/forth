@@ -174,21 +174,25 @@ __seal
   rdrop
 ;
 
-: @ ( ring -- item* )
-  >r
+: w-e ( ring -- )
 #if-flag multi
   begin
-    r@ __ empty?
+    dup __ empty?
   while
     eint? if
       dup __ wait-empty
     else
-      r> abort" Ring empty"
+      abort" Ring empty"
     then
-  repeat
+  repeat drop
 #else
-  r@ __ empty? abort" Ring empty"
+  __ empty? abort" Ring empty"
 #endif
+;
+
+: @ ( ring -- item* )
+  >r
+  r@ w-e
 
   ( )
   r@ __ start @ __ *esize
@@ -211,7 +215,7 @@ __seal
 
 #if-flag ring-var=cint
 
-: s! ( addr count ring )
+: s! ( addr count ring -- )
 \ send a string to the ring
   -rot 0 do ( ring addr )
     2dup c@ swap __ !
@@ -219,6 +223,39 @@ __seal
   loop
   2drop
 ;
+
+: s@ ( ring -- start count )
+\ return an address plus the max #chars accessible
+  >r
+  r@ __ w-e
+  r@ __ start @ __ *esize
+  r@ __ \offset @ r@ + +
+  ( start )
+
+  r@ __ start @ r@ __ num @ +
+  r@ __ limit @
+  ( end lim )
+  <= if \ OK to get all
+    r@ __ num @
+  else
+    r@ __ limit @ r@ __ start @ -
+  then
+  rdrop
+;
+
+: skip ( len ring -- )
+\ drops the first N chars, after S@
+  >r
+  r@ __ num @ over - dup 0< abort" not enough chars"
+  ( len num- )
+  r@ __ num !
+  r@ __ start @ + r@ __ mask r@ __ start !
+#if-flag multi
+  r@ __ wake-empty
+#endif
+  rdrop
+;
+
 #endif
 
 ;class

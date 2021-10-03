@@ -38,6 +38,26 @@ rr 20 dump
 #ok rr empty?
 #ok rr full? not
 
+\ test whether data wrapping round the ring edge is handled correctly.
+rr >setup
+31 rr !
+32 rr !
+rr s@
+#ok 2 =
+#ok c@ 31 =
+2 rr skip
+33 rr !
+34 rr !
+rr s@
+#ok 1 =
+#ok c@ 33 =
+1 rr skip
+rr s@
+#ok 1 =
+#ok c@ 34 =
+1 rr skip
+
+
 1 rr !
 12 rr !
 23 rr !
