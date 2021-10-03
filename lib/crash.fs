@@ -68,9 +68,20 @@ forth definitions
 
 : ct ( -- )
   cr
-  rdepth 0 do
-    i hex. i 2+ rpick dup hex. .word cr
-  loop
+  0
+  begin ( i )
+    dup 0 <# # # #> type space
+    dup rpick dup hex. dup .word-off
+    ( i addr )
+    addr>woff ?dup if
+      nip lfa>nfa
+      ( i name )
+      dup count s" quit" compare if cr 2drop exit then
+      count s" (go)" compare if cr drop exit then
+    then ( i )
+    cr 1+
+    dup 99 > if drop exit then
+  again
 ;
 
 #if defined unhandled
