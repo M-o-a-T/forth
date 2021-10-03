@@ -43,7 +43,8 @@ __data
   hint field: num
   aligned
 #if-flag multi
-  task %queue field: tasks
+  task %queue field: q-empty \ readers
+  task %queue field: q-full  \ writers
 #endif
 __seal
 
@@ -55,7 +56,8 @@ __seal
   __ elems@ over __ limit !  \ XXX depends on no overriding
   \ __ \offset @ size + offset !
 #if-flag multi
-  dup tasks >setup
+  dup q-empty >setup
+  dup q-full >setup
 #endif
   drop
 ;
@@ -92,15 +94,26 @@ __seal
 ;
 
 #if-flag multi
-: wait ( ring -- )
+: wait-empty ( ring -- )
 \ wait for wake-up
-  __ tasks wait
+  __ q-empty wait
 ;
 
-: wake (  ring -- )
+: wake-empty (  ring -- )
 \ wake up one waiting task
-  __ tasks one
+  __ q-empty one
 ;
+
+: wait-full ( ring -- )
+\ wait for wake-up
+  __ q-full wait
+;
+
+: wake-full (  ring -- )
+\ wake up one waiting task
+  __ q-full one
+;
+
 #endif
 
 : empty? ( ring -- bool )
@@ -120,7 +133,7 @@ __seal
     r@ __ full?
   while 
     eint? if
-      r@ __ wait
+      r@ __ wait-full
     else
       r> abort" Ring full"
     then
@@ -143,7 +156,7 @@ __seal
 #if-flag multi
   \ 1st char? wake up
   0= if
-    r@ __ wake
+    r@ __ wake-empty
   then
 #endif
 
@@ -157,7 +170,7 @@ __seal
     r@ __ empty?
   while
     eint? if
-      r@ __ wait
+      dup __ wait-empty
     else
       r> abort" Ring empty"
     then
@@ -178,7 +191,7 @@ __seal
   \ We only need that if the ring was full,
   \ but testing for that is more expensive than
   \ simply checking whether someone's waiting
-  r> __ wake
+  r> __ wake-full
 #else
   rdrop
 #endif
