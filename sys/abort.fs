@@ -56,7 +56,7 @@ forth definitions
 \ Returns directly to the closest CATCH.
 \ DO NOT call with a throwcode of zero.
 #if-flag debug
-  dup ." THR:" hex. ct
+  dup ." THR:" . ct
 #endif
   aborthandler @ ?dup if
     \ restore previous state to jump to
