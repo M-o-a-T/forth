@@ -5,6 +5,8 @@
 
 forth definitions only
 
+\voc also
+
 #require .idd debug/voc.fs
 
 \voc definitions also
