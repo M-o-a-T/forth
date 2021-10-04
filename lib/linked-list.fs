@@ -17,6 +17,9 @@ __seal
 
 : insert ( new this -- )
 \ add new item before me
+#if-flag debug
+  over __ prev @ poisoned <> if ." item is not free" -22 abort then
+#endif
   tuck __ prev @ ( this new prev )
   2dup __ next ! over __ prev ! ( this new )
   2dup __ next ! swap __ prev ! ( new )
@@ -59,6 +62,13 @@ forth definitions
 
 forth definitions
 \voc \d-list class: d-list-item
+
+#if-flag debug
+: setup ( ptr -- )
+  poisoned over __ prev !
+  poisoned swap __ next !
+;
+#endif
 
 : remove ( this -- )
 \ remove from the list, zero the pointers.
