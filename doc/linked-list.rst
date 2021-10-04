@@ -56,6 +56,13 @@ necessary. If you want to leave the loop prematurely, use THROW / CATCH.
 ``(run)`` leaves the stack alone, so other elements are accessible if
 required.
 
+The file ``debug/linked-list.fs`` adds a ``?`` word to the linked list's
+dictionary which can be used to display links to the previous and next
+entries, and the names of the objects these point to. You should not
+apply it to list items that are not reachable from a list head, as that may
+show spurious data and/or cause a crash.
+
+
 Classes
 =======
 
