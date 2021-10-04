@@ -620,12 +620,16 @@ task \int also
 #if-flag debug
 : (go) ( xt -- does-not-return )
   begin
-    cr ." RUN: " dup dup hex. .word  cr this ?
+    dup
+    cr ." RUN: " dup hex. dup .word  cr this ?
     catch
-    cr ." END:"
-    ?dup if hex. then
-    this .. .word cr
     0 this abortcode !
+    cr ." END:"
+    ?dup if dup . else -1 then
+    this .. .word cr
+    dup \voc abortcode !
+    .abort
+    this abortcode !
     =dead this newstate !
     yield
   again
@@ -634,9 +638,12 @@ task \int also
 : (go) ( xt -- does-not-return )
   begin
     dup catch
+    0 this abortcode !
+    dup 0= if drop -1 then
+    dup \voc abortcode !
+    .abort
     this abortcode !
     =dead this newstate !
-    .abort
     yield
   again
 ;
