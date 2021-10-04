@@ -29,4 +29,3 @@ in ``test/main.fs`` with every possible combination of these flags:
 
   Multitasking code will be included.
 
-  TODO.
