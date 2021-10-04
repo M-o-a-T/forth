@@ -701,7 +701,8 @@ task \int definitions
   get-current  \twid @ set-current ( subclass )
   dup \voc (dovoc  \ set temp context to the subclass
   \voc lfa>nfa
-  count [with] object: \ and make our object
+  count [with] object: \ make our object
+  postpone previous \ take off the task vocabulary
 \ \ object setup is in its "setup"
 ;
 
