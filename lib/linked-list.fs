@@ -30,6 +30,7 @@ forth definitions
 \voc \d-list class: d-list-head
 
 : setup ( ptr -- )
+\ list heads are linked to themselves
   dup dup __ prev !
   dup     __ next !
 ;
@@ -71,7 +72,7 @@ forth definitions
 #endif
 
 : remove ( this -- )
-\ remove from the list, zero the pointers.
+\ remove from the list, kill the pointers if debugging.
 \ You can't remove a list head, so this is here.
   dup __ prev @ over __ next @ ( this prev next )
   2dup __ prev ! swap __ next ! ( this )
