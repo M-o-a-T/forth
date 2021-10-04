@@ -29,6 +29,7 @@ compiletoflash
 #endif
 
 #endif
+\ debug
 
 compiletoflash
 #include sys/abort.fs
