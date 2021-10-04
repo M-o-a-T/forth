@@ -156,7 +156,7 @@ previous definitions
   ?err drop
 ;
 
-: call7 syscall cr ;
+: call7 syscall ;
 : call6 0 swap call7 ;
 : call5 0 swap call6 ;
 : call4 0 swap call5 ;
