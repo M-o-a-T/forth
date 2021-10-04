@@ -1,5 +1,9 @@
 #if defined syscall
 
+#if defined sys
+#end
+#endif
+
 forth only definitions
 
 voc: sys
@@ -440,7 +444,14 @@ __seal
 
 ;class
 
-forth only definitions
+
+forth definitions
+
+#if-flag multi
+epcb object: poll
+#endif
+
+forth only
 
 #endif
 \ syscall
