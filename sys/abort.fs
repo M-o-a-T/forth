@@ -40,6 +40,14 @@ compiletoflash
 0 variable abortmsg
 0 variable abortcode
 
+#require r>ctx sys/base.fs
+#if-flag debug
+#require ct lib/crash.fs
+#if-flag multi
+#include debug/multitask.fs
+#endif
+#endif
+
 #if token forth find drop
 forth only definitions
 #if undefined aborthandler
@@ -47,16 +55,15 @@ forth only definitions
 #endif
 #endif
 
-#require r>ctx sys/base.fs
-#if-flag debug
-#require ct lib/crash.fs
-#endif
-
 : throw ( throwcode -- )
 \ Returns directly to the closest CATCH.
 \ DO NOT call with a throwcode of zero.
 #if-flag debug
-  dup ." THR:" . ct
+  dup ." THR:" . 
+#if-flag multi
+  task this ? cr
+#endif
+  ct
 #endif
   aborthandler @ ?dup if
     \ restore previous state to jump to
