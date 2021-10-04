@@ -180,7 +180,6 @@ forth definitions
     \ dup .idd space
     dup vocnext
   ?dup 0= until
-  cr
   ( 0 voc super … |R: obj )
   begin
     ?dup
