@@ -268,7 +268,7 @@ forth definitions
   r@ __ num !
   r@ __ start @ + r@ __ mask r@ __ start !
 #if-flag multi
-  r@ __ wake-empty
+  r@ __ q-full all
 #endif
   rdrop
 ;
