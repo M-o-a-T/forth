@@ -74,8 +74,8 @@ Adds a new item to this list.
 
 The item is inserted at the end, i.e. before the head.
 
-run: ( "name" X* head -- Y* )
------------------------------
+each: ( "name" X* head -- Y* )
+------------------------------
 
 Execute NAME with each list member's address, in turn, on the stack.
 
@@ -86,10 +86,14 @@ NAME may remove the current item. It can freely add items to the list.
 It must not remove any other item, and no other code may do so while ``run:``
 is active.
 
-(run) ( xt head -- )
---------------------
+NAME return a value on the stack. If that value is not zero, ``each:``
+returns that value; otherwise it continues to the next item and returns
+zero once all items have been processed.
 
-Like ``run:`` but expects an explicit execute token on the stack.
+each ( xt head -- )
+-------------------
+
+Like ``each:`` but expects an explicit execute token on the stack.
 
 d-list-item
 +++++++++++
