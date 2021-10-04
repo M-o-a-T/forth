@@ -2,6 +2,11 @@
 
 \voc also definitions
 
+#if defined .idd
+forth only definitions
+#end
+#endif
+
 : .wtag ( wtag -- ) ." wtag: " hex. ;
 
 : .ctag ( ctag -- ) ." ctag: " hex. ;
