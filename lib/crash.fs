@@ -49,12 +49,15 @@ forth definitions only
 forth definitions
 
 : .word-off ( address -- )
-  addr>woff
-  ?dup if ( off lfa )
+  dup addr>woff
+  ?dup if ( addr off lfa )
     \voc .idd
-    ?dup if ( off )
+    ?dup if ( addr off )
       [char] + emit base @  16 base ! swap .   base !
-    then
+    then ( addr )
+    drop
+  else
+    ." ?:" hex.
   then
 ;
 
