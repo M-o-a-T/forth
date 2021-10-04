@@ -211,6 +211,39 @@ The words ``__data`` and ``__seal`` must frame your field definition, to
 ensure that the required buffer size is calculated and stored in your object.
 You don't need them if your subclass doesn't contain any data of its own.
 
+Debugging
++++++++++
+
+It's a food idea to add a ``?`` debug word to your classes. This word
+should print some detail about the object in question. If it prints more
+than one line, it should not start or end with a line feed.
+
+.all' ( "name" -- )
+-------------------
+
+Find the named class. Scan the dictionary. For each object of that class
+(or one of its subclasses), if the word ``?`` is defined for it, it is
+called; its output is followed by the word's name (preceded by the
+vocabulary it's defined in, if any).
+
+.all ( lfa -- )
+---------------
+
+As above, but use the base class you found with ``('``.
+
+Thus::
+
+	\cls also
+	.all' root-cls
+
+or::
+
+	\cls (' root-cls .all
+
+will print a list of all your classes.
+
+These words are located in ``debug/class.fs``.
+
 Field alignment
 +++++++++++++++
 

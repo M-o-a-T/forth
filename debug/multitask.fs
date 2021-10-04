@@ -54,15 +54,13 @@ task %cls definitions also
   then
   space
   dup __ state @ =idle > if
-    dup __ link ?  \ emits CR
-  else
-    cr
+    dup __ link ?
   then
   \ dup __ abortptr @ ?dup if ." Abort:" hex. then
   dup __ abortcode @ ?dup if ." Sig:" hex. then
   dup __ checkfn @ ?dup if ." Check:" .word  dup __ checkarg @ hex.  then
   \ 'checkarg' may also be a queue
-  cr drop
+  drop
 ;
 
 set-current

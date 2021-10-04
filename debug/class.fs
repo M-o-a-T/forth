@@ -10,37 +10,53 @@ forth only definitions
 \voc also
 \cls also
 
-class-root definitions
+\voc definitions
 
-\ Create a class that inherits from / extends the actual class context.
-\ This is just a subvocabulary.
-
-\ When we declare "class: foo" followed by "class: bar", we want them to be
-\ (a) siblings and (b) declared in the same vocabulary.
-\ If you want subclasses, use "foo class: bar".
-
-: ~class: ( "name" -- )
-  _sop_ @ dup @ swap context = if ( voc )
-    dup (ign
-    current @ over = if
-      dup lfa>wtag tag>wid current !
-    then ( voc )
+: is-sub? ( wid cwid -- flag )
+  begin
+    2dup = if
+      2drop 1 exit
+    then
     vocnext
-  else
-    ..
-  then
-  ~voc-extend
+  dup 0= until
+  2drop 0
 ;
-
 
 forth definitions
 
-\ Create a class that only inherits from / extends class-root.
-: ~class: ( "name" -- )
-  [ ' class-root call, ] ~voc:
+: .all ( lfa -- )
+\ list all objects with this class
+  >r
+  dictionarystart begin
+    ( test )
+    dup obj-lfa>?cwid ?dup if
+      ( test cwid )
+      r@ over is-sub? if
+        dup s" ?" rot ??-vocs-no-root
+        ( test cwid lfa-? )
+        ?dup if
+          cr
+          2 pick .idd ." :: " swap .idd cr
+          over lfa>xt execute ( test lfa-? obj )
+          swap lfa>xt execute
+          cr
+        else
+          drop
+        then
+      else
+        drop
+      then
+    then
+  dictionarynext until
+  drop rdrop
 ;
 
-only
+
+: .all' ( "name" -- list all objects of this class )
+  (' .all
+;
+
+forth only
 
 \ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=

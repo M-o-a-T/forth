@@ -196,7 +196,7 @@ forth definitions
   rdrop
 ;
 
-: lfa>?cwid ( lfa -- cwid|0 )
+: obj-lfa>?cwid ( lfa -- cwid|0 )
 \ check whether this word
 \ - is not in the Mecrisp core
 \ - is a buffer (word flag 0x100)
@@ -225,7 +225,7 @@ forth definitions
       dup lfa>xt execute
     else  \ check whether the word is in a voc but not itself one
       ( addr )
-      dup lfa>?cwid ( lfa cwid|0 )
+      dup obj-lfa>?cwid ( lfa cwid|0 )
       ?dup if
         over lfa>xt execute
         !setup

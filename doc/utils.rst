@@ -40,6 +40,15 @@ voc-lfa  ( str len -- )
 Usse this if you need the LFA of a word, instead of immediately executing
 it.
 
+obj-lfa>?cwid  ( lfa -- cwid|0 )
+================================
+
+Given an LFA of an object, return its context WID (i.e. its class).
+
+Any other LFA, or a naked buffer, yields zero.
+
+Split off because both system initialization and object debugging need it.
+
 haligned ( c-addr -- h-addr )
 =============================
 
