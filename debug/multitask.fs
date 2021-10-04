@@ -5,10 +5,13 @@
 #include debug/linked-list.fs
 #endif
 
+#if task %cls undefined ?
+
 #include debug/linked-list.fs
 get-current
 
 task %cls definitions also
+task also
 
 : find-beef ( max stack-end -- n )
   dup @ poisoned <> if 2drop -4 exit then
@@ -66,8 +69,11 @@ task %cls definitions also
 ;
 
 set-current
+#endif
 
 forth definitions
+
+#if defined check-tasks
 
 : nop0 0 ;
 : tasks ( -- ) \ Show tasks currently in round-robin list
@@ -90,5 +96,6 @@ forth definitions
     ( 0 one-fewer-tasks… )
   repeat
 ;
+#endif
 
 #ok depth 0=
