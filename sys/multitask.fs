@@ -505,6 +505,15 @@ task definitions
 
   \ check new task for pending abort
   this abortcode @ ?dup if throw then
+#if-flag debug
+  \ ." >TASK:" this .. .word depth . rdepth . cr
+  this pstack @ ?dup if  depth  5 + < if
+    ." >TASK:" this .. .word
+    ." Param stack tight" -3 abort then then
+  this rstack @ ?dup if rdepth 10 + < if
+    ." >TASK:" this .. .word
+    ." Return stack tight" -5 abort then then
+#endif
   \ The abort handler is responsible for clearing this, if warranted
   \ otherwise the abort will be re-thrown next time
 
