@@ -77,7 +77,8 @@ forth definitions
       nip lfa>nfa
       ( i name )
       dup count s" quit" compare if cr 2drop exit then
-      count s" (go)" compare if cr drop exit then
+      dup count s" (go)" compare if cr drop exit then
+      count s" (task)" compare if cr drop exit then
     then ( i )
     cr 1+
     dup 99 > if drop exit then
