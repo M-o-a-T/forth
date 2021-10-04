@@ -168,6 +168,8 @@ forth definitions
 
 #if undefined %init!
 
+#include debug/voc.fs
+
 \ #require .idd lib/crash.fs
 \voc definitions also
 
@@ -194,21 +196,20 @@ forth definitions
   rdrop
 ;
 
-: ?setup ( lfa -- )
-\ check if this word
-\ - is a buffer (flag 0x100)
+: lfa>?cwid ( lfa -- cwid|0 )
+\ check whether this word
+\ - is not in the Mecrisp core
+\ - is a buffer (word flag 0x100)
 \ - sets a context
-\ - the context in question contains SETUP
-
-  dup ['] forth-wl <= if drop exit then
-  dup lfa>flags h@ $100 and 0= if drop exit then
-  dup lfa>wtag 1 and 0= if drop exit then
-  dup lfa>ctag dup if
-    tag>wid swap lfa>xt execute
-    !setup
-  else
-    drop
+\ If so, return that cwid.
+  dup ['] forth-wl > if
+    dup lfa>flags h@ $100 and if
+      dup lfa>wtag 1 and if
+        lfa>ctag tag>wid exit
+      then
+    then
   then
+  drop 0
 ;
 
 : %init! ( -- )
@@ -217,7 +218,6 @@ forth definitions
 \ ignore RAM here, this is called during init
 
   dictionarystart begin ( addr )
-    \ skip all core words
     dup lfa>nfa count s" %init" compare if
       ( addr )
       \ run it in its voc context
@@ -225,7 +225,11 @@ forth definitions
       dup lfa>xt execute
     else  \ check whether the word is in a voc but not itself one
       ( addr )
-      dup ?setup
+      dup lfa>?cwid ( lfa cwid|0 )
+      ?dup if
+        over lfa>xt execute
+        !setup
+      then
     then
   ( addr )
   dictionarynext until
