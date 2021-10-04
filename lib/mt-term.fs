@@ -49,7 +49,7 @@ task %queue object: outq
 
 0 variable npr
 
-task looped :task: outsend
+looped :task: outsend
   begin
     begin
       outbuf empty?
@@ -199,11 +199,11 @@ looped :task: inrecv
 : emit-init
   ['] qemit? hook-emit? !
   ['] qemit hook-emit !
+  ['] qkey? hook-key? !
+  ['] qkey hook-key !
   task !multi
   inrecv start
   yield
-  ['] qkey? hook-key? !
-  ['] qkey hook-key !
 ;
 : emit-exit
   ['] oemit? hook-emit? !
