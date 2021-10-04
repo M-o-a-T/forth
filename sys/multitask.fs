@@ -35,6 +35,9 @@ forth definitions only  decimal
 #echo duh
 #require class: lib/class.fs
 #require d-list-item lib/linked-list.fs
+#if-flag debug
+#require .word lib/crash.fs
+#endif
 
 voc: task
 voc: \int
@@ -854,11 +857,17 @@ task definitions
 ;
 
 
+forth definitions only
+#if undefined time
+#include lib/timeout.fs
+#endif
 
 \ *****************
 \     idle task
 \ *****************
 
+forth only
+task also
 task \int definitions also
 
 : i-check ( task -- )
@@ -887,7 +896,6 @@ task \int definitions also
 : run-irqs ( -- )
 \ walks through the check- and irq-task list
   this ..  \ for busy?
-
   \ walk the check list
   check-tasks each: i-check drop ( n )
   \ "busy" checkers or more work present? exit
@@ -899,7 +907,13 @@ task \int definitions also
   busy? if eint drop exit then
   drop \ don't need taskptr any more
   check-tasks empty? not if eint exit then
+#[if] defined syscall
+  \ check timeouts and epoll
+  time poll
+#else
+  \ the timer code will have arranged an interrupt
   \halt
+#endif
   eint
 ;
 

@@ -34,6 +34,12 @@ test-ram
 #include test/class.fs
 #endif
 
+test-ram
+#if undefined .all
+#include debug/class.fs
+#endif
+\cls (' root-cls .all
+
 test-drop
 
 compiletoflash
