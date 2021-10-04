@@ -212,7 +212,7 @@ looped :task: inrecv
   ['] okey hook-key !
 ;
 
-#if-flag syscall
+#if defined syscall
 \ TODO doesn't yet work on real hardware
 :init emit-init ;
 #endif
