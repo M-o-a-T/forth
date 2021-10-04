@@ -237,7 +237,7 @@ task definitions also
 
 d-list-head class: %queue
 : empty?  ( q -- flag )
-  dup __ next @ .. over =
+  dup __ next @ .. swap =
 ;
 
 
