@@ -136,7 +136,12 @@ r9 object: rd9
   r9y @ 2 and if task yield then
   rd9 @
   \ ." R " dup . i . rd9 ? rd9 .. 30 dump
-  i <> if ." ERROR AT " i . rd9 ? cr rd9 .. 30 dump unloop 1 r9c ! exit then
+  i <> if
+    ." ERROR AT " i .
+#if-flag debug
+    rd9 ?
+#endif
+    cr rd9 .. 30 dump unloop 1 r9c ! exit then
   loop
   2 r9c !
 ;
