@@ -36,22 +36,19 @@ one start  two start  three start
   begin yield one state @ =dead = until 
   begin yield two state @ =dead = until 
   begin yield three state @ =dead = until 
+  300 0 do yield loop
 ;
 
 : slp
-#if-flag !debug
-  emit-init
-#endif
   ['] ?slp catch
-#if-flag !debug
-  emit-exit
-#endif
 ;
 
 #if-flag debug
 tasks
 #endif
+#delay 0.5
 slp
+#delay 0.2
 #if-flag debug
 tasks
 #endif
