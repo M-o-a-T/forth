@@ -84,7 +84,7 @@ forth definitions
   cr begin
     ( 0 tasks… )
   ?dup while
-    task %cls ?
+    task %cls ? cr
     ( 0 one-fewer-tasks… )
   repeat
 ;
