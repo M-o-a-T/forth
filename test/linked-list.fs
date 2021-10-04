@@ -27,8 +27,8 @@ x2 .. th insert
 #ok x1 prev @ th .. =
 
 0 variable n
-: process hex. n @ 1+ n ! ;
-' process th each
+: process hex. n @ 1+ n ! 0 ;
+' process th each drop
 #ok n @ 2 =
 
 x1 remove
@@ -36,7 +36,7 @@ x1 remove
 #ok x1 prev @ poisoned =
 #ok x1 next @ poisoned =
 #endif
-' process th each
+' process th each drop
 #ok n @ 3 =
 
 #ok th next @ x2 .. =
@@ -47,7 +47,7 @@ x1 remove
 x2 remove
 #ok th next @ th .. =
 #ok th prev @ th .. =
-' process th each
+' process th each drop
 #ok n @ 3 =
 
 \ SPDX-License-Identifier: GPL-3.0-only

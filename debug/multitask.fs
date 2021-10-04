@@ -68,6 +68,8 @@ task %cls definitions also
 set-current
 
 forth definitions
+
+: nop0 0 ;
 : tasks ( -- ) \ Show tasks currently in round-robin list
   \ The list may change, so first take a snapshot
   eint? dint >r
@@ -76,8 +78,8 @@ forth definitions
     dup %cls next @ ..
     dup this .. =
   until drop
-  check-tasks each: nop  \ just leave them on the stack
-  irq-tasks each: nop  \ just leave them on the stack
+  check-tasks each: nop0 drop \ just leave them on the stack
+  irq-tasks each: nop0 drop \ just leave them on the stack
   r> if eint then
   ( 0 tasks… )
 

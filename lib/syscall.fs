@@ -342,8 +342,9 @@ __seal
 ;
 
 #if-flag multi
-: (tear) ( task -- )
+: (tear) ( task -- flag )
   err EBADF swap  task %cls signal
+  0
 ;
 #endif
 
@@ -351,7 +352,7 @@ __seal
   dup __ teardown
   dup __ fd @  call close
 #if-flag multi
-  __ waiters each: (tear)
+  __ waiters each: (tear) drop
 #else
   drop
 #endif

@@ -263,11 +263,12 @@ d-list-head class: %queue
   r>
 ;
 
-: each ( xt queue )
+: each ( xt queue -- flag )
 \ call xt with every job
   ['] (adj) swap
   __ each
-  drop
+  ( xt flag )
+  nip
 ;
 
 \ duplicate from lib/linked-list.fs, unfortunately
@@ -833,6 +834,7 @@ task \int definitions also
   else
     drop
   then
+  0
 ;
 
 : busy? ( this -- this flag )
@@ -845,12 +847,12 @@ task \int definitions also
   this ..  \ for busy?
 
   \ walk the check list
-  check-tasks each: i-check  ( n )
+  check-tasks each: i-check drop ( n )
   \ "busy" checkers or more work present? exit
 
   \ disable IRQs and walk the IRQ list
   dint
-  irq-tasks each: i-check ( n )
+  irq-tasks each: i-check drop ( n )
   \ exit if checkers present or work found
   busy? if eint drop exit then
   drop \ don't need taskptr any more

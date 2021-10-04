@@ -31,8 +31,8 @@ forth definitions
   dup     __ next !
 ;
 
-: each ( xt head -- ) 
-\ run XT with each item.
+: each ( xt head -- res )
+\ run XT with each item. See EACH: for details.
   swap >r  ( head |R: xt )
   dup __ next @
   begin
@@ -40,14 +40,19 @@ forth definitions
   while ( head this )
     r@ rot >r ( this xt |R> xt head )
     over __ next @ >r ( this xt |R: xt head next )
-    execute
+    execute ( flag )
+    ?dup if
+      rdrop rdrop rdrop exit
+    then
     r> r> swap ( head next )
   repeat ( head head )
   r> 2drop drop
+  0
 ;
 
-: each: ( head "name" -- )
-\ run NAME with each item
+: each: ( head "name" -- res )
+\ run NAME with each item until one call returns nonzero. Return that,
+\ or zero if we ran through all elements.
   ' literal, postpone swap postpone each
   immediate
 ;
