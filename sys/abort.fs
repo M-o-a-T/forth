@@ -41,7 +41,7 @@ compiletoflash
 0 variable abortcode
 
 #if token forth find drop
-forth definitions
+forth only definitions
 #if undefined aborthandler
 \voc also
 #endif
