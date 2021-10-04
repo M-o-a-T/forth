@@ -546,16 +546,6 @@ task definitions
   if eint then
 ;
 
-: start ( task -- )
-  dup __ state @ =dead > abort" Task running"
-  =sched swap __ >state.i
-;
-
-: continue ( task -- )
-  dup __ state @ =dead <= abort" Task not running"
-  =sched swap __ >state.i
-;
-
 : \kill ( task -- )
   =sched swap __ >state.i
   inline
@@ -725,6 +715,41 @@ subtask class: looped
   (cont) (go)
 ;
 ;class
+
+
+task %cls definitions
+
+: (start) ( task ctx -- )
+  >r
+  dup __ state @ =dead > abort" Task running"
+  dup __ state @ =dead = if
+    \ the main task cannot be =dead. We hope.
+#if-flag debug
+    dup __ pstack @ 0= abort" Maintask dead??"
+#endif
+    dup r@  \cls (>setup)
+    =new over __ state !
+  then
+  rdrop
+  =sched swap __ >state.i
+;
+
+: start
+\ Start a task. If the task is dead we need to re-animate it
+\ which is why we save the voc context here.
+  \voc voc-context @
+  forth state @ if \ compile
+    literal, postpone (start)
+  else \ interactive
+    (start)
+  then
+immediate ;
+
+
+: continue ( task -- )
+  dup __ state @ =dead <= abort" Task not running"
+  =sched swap __ >state.i
+;
 
 
 \ *****************

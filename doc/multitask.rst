@@ -37,7 +37,7 @@ Starting a task is easy::
 
     foo start
 
-Alternately::
+Alternately, doing this::
 
     :init
       foo start
@@ -46,15 +46,28 @@ Alternately::
 will also remember to start the task after a reset, if you're compiling
 into Flash.
 
+A task cannot be started if it is already running. You can use this word to
+(re)start a dead task; however, doing this requires you to use ``start`` on
+the task's word directly. Otherwise it cannot access the task's main word.
+
+Thus, this works::
+
+    :task: foo … ;
+    foo start
+    …
+    foo .. task %cls continue
+
+but this will crash::
+
+    … \ task needs restarting
+    foo .. task %cls start
+
+
 continue ( task -- )
 ++++++++++++++++++++
 
 CONTINUE does the same thing as START, except to a task that has already
-been running.
-
-The difference is strictly from a PoV of code correctness. It never makes
-sense to start-or-continue a task; you either know it's new and (re)start
-it, or you know it is running, then you continue it.
+been started.
 
 \kill ( task -- )
 +++++++++++++++++
