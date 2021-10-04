@@ -28,8 +28,7 @@ task also
 ;
 
 #if defined syscall
-: poll
-  -1
+: poll ( f,|-1 )
   forth poll poll
   drop
 ;

@@ -895,6 +895,10 @@ task \int definitions also
 
 : run-irqs ( -- )
 \ walks through the check- and irq-task list
+#[if] defined syscall
+  0, time poll
+#endif
+
   this ..  \ for busy?
   \ walk the check list
   check-tasks each: i-check drop ( n )
@@ -909,7 +913,7 @@ task \int definitions also
   check-tasks empty? not if eint exit then
 #[if] defined syscall
   \ check timeouts and epoll
-  time poll
+  -1 time poll
 #else
   \ the timer code will have arranged an interrupt
   \halt
