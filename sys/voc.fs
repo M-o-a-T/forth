@@ -163,7 +163,7 @@ forth-wl variable c2r-current
     if
       name?   ( c-addr u lfa flag )
       if
-        nip nip r> drop exit
+        nip nip rdrop exit
       then
     then
     dictionarynext drop
@@ -184,7 +184,7 @@ forth-wl variable c2r-current
       if
         name?
         if
-          r> r> drop over >r >r         \ R: wid lfa.found
+          r> rdrop over >r >r         \ R: wid lfa.found
           \ for debugging only :
           \ cr dup lfa>wtag .wtag dup .header  \ print wtag(lfa) and name(lfa)
           \
@@ -193,7 +193,7 @@ forth-wl variable c2r-current
     else ( c-addr u lfa )
       name?
       if 
-        r> r> drop over >r >r           \ R: wid lfa.found
+        r> rdrop over >r >r           \ R: wid lfa.found
         \ for debugging only :
         \ cr 9 spaces dup .header
         \
@@ -212,7 +212,7 @@ forth-wl variable c2r-current
 : ??-wl ( c-addr u wid -- lfa|0 )
   >r compiletoram?
   if
-    2dup r@ search-wl-in-ram ?dup if nip nip r> drop exit then
+    2dup r@ search-wl-in-ram ?dup if nip nip rdrop exit then
   then
   r> search-wl-in-flash
 ;
@@ -231,7 +231,7 @@ compiletoram
     @ ( c-addr u wid|0 ) dup
   while
     >r 2dup r> ??-wl dup
-    if nip nip r> drop exit then drop
+    if nip nip rdrop exit then drop
     r> cell+ dup >r
   repeat
   r> 2drop 2drop 0
@@ -407,7 +407,7 @@ get-order \voc-wl swap 1+ set-order
   @
   begin
    \ dup .
-   >r 2dup r@ ??-wl dup if nip nip r> drop exit then drop
+   >r 2dup r@ ??-wl dup if nip nip rdrop exit then drop
    r> vocnext dup 0= 
   until
   drop root-wl ??-wl
@@ -420,7 +420,7 @@ get-order \voc-wl swap 1+ set-order
 \  to be worth the trouble.)
 : ??-vocs-no-root ( c-addr len a-addr -- lfa|0 )
   begin
-   >r 2dup r@ ??-wl dup if nip nip r> drop exit then drop
+   >r 2dup r@ ??-wl dup if nip nip rdrop exit then drop
    r> vocnext dup 0= 
   until
   nip nip
@@ -441,7 +441,7 @@ get-order \voc-wl swap 1+ set-order
     then
     dup 
 
-    if nip nip r> drop exit then drop
+    if nip nip rdrop exit then drop
     r> cell+ dup >r
   repeat
   r> 2drop 2drop 0
