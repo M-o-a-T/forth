@@ -12,8 +12,6 @@ timespec object: dly
 dly sleep
 #delay 0.2
 
-epcb object: ep
-
 \ for testing, create a pipe
 call pipe 
 constant rfd
@@ -40,7 +38,7 @@ rfd nonblock
 
 0 variable okr
 :task: rdr
-  rfd ep wait-read
+  rfd poll wait-read
   rfd dbuf 6 call read 4 <> abort" RDR"
   1 okr !
 ;
@@ -50,22 +48,25 @@ rdr start
   task yield
   task yield
   okr @ abort" early"
-  wfd ep wait-write
+  wfd poll wait-write
   wfd bla call write 4 <> abort" WRT"
   task yield
   okr @ 1 <> abort" RES"
 ;
 wrt start
 : pol
+  0 okr !
   10 0 do
     task yield
-	0, ep poll .
-	okr @ if unloop exit then
+    0, poll poll .
+    okr @ if unloop exit then
   loop
 ;
 pol
 
 #else
+
+epcb object: ep
 
 rfd ep wait-read
 #ok depth 0=
@@ -96,7 +97,9 @@ wfd bla call write
 \ close the test epoll instance
 rfd sys call close
 wfd sys call close
+#if-flag !multi
 ep teardown
+#endif
 
 
 \ SPDX-License-Identifier: GPL-3.0-only
