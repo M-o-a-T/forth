@@ -70,7 +70,7 @@ __seal
 \ ************************************************************
 
 : mask ( offset ring -- offset&bitmask )
-  __ limit @ over = if drop 0 then
+  __ limit @ 2dup >= if - else drop then
 ;
 
 #if-flag multi

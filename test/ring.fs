@@ -14,8 +14,7 @@ compiletoflash
 
 ring class: r4
 3 constant elems
-
-forth only definitions
+;class
 
 r4 object: rr
 rr 40 dump 
@@ -120,6 +119,48 @@ t2 start
 t1 start
 : tw begin  task yield  done @ until ;
 tw
+
+ring class: r9
+9 constant elems
+;class
+
+r9 object: rd9
+
+0 variable r9c
+0 variable r9y
+:task: r9w  100 0 do i rd9 !
+  \ ." W " i . rd9 ? rd9 .. 30 dump
+  r9y @ 1 and if task yield then loop ;
+:task: r9r
+  100 0 do
+  r9y @ 2 and if task yield then
+  rd9 @
+  \ ." R " dup . i . rd9 ? rd9 .. 30 dump
+  i <> if ." ERROR AT " i . rd9 ? cr rd9 .. 30 dump unloop 1 r9c ! exit then
+  loop
+  2 r9c !
+;
+
+: r9l  1000 0 do task yield r9c @ if unloop exit then loop ;
+
+r9w start  r9r start
+r9l
+#ok r9c @ 2 =
+
+1 r9y !  0 r9c !
+r9w start  r9r start
+r9l
+#ok r9c @ 2 =
+
+2 r9y !  0 r9c !
+r9w start  r9r start
+r9l
+#ok r9c @ 2 =
+
+3 r9y !  0 r9c !
+r9w start  r9r start
+r9l
+#ok r9c @ 2 =
 
 #endif
 
