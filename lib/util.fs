@@ -11,7 +11,7 @@ forth only
 root definitions
 
 sticky  \ deleted by "find"
-: defined   ( "token" -- flag ) token find drop 0<> ; 
+: defined   ( "token" -- flag ) token \voc ??-dictionary postpone .. 0<> ; 
 
 sticky  \ deleted by "find" in "defined"
 : undefined ( "token" -- flag ) defined not ;
