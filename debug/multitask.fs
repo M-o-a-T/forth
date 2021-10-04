@@ -36,7 +36,8 @@ task %cls definitions also
 ;
 
 : ? ( task -- )
-  dup ." Task:$" dup hex. .word-off \ should be declared somewhere
+  dup \ ." Task:$" dup hex.
+  .word-off \ should be declared somewhere
   dup __ state @ ." State:" .state
   dup __ newstate @ ?dup if
     over __ state @
@@ -54,7 +55,7 @@ task %cls definitions also
   then
   space
   dup __ state @ =idle > if
-    dup __ link ?
+    ." Link:" dup __ link ?
   then
   \ dup __ abortptr @ ?dup if ." Abort:" hex. then
   dup __ abortcode @ ?dup if ." Sig:" hex. then

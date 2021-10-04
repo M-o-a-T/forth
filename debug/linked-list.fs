@@ -4,7 +4,7 @@
 \voc \d-list definitions also
 
 : ? ( list -- )
-  ." DL:" \ dup dup hex. .word-off
+  \ ." Link:" \ dup dup hex. .word-off
   dup ( list list )
   2dup __ next @ .. = if
     ." same" 2drop exit
@@ -17,12 +17,14 @@
     exit
   then
 #endif
-  dup ." <" dup hex. .word-off
+  dup ." <" \ dup hex.
+  .word-off
   ." >"
   over = if
     ." same" drop
   else
-    dup hex. .word-off
+    \ dup hex.
+    .word-off
   then
 ;
 
