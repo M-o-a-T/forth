@@ -140,7 +140,6 @@ forth definitions
 
 #if-flag debug
 : ? ( ring -- )
-  cr
   ." N:" dup __ limit ?
   ." E:" 1 __ *esize .
   ." S:" dup __ start ?
@@ -209,7 +208,6 @@ forth definitions
   >r
   r@ w-e
 
-  ( )
   r@ __ start @ __ *esize
   r@ __ \offset @ r@ + +
 #send {ring-var} @
