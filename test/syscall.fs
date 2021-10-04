@@ -2,6 +2,7 @@
 #end
 #endif
 
+forth only definitions
 sys also
 epoll also
 
@@ -39,13 +40,9 @@ rfd nonblock
 
 0 variable okr
 :task: rdr
-  ." RDR A" cr
   rfd ep wait-read
-  ." RDR B" cr
   rfd dbuf 6 call read 4 <> abort" RDR"
-  ." RDR C" cr
   1 okr !
-  ." RDR D" cr
 ;
 
 rdr start
@@ -94,14 +91,13 @@ wfd bla call write
 #ok -1 =
 #delay 0.2
 
-
-
-
 #endif
 
-\ we need that
+\ close the test epoll instance
+rfd sys call close
+wfd sys call close
 ep teardown
+
 
 \ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=
-
