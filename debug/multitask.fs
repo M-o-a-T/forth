@@ -37,7 +37,8 @@ task %cls definitions also
 
 : ? ( task -- )
   dup \ ." Task:$" dup hex.
-  .word-off \ should be declared somewhere
+  .word-off \ prints hex addr if not declared
+  space 
   dup __ state @ ." State:" .state
   dup __ newstate @ ?dup if
     over __ state @
