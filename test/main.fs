@@ -71,7 +71,18 @@ test-drop
 
 #if-flag multi
 
+compiletoflash
+
+#if undefined term
+#include lib/mt-term.fs
 test-ram
+#include test/mt-term.fs
+
+#endif
+
+test-ram
+
+#include test/mt-term.fs
 
 #if-flag debug
 #if undefined tasks
