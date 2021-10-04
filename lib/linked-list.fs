@@ -46,7 +46,7 @@ forth definitions
     then
     r> r> swap ( head next )
   repeat ( head head )
-  r> 2drop drop
+  rdrop 2drop
   0
 ;
 
