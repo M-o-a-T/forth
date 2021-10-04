@@ -39,6 +39,7 @@ __seal
   -1 over __ x !
   -1 swap __ y !
 ;
+: ? dup __ x ? __ y ? ;
 ;class
 
 point object: p1
