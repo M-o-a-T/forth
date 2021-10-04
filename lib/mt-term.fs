@@ -54,12 +54,8 @@ looped :task: outsend
     begin
       outbuf empty?
     not while
-\     begin
-\       oemit?
-\     not while
-\       yield
-\     repeat
-      outbuf @ oemit
+      1 poll wait-write
+      outbuf s@  1 -rot sys call write  outbuf skip
       3 outdly !
     repeat
 
