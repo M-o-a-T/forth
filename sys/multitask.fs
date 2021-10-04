@@ -84,10 +84,17 @@ task item
   task-link field: link
   var> int field: stackptr
   var> int field: abortptr
-  var> int field: abortcode
-
   var> int field: checkfn
+.s
+  2dup
+  var> int field: abortcode
   var> int field: checkarg  \ dups as dest waitqueue
+  2swap
+.s
+  var> fixed field: timeout \ for waitq
+#ok 2over d= 
+.s
+
   var> cint field: state
   var> cint field: newstate
   aligned
