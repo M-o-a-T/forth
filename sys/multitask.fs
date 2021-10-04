@@ -433,6 +433,38 @@ task also
 \        yield 
 \ ********************
 
+forth definitions
+: depth
+  in-main? if depth else
+    this task-ps sp@ - 1 cells / 1-
+  then
+;
+
+: rdepth
+  in-main? if rdepth else
+    this task-rs rp@ - 1 cells / 1-
+  then
+;
+
+\ Override standard words so they work with tasks
+
+\voc sticky
+: .s
+  \ can't patch our "depth" into the core, so …
+  depth
+  ." Stack: [" dup . ." ] "
+  ?dup if 
+    1-
+    begin
+    ?dup while
+      dup 1+ pick .
+      1-
+    repeat
+    ." TOS: " dup . 
+  then
+  ." *>" cr
+;
+
 task definitions
 
 : yield ( -- )
@@ -728,37 +760,6 @@ task %cls definitions
 forth definitions
 : :task: task %cls :task: ;
 
-
-\ Override standard words so they work with tasks
-
-: depth
-  in-main? if depth else
-    this task-ps sp@ - 1 cells / 1-
-  then
-;
-
-: rdepth
-  in-main? if rdepth else
-    this task-rs rp@ - 1 cells / 1-
-  then
-;
-
-\voc sticky
-: .s
-  \ can't patch our "depth" into the core, so …
-  depth
-  ." Stack: [" dup . ." ] "
-  ?dup if 
-    1-
-    begin
-    ?dup while
-      dup 1+ pick .
-      1-
-    repeat
-    ." TOS: " dup . 
-  then
-  ." *>" cr
-;
 
 \ Replace the QUIT hook
 
