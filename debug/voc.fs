@@ -293,7 +293,7 @@ forth definitions
 
 \voc definitions
 
-: show-word-name ( lfa wid -- )
+: (swn) ( lfa wid -- )
   >r dup forth-wl >=   \ tagged word ?
   if ( lfa )
     dup lfa>wtag tag>wid r@ =     \ wid(lfa) = wid
@@ -309,7 +309,7 @@ forth definitions
 ;
 
 : show-word-name ( lfa wid -- )
-  over smudged? if show-word-name else 2drop then
+  over smudged? if (swn) else 2drop then
 ;
 
 : show-word-in-ram ( wid lfa -- )
