@@ -55,3 +55,6 @@ task also
   begin t3 state @ =dead <> while yield repeat
 ;
 yy
+
+\ SPDX-License-Identifier: GPL-3.0-only
+#ok depth 0=
