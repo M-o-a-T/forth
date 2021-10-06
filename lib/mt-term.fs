@@ -56,7 +56,7 @@ looped :task: outsend
     not while
       1 poll wait-write
       outbuf s@  1 -rot sys call write  outbuf skip
-      3 outdly !
+      2 outdly !
     repeat
 
     \ outbuf is empty. Count down?
@@ -100,7 +100,7 @@ looped :task: outsend
 #if-flag debug
       0 outnum !
 #endif
-      3 outdly +!
+      1 outdly +!
       outsend continue
     then
   repeat
