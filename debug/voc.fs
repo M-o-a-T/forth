@@ -145,7 +145,7 @@ forth definitions
   then
   over cr .idd cr ." FLASH: "
   show-wl-in-flash
-  dup cr
+  cr
   ." RAM:   "
   0 show-wl-in-ram
   cr
@@ -361,7 +361,7 @@ forth definitions
   then
   over cr .idd cr ." FLASH: "
   show-word-in-flash
-  dup cr ." RAM:   " 
+  cr ." RAM:   " 
   0 show-word-in-ram
   cr
 ;
