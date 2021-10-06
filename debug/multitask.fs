@@ -66,7 +66,7 @@ task also
     dup __ timeout @ ." Timer:" .
   else
   \ dup __ abortptr @ ?dup if ." Abort:" hex. then
-    dup __ abortcode @ ?dup if ." Sig:" hex. then
+    dup __ abortcode @ ?dup if ." Sig:" . then
     dup __ checkfn @ ?dup if ." Check:" .word  dup __ checkarg @ hex.  then
   then
   \ 'checkarg' may also be a queue
