@@ -577,6 +577,9 @@ task also
 \        yield 
 \ ********************
 
+task \int definitions
+0 variable yield-rs
+
 task definitions
 
 : yield ( -- )
@@ -597,6 +600,7 @@ task definitions
 
   ( oldtask )
   this .. dup newstate @ if  \ state change? if so, do some work
+    yield-rs @ rp!
     dup %cls next @ ..
     ( oldtask newtask )
     \ ." T:" dup .word   \ debug only, not when multitasking
@@ -833,6 +837,25 @@ subtask class: looped
 ;class
 
 
+task \int definitions
+task also
+
+subtask class: swtc
+\ one-off class for SWT
+1 constant psize  \ unused
+100 constant rsize \ TODO check actual usage
+: setup ( ptr -- )
+  __ task-rs yield-rs !
+;
+: \main ;
+;class
+
+\ This task holds return stack space for "yield" to use when it needs
+\ to do some nontrivial work, but is otherwise unused. The task cannot be
+\ started at all because the stack pointer is completely wrong
+swtc object: swt
+
+
 task %cls definitions
 
 : (start) ( task ctx -- )
@@ -913,7 +936,6 @@ task %cls definitions
 
 forth definitions
 : :task: task %cls :task: ;
-
 
 task definitions
 
