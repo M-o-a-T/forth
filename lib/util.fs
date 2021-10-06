@@ -168,7 +168,9 @@ forth definitions
 
 #if undefined %init!
 
-#include debug/voc.fs
+\ #if-flag debug
+\ #include debug/voc.fs
+\ #endif
 
 \ #require .idd lib/crash.fs
 \voc definitions also
