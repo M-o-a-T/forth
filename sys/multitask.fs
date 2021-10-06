@@ -56,8 +56,9 @@ sub ignore
 4 constant =check \ checking (in IRQ list)
 5 constant =irq \ checking, IRQ on (in IRQ list)
 6 constant =wait \ in some other queue
+7 constant =timer \ in some other queue
 \ there might be more later
-7 constant #states
+8 constant #states
 
 \ ********************
 \         task
@@ -111,14 +112,18 @@ dup constant \link-off
   task-link field: link
   var> int field: stackptr
   var> int field: abortptr
-  var> int field: checkfn
-  2dup
   var> int field: abortcode
-  var> int field: checkarg  \ dups as dest waitqueue
-  2swap
-  var> fixed field: timeout \ for waitq
-#ok 2over d= 
+  var> int field: checkfn
 
+  2dup
+  var> int field: checkarg
+  2swap
+  2dup
+  var> uint field: timeout \ for waitq
+  2swap
+  \int waitq-link field: waitq
+#ok 2over d= 
+#ok 2over d= 
   var> cint field: state
   var> cint field: newstate
   aligned
@@ -319,6 +324,12 @@ task also
 #include debug/multitask.fs
 #endif
 
+forth definitions only
+#if undefined time
+#include lib/timeout.fs
+forth definitions only
+task also
+#endif
 
 
 
@@ -339,6 +350,7 @@ task \int definitions also
 4 constant _irq
 5 constant _enq
 6 constant _deq
+7 constant _ent
 
 _table: state>q
 _no  c, \ =new
@@ -348,13 +360,28 @@ _run c, \ =sched
 _chk c, \ =check
 _irq c, \ =irq
 _enq c, \ =wait
+_ent c, \ =timer
 
 task also
 %cls definitions also
 \int also
 
+: \old  ( state task new_q old_q -- state task new_q )
+    case
+      _no of
+        endof
+      _err of
+        -22 abort" Task dead"
+        endof
+      ( state task new_q )
+      _ent of
+        over time remove
+        endof
+      drop over __ link remove  \ task is queued, so dequeue
+      0
+    endcase
+;
 : \new  ( state task new_q -- state task )
-\ helper
     case
       _run of
         dup __ link .. this link insert
@@ -365,15 +392,16 @@ task also
       _chk of
         dup check-tasks insert
         endof
+      _ent of
+        dup time insert
+        endof
       _enq of
 #if-flag debug
-        dup checkarg @ 0= abort" wait without queue"
+        dup waitq @ .. 0= abort" wait without queue"
 #endif
-        dup dup __ checkarg @
-        ( state task  task waitq )
-        %queue insert
+        dup dup __ waitq @ insert
 #if-flag debug
-        0 over __ checkarg !
+        0 over __ waitq !
 #endif
         endof
     endcase
@@ -394,21 +422,12 @@ task also
   dup _enq = if drop _deq then
   ( state task new_q old_q )
   2dup <> if
-    \ process old state
-    _no over = if 
-      drop  \ not queued, nothing to do
-    else
-      _err = if abort" Task dead" then
-      ( state task new_q )
-      over __ link remove  \ task is queued, so dequeue
-    then
-    ( state task new_q )
-    \ process new state
+    \old
     \new
-    ( state task )
   else
     2drop
   then
+  ( state task )
   \ the above compares state effects, not states. States may still be
   \ different. But the additional tests are not worth the effort.
   __ state !
@@ -450,7 +469,7 @@ task also
 
 : add ( task q -- )
 \ insert some task.
-  over %cls checkarg !
+  over %cls waitq !
   ( task )
   =wait swap %cls >state
 ;
@@ -780,6 +799,10 @@ task %cls definitions
   then
 immediate ;
 
+: sleep ( µs task -- )
+  tuck __ timeout !
+  =timer swap __ >state.i
+;
 
 : continue ( task -- )
   dup __ state @ =dead <= abort" Task not running"
@@ -830,9 +853,15 @@ forth definitions
 : :task: task %cls :task: ;
 
 
-\ Replace the QUIT hook
-
 task definitions
+
+: sleep ( µs -- )
+  this sleep
+  yield
+;
+
+
+\ Supplant the QUIT hook
 
 : quit ( -- does-not-return )
 \ call "quit" if we're the main task
@@ -883,8 +912,8 @@ task definitions
 
 
 forth definitions only
-#if undefined time
-#include lib/timeout.fs
+#if time undefined poll
+#include lib/timeout2.fs
 #endif
 
 \ *****************
@@ -938,12 +967,11 @@ task \int definitions also
   dint
   irq-tasks each: i-check drop ( n )
   \ exit if checkers present or work found
-  busy? if eint drop exit then
-  drop \ don't need taskptr any more
+  busy? if eint exit then
   check-tasks empty? not if eint exit then
 #[if] defined syscall
   \ check timeouts and epoll
-  -1 poll drop
+  ?multi time poll drop
 #else
   \ the timer code will have arranged an interrupt
   \halt
@@ -954,9 +982,12 @@ task \int definitions also
 task \int definitions
 
 looped :task: idle
+  this ..
   begin
     run-irqs
-    busy? if yield then
+    busy? if
+      yield
+    then
   again
 ;
 
