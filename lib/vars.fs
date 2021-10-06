@@ -15,7 +15,12 @@ __seal
 : @ ( a -- n ) @ inline ;
 : ! ( n a -- ) ! inline ;
 : ? ( a -- )  @ . ;
+: +! ( n a -- ) +! inline ;
 
+;class
+
+int class: uint
+: ? ( a -- )  @ u. ;
 ;class
 
 class: cint
@@ -39,6 +44,7 @@ __seal
 : @ ( a -- n ) h@ inline ;
 : ! ( n a -- ) h! inline ;
 : ? ( a -- )  h@ . ;
+: +! ( n a -- ) dup h@ rot + swap h! ;
 
 ;class
 
@@ -51,6 +57,7 @@ __seal
 : @ ( a -- n ) 2@ inline ;
 : ! ( n a -- ) 2! inline ;
 : ? ( a -- )  2@ ud. ;
+: +! ( n a -- ) >r r@ 2@ d+ r> 2! ;
 
 ;class
 
