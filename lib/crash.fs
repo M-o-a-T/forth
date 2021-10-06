@@ -49,6 +49,7 @@ forth definitions only
 forth definitions
 
 : .word-off ( address -- )
+\ print word name and offset. Print adress if not found.
   dup addr>woff
   ?dup if ( addr off lfa )
     \voc .idd
@@ -58,6 +59,17 @@ forth definitions
     drop
   else
     ." ?:" hex.
+  then
+;
+
+: .word-off-n ( address -- )
+\ print word name and offset, but don't say anything if not found
+  addr>woff
+  ?dup if ( addr off lfa )
+    \voc .idd
+    ?dup if ( addr off )
+      [char] + emit base @  16 base ! swap .   base !
+    then ( addr )
   then
 ;
 
@@ -76,7 +88,7 @@ forth definitions
   0
   begin ( i )
     dup 0 <# # # #> type space
-    dup rpick dup hex. dup .word-off
+    dup rpick dup hex. dup .word-off-n
     ( i addr )
     addr>woff ?dup if
       nip lfa>nfa
