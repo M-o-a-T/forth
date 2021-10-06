@@ -1016,9 +1016,7 @@ task \int definitions also
 
 : run-irqs ( this -- this )
 \ walks through the check- and irq-task list
-#[if] defined syscall
   0 time poll drop
-#endif
 
   \ walk the check list
   check-tasks each: i-check drop ( n )
