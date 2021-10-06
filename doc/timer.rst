@@ -37,8 +37,9 @@ TASK sleep ( µs task -- )
 
 Suspends another task for the given time.
 
-As with other task states: if you apply this to the current task, it will
-not be suspended until the next time you call ``yield``.
+Unlike ``task sleep``, if you apply this to the current task (i.e. you
+write ``task this sleep``,), your task will not be suspended until the next
+time you call ``yield``.
 
 now
 ---
