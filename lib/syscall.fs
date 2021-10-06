@@ -400,8 +400,12 @@ __seal
   0 r@ __ evt u32 !
   \ dup 0 >= if r@ __ timeout ! 0 then 
   ( timeout |R: epcb )
-  r@ __ fd @  r@ evt ..  rot 1 swap ( epfd evt 1 timeout )
-  252 sys call4 ?err \ epoll_wait
+  begin
+    r@ __ fd @  r@ evt ..  rot 1 swap ( epfd evt 1 timeout )
+    252 sys call4
+    dup err EINTR +
+  until
+  ?err \ epoll_wait
   if
     r>
     __ evt u32 @
