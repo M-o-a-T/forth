@@ -60,7 +60,6 @@ task also
   \ =idle r@ %cls state !
   ( next |R: task )
 
-  dup .word-off r@ .word-off 
   dup queue .. = if \ last element
     drop rdrop
   else ( old next )
