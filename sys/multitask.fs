@@ -41,6 +41,10 @@ forth definitions only  decimal
 
 voc: task
 voc: \int
+
+: yield-dummy -29 abort ;
+' yield-dummy variable yield-hook
+
 voc: sub
 task definitions
 sub ignore
@@ -144,6 +148,9 @@ task-link item
 
 
 task definitions
+
+: yield \int yield-hook @ execute ;
+
 var> int class: %var
 %cls item
 : @ __ @ inline ;
@@ -530,6 +537,10 @@ task definitions
   \ ." RET to " r@ hex. ."  RP=" rp@ hex. ."  SP=" sp@ hex. cr
   \ r@ 1 bic disasm-$ ! seec
   \ return to caller
+;
+
+:init
+  ['] yield  dup h.s drop  task \int yield-hook !
 ;
 
 : caught ( -- )
