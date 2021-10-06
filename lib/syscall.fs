@@ -427,6 +427,7 @@ __seal
   0 r@ __ poll
   if \ no work. Call with original timeout if that was not zero.
     ?dup if ( timeout )
+      dup -1 < if drop 1000000000 then
       r@ __ poll
     else
       -1
