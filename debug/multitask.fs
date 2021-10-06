@@ -1,4 +1,4 @@
-\ some words to debug multitasking
+\ debug multitasking: add `?` to tasks
 
 #require .word fs/lib/crash.fs
 #if \voc \d-list undefined ?

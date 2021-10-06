@@ -1,4 +1,4 @@
-\ Classes. They go to a subvocabulary of \voc.
+\ Debug classes.
 
 #if \voc undefined ~voc:
 #include debug/voc-debug.fs
@@ -13,6 +13,7 @@ forth only definitions
 \voc definitions
 
 : is-sub? ( wid cwid -- flag )
+\ check whether CWID is (the same or) a subclass of WID
   begin
     2dup = if
       2drop 1 exit

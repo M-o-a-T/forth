@@ -1,4 +1,4 @@
-\ word lists, introspection etc. for vis
+\ debug version of some word list scanners
 
 \voc also definitions
 

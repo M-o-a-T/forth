@@ -1,4 +1,4 @@
-\ word lists, introspection etc. for vis
+\ Print word names (including their vocabulary paths), show voc state, etc
 
 \voc also definitions
 
