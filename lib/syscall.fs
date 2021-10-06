@@ -331,7 +331,7 @@ class: epcb
 __data
   var> int field: fd
   epoll_event field: evt
-  timespec field: timeout
+  \ timespec field: timeout \ ignored, we use msec
 #if-flag multi
   task %queue field: waiters
 #endif
@@ -391,31 +391,20 @@ __seal
 \ wait for fd to be writeable
   =OUT swap __ (wait) ;
 
-
-: poll  ( f,|-1 epcb -- work? )
+: poll  ( ms|-1 epcb -- work? )
 \ Wait until the timeout runs out or a registered epoll succeeds.
+\ Return -1 if no work. Otherwise on multitask return 0, singletask
+\ returns the file descriptor that is ready.
   >r
   0 r@ __ evt events !
   0 r@ __ evt u32 !
-  dup 0 >= if r@ __ timeout ! 0 then
-  ( flag |R: epcb )
-  dup ( flag flag )
-  r@ __ fd @  r@ evt ..  rot 1 swap ( flag  epfd evt 1 flag )
-  if 0 else r@ timeout .. then
-  0  \ no sigmask
-  441 sys call5 \ epoll_pwait2
-  dup err ENOSYS + if
-    nip ( err )
-  else
-    \ our kernel / emulator doesn't do "epoll_pwait2". Sigh.
-    drop ( flag )
-    r@ __ fd @  r@ evt ..  rot 1 swap ( epfd evt 1 flag )
-    if -1 else r@ __ timeout @ 1000, f* nip then
-    252 sys call4 \ epoll_wait
-  then
-  ?err
+  \ dup 0 >= if r@ __ timeout ! 0 then 
+  ( timeout |R: epcb )
+  r@ __ fd @  r@ evt ..  rot 1 swap ( epfd evt 1 timeout )
+  252 sys call4 ?err \ epoll_wait
   if
-    r> __ evt u32 @
+    r>
+    __ evt u32 @
 #if-flag multi
     task %cls continue  0
 #endif
