@@ -74,7 +74,7 @@ __data
 
 d-list-item class: task-link
 dup constant \link-off
-task item
+%cls item
 : @ ( d-list-adr -- task )
 \ pretend that the list item stores a link to the task it's in
   __ \link-off - inline ;
