@@ -270,7 +270,7 @@ d-list-head class: %queue
   \ for transparency
   swap >r 
   r@ execute
-  r>
+  r> swap
 ;
 
 : each ( xt queue -- flag )
