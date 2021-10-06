@@ -143,9 +143,10 @@ forth definitions
     \ Show words in flash starting with the first word in flash.
     dup  dup forth-wl = if _sof_ else forth-wl then
   then
-  over cr ." << FLASH: " .wid
+  over cr .idd cr ." FLASH: "
   show-wl-in-flash
-  dup cr ." >> RAM:   " .wid
+  dup cr
+  ." RAM:   "
   0 show-wl-in-ram
   cr
 ;
@@ -358,9 +359,9 @@ forth definitions
     \ Show words in flash starting with the first word in flash.
     dup dup forth-wl = if _sof_ else forth-wl then
   then
-  over cr ." << FLASH: " .wid
+  over cr .idd cr ." FLASH: "
   show-word-in-flash
-  dup cr ." >> RAM:   " .wid
+  dup cr ." RAM:   " 
   0 show-word-in-ram
   cr
 ;
