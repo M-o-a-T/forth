@@ -15,10 +15,20 @@ __data
   int field: next
 __seal
 
+#if-flag debug
+#include debug/linked-list.fs
+#endif
+\voc \d-list definitions also
+
+
 : insert ( new this -- )
 \ add new item before me
 #if-flag debug
-  over __ prev @ poisoned <> if ." item is not free" -22 abort then
+  over __ prev @ poisoned <> if
+    ." item not free: "
+    over hex. over __ prev @ hex. over __ next @ hex. ct
+    -22 abort
+  then
 #endif
   tuck __ prev @ ( this new prev )
   2dup __ next ! over __ prev ! ( this new )
