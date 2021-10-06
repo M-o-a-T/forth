@@ -5,7 +5,10 @@ compiletoflash
 #endif
 
 #if token abort find drop 0=
-: abort ( -- ) cr quit ;
+: abort ( -- )
+  cr
+  quit
+;
 #endif
 
 \ already known? bye
@@ -120,7 +123,9 @@ forth only definitions
 \ runtime for abort"
   swap ?dup if
     swap abortmsg ! throw
-  else drop then
+  else
+    drop
+  then
 ;
 
 #if-flag !plain
