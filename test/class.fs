@@ -7,6 +7,10 @@ compiletoflash
 
 test-ram
 
+#if undefined .all
+#include debug/class.fs
+#endif
+
 var> also
 
 int object: i1
@@ -76,6 +80,12 @@ p1 show
 
 p1 get .s 2drop
 #ok p1 get #1 = swap #2 = and
+
+\ now dump all our classes
+
+\cls also
+.all' root-cls
+previous
 
 \ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=
