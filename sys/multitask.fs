@@ -68,7 +68,27 @@ sub ignore
 
 task definitions
 
+d-list-head class: %queue
+\ Some task queue
+: empty?  ( q -- flag )
+  dup __ next @ .. swap =
+;
+;class
+
+task \int definitions
+
+var> int class: waitq-link
+%queue item
+: @ ( d-list-adr -- task )
+\ the entry stores a pointer to a waitq
+  __ @ inline ;
+
+;class
+
+task definitions
+
 sized class: %cls
+\ the TASK class
 __data
   var> cint field: pstack  \ param stack size, cells
   var> cint field: rstack  \ return stack size, cells
@@ -250,13 +270,8 @@ task definitions
 \     Task queues
 \ ********************
 
-task definitions also
-
-d-list-head class: %queue
-: empty?  ( q -- flag )
-  dup __ next @ .. swap =
-;
-
+task %queue definitions also
+task also
 
 : insert ( task q -- )
 \ insert a task.
@@ -443,6 +458,11 @@ task also
   =wait swap %cls >state
 ;
 
+: wait ( q -- )
+\ insert the current task.
+  this .. swap __ add
+  yield
+;
 
 %queue ignore
 
@@ -547,16 +567,6 @@ task definitions
 \ clear the current task's abort code
   0 this abortcode !
 ;
-
-%queue definitions also
-
-: wait ( q -- )
-\ insert this task.
-  this .. swap __ add
-  yield
-;
-
-%queue ignore
 
 %cls definitions
 
@@ -885,7 +895,12 @@ forth definitions only
 \ *****************
 
 forth only
-task also
+task definitions also
+
+: !single ( -- ) [ hook-pause @ literal, ]  hook-pause ! ;
+: !multi  ( -- ) task ['] yield hook-pause ! ;
+: ?multi  ( -- ) task ['] yield hook-pause @ = ;
+
 task \int definitions also
 
 : i-check ( task -- )
@@ -950,9 +965,6 @@ looped :task: idle
 
 forth only
 task definitions also
-
-: !single ( -- ) [ hook-pause @ literal, ]  hook-pause ! ;
-: !multi  ( -- ) task ['] yield hook-pause ! ;
 
 \ This task checks whether anything else in the system is running, or wants
 \ to run. Otherwise it sleeps, to conserve (some) power.
