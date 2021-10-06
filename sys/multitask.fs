@@ -578,7 +578,7 @@ task also
 \ ********************
 
 task \int definitions
-0 variable yield-rs
+%var object: yield-task
 
 task definitions
 
@@ -595,12 +595,21 @@ task definitions
 #endif
 
   dint
+  \ save current state.
   ctx>r rp@ sp@ this stackptr !
-  \ save current return and stack pointer. Don't go below sp@
+  \ We must not modify the existing stack after this point,
+  \ so pretend that there's nothing on it.
 
+  this ..
   ( oldtask )
-  this .. dup newstate @ if  \ state change? if so, do some work
-    yield-rs @ rp!
+  dup newstate @ if  \ state change? if so, do some work
+    yield-task @ .. ?dup if
+      dup >this
+      %cls stackptr @ ( old spnew )
+      sp+! sp!
+      \ on the temp stack we now find ( rp old ). We must not modify rp.
+      over rp!
+    then ( old )
     dup %cls next @ ..
     ( oldtask newtask )
     \ ." T:" dup .word   \ debug only, not when multitasking
@@ -700,11 +709,34 @@ task definitions
 \       subtask
 \ ********************
 
+\ superclass for tasks with stacks
+\ 
+task \int also definitions
+task also
+%cls class: \stk
+: setup
+  dup __ task-ps over __ pstack @ stackfill
+  dup __ task-rs over __ rstack @ stackfill
+;
+;class
+
+\ superclass for internal non-tasks that need a stack
+\stk class: inttask
+: setup ( ptr -- )
+  \ save the RSP to the PSP
+  dup __ task-rs
+  over __ task-ps
+  sp+!
+  \ and the PSP to the task struct
+  swap __ stackptr !
+;
+;class
+
+
 \ class for everything but the main task
 
-task %cls class: subtask
-task also
-task \int also
+task definitions
+\stk class: subtask
 
 100 constant psize  \ this is a "safe" default
 100 constant rsize  \ feel free to reduce this *after* testing.
@@ -793,9 +825,6 @@ task \int also
 ;
 
 : setup ( object -- )
-  dup __ task-ps over __ pstack @ sfill
-  dup __ task-rs over __ rstack @ sfill
-
   __ main@ swap __ prep
 ;
 
@@ -819,15 +848,15 @@ subtask class: looped
 ;class
 
 
-task \int definitions
+task \int definitions also
 task also
 
-subtask class: swtc
+inttask class: \ytc
 \ one-off class for SWT
-1 constant psize  \ unused
-100 constant rsize \ TODO check actual usage
+50 constant psize  \ unused
+50 constant rsize \ TODO check actual usage
 : setup ( ptr -- )
-  __ task-rs yield-rs !
+  yield-task !
 ;
 : \main ;
 ;class
@@ -835,7 +864,7 @@ subtask class: swtc
 \ This task holds return stack space for "yield" to use when it needs
 \ to do some nontrivial work, but is otherwise unused. The task cannot be
 \ started at all because the stack pointer is completely wrong
-swtc object: swt
+\ytc object: yield-temp
 
 
 task %cls definitions
