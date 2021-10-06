@@ -56,14 +56,16 @@ monotonic object: systime
   (check)
 ;
 
-#if defined syscall
 : poll ( timeout -- work? )
 \ flag 0: check only
   check ( flg dly )
+#[if] defined syscall
   umin
   forth poll poll
-;
+#else
+  nip
 #endif
+;
 
 \ ****************
 \ long-term delays
