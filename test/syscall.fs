@@ -58,7 +58,7 @@ wrt start
   0 okr !
   10 0 do
     task yield
-    0, poll poll .
+    0 poll poll .
     okr @ if unloop exit then
   loop
 ;
@@ -71,7 +71,7 @@ epcb object: ep
 rfd ep wait-read
 #ok depth 0=
 #delay 1
-0,5 ep poll
+500 ep poll
 #ok -1 =
 #ok depth 0=
 #delay 0.2
@@ -79,16 +79,16 @@ rfd ep wait-read
 wfd ep wait-write
 #ok depth 0=
 
-0,5 ep poll
+50 ep poll
 .s
 #ok wfd =
 #ok depth 0=
 wfd bla call write
 #ok 4 =
-0,5 ep poll
+500 ep poll
 #ok rfd =
 #delay 1
-0,5 ep poll
+500 ep poll
 #ok -1 =
 #delay 0.2
 

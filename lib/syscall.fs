@@ -391,7 +391,7 @@ __seal
 \ wait for fd to be writeable
   =OUT swap __ (wait) ;
 
-: poll1  ( ms|-1 epcb -- work? )
+: poll  ( ms|-1 epcb -- work? )
 \ Wait until the timeout runs out or a registered epoll succeeds.
 \ Return -1 if no work. Otherwise on multitask return 0, singletask
 \ returns the file descriptor that is ready.
@@ -420,16 +420,16 @@ __seal
 \ Call with the specified timeout only if no work has been found.
 \ Return as in poll1.
   >r
-  0 r@ __ poll1
+  0 r@ __ poll
   if \ no work. Call with original timeout if that was not zero.
     ?dup if ( timeout )
-      r@ __ poll1
+      r@ __ poll
     else
       0
     then ( return )
   else \ found work. Repeat until no more work.
     drop
-    begin 0 r@ __ poll1 until
+    begin 0 r@ __ poll until
     0 
   then
   rdrop
