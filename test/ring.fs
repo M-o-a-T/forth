@@ -1,6 +1,10 @@
 forth only definitions
 decimal
 
+#if undefined ring
+#include lib/ring.fs
+#endif
+
 #if undefined dump
 #include lib/dump.fs
 #endif

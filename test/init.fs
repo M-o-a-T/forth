@@ -1,6 +1,7 @@
 #include sys/init.fs
 
 compiletoflash
+forth definitions only
 \ essential for testing, unfortunately
 
 #if-flag ram

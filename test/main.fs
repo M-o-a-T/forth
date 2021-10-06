@@ -30,6 +30,13 @@ compiletoflash
 test-drop
 test-ram
 
+#if undefined yy
+#include test/timeout.fs
+#endif
+
+test-drop
+test-ram
+
 #if undefined p1
 #include test/class.fs
 #endif

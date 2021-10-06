@@ -166,8 +166,9 @@ task-link item
   __ rsize@ over __ rstack !
   =new swap __ state !
 ;
-;class  \ %cls
 
+
+;class  \ %cls
 
 task definitions
 
@@ -548,6 +549,7 @@ task also
 
 : all ( q -- )
 \ start all tasks
+\ does not yield
   begin
     dup __ pop
   dup while
@@ -1012,7 +1014,7 @@ task \int definitions also
   dup %cls next @ .. over <>
 ;
 
-: run-irqs ( -- )
+: run-irqs ( this -- this )
 \ walks through the check- and irq-task list
 #[if] defined syscall
   0 time poll drop
