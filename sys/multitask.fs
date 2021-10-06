@@ -235,10 +235,99 @@ task definitions
   inline
 ;
 
+#if-flag debug
+main .. variable dbg-this-task
+%cls item
+: dbg-this ( -- task )
+\ Get the current task (to reduce typing, but also for future multi-CPU)
+  this-task @ ..
+  inline
+;
+: this>dbg
+  this-task @ dbg-this-task !
+;
+#endif
+
+
 : in-main?  ( -- flag )
 \ are we in the main task?
   \ ." M:" this-task @ hex. this .. hex. main .. hex. cr
   this .. main .. =
+;
+
+#if-flag debug
+: dbg-in-main?  ( -- flag )
+\ are we in the main task?
+  \ ." M:" this-task @ hex. this .. hex. main .. hex. cr
+  dbg-this .. main .. =
+;
+#endif
+
+forth definitions
+
+#if-flag debug
+: depth
+  dbg-in-main? if depth else
+    dbg-this task-ps sp@ - 1 cells / 1-
+  then
+;
+
+: rdepth
+  dbg-in-main? if rdepth else
+    dbg-this task-rs rp@ - 1 cells / 1-
+  then
+;
+
+#else
+
+: depth
+  in-main? if depth else
+    this task-ps sp@ - 1 cells / 1-
+  then
+;
+
+: rdepth
+  in-main? if rdepth else
+    this task-rs rp@ - 1 cells / 1-
+  then
+;
+
+#endif
+
+\ Override standard words so they work with tasks
+
+\voc sticky
+: .s
+  \ can't patch our "depth" into the core, so …
+  depth
+  ." Stack: [" dup . ." ] "
+  ?dup if 
+    1-
+    begin
+    ?dup while
+      dup 1+ pick .
+      1-
+    repeat
+    ." TOS: " dup . 
+  then
+  ." *>" cr
+;
+
+\voc sticky
+: h.s
+  \ can't patch our "depth" into the core, so …
+  depth
+  ." Stack: [" dup . ." ] "
+  ?dup if 
+    1-
+    begin
+    ?dup while
+      dup 1+ pick hex.
+      1-
+    repeat
+    ." TOS: " dup hex.
+  then
+  ." *>" cr
 ;
 
 %cls definitions
@@ -486,38 +575,6 @@ task also
 \        yield 
 \ ********************
 
-forth definitions
-: depth
-  in-main? if depth else
-    this task-ps sp@ - 1 cells / 1-
-  then
-;
-
-: rdepth
-  in-main? if rdepth else
-    this task-rs rp@ - 1 cells / 1-
-  then
-;
-
-\ Override standard words so they work with tasks
-
-\voc sticky
-: .s
-  \ can't patch our "depth" into the core, so …
-  depth
-  ." Stack: [" dup . ." ] "
-  ?dup if 
-    1-
-    begin
-    ?dup while
-      dup 1+ pick .
-      1-
-    repeat
-    ." TOS: " dup . 
-  then
-  ." *>" cr
-;
-
 task definitions
 
 : yield ( -- )
@@ -553,6 +610,9 @@ task definitions
   ( newtask )
 
   \ now return to the now-current task
+#if-flag debug
+  this>dbg
+#endif
   this stackptr @ sp! rp! r>ctx \ restore pointers and registers
   eint
 
