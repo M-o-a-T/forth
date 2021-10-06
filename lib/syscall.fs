@@ -345,23 +345,6 @@ __seal
   swap __ fd !
 ;
 
-#if-flag multi
-: (tear) ( task -- flag )
-  err EBADF swap  task %cls signal
-  0
-;
-#endif
-
-: teardown ( addr -- )
-  dup __ teardown
-  dup __ fd @  call close
-#if-flag multi
-  __ waiters each: (tear) drop
-#else
-  drop
-#endif
-;
-
 : (wait) ( fd mode epcb -- )
 \ wait for this event
   >r

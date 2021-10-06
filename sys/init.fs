@@ -36,7 +36,10 @@ compiletoflash
 
 #if-flag multi
 #include sys/multitask.fs
+#include lib/syscall2.fs
+#endif
 
+#if-flag multi
 #echo
 #echo ************
 #echo  MULTI TASK
