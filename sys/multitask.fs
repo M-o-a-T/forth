@@ -958,7 +958,6 @@ task \int definitions also
   0 time poll drop
 #endif
 
-  this ..  \ for busy?
   \ walk the check list
   check-tasks each: i-check drop ( n )
   \ "busy" checkers or more work present? exit

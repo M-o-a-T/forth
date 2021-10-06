@@ -34,6 +34,7 @@ task also
     =check of ." chk"  endof
     =irq   of ." irq"  endof
     =wait  of ." wait" endof
+    =timer of ." time" endof
     ." ?" . 0
   endcase
 ;
@@ -61,9 +62,13 @@ task also
   dup __ state @ =idle > if
     ." Link:" dup __ link ?
   then
+  dup __ state @ =timer = if
+    dup __ timeout @ ." Timer:" .
+  else
   \ dup __ abortptr @ ?dup if ." Abort:" hex. then
-  dup __ abortcode @ ?dup if ." Sig:" hex. then
-  dup __ checkfn @ ?dup if ." Check:" .word  dup __ checkarg @ hex.  then
+    dup __ abortcode @ ?dup if ." Sig:" hex. then
+    dup __ checkfn @ ?dup if ." Check:" .word  dup __ checkarg @ hex.  then
+  then
   \ 'checkarg' may also be a queue
   drop
 ;
