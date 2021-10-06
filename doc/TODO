@@ -1,5 +1,7 @@
 Documentation generation: Sphinx and whatnot
 
+Process AMD's SVD files to generate voc-aware register descriptions.
+
 more tests for STM32
 
 add interrupt-based terminal buffers to STM32
