@@ -80,7 +80,7 @@ monotonic object: systime
     hourjobs all
   again
 ;
-\ :init: hourtask start ; 
+:init hourtask start ; 
     
 
 : seconds ( sec -- )
