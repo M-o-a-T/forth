@@ -276,14 +276,14 @@ __seal
 timespec class: monotonic
 \ the monotonic clock: seconds since (re)boot
 : get ( ts -- )
-  1 __ get
+  1 swap __ get
 ;
 ;class
 
 timespec class: realtime
 \ realtime clock: seconds since 1970-01-01 00:00:00 UTC (excluding leap seconds)
 : get ( ts -- )
-  0 __ get
+  0 swap __ get
 ;
 ;class
 
