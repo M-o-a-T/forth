@@ -429,7 +429,7 @@ __seal
     ?dup if ( timeout )
       r@ __ poll
     else
-      0
+      -1
     then ( return )
   else \ found work. Repeat until no more work.
     drop

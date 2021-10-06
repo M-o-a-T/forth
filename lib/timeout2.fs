@@ -47,7 +47,7 @@ monotonic object: systime
 
 : (check) ( elapsed -- delay )
   queue each: check1
-  dup 0= if nip then \ if we ran past the end the time is still on-stack
+  dup 0= if 2drop -1 then \ if we ran past the end, the time is still on-stack
 ;
 : check ( -- delay )
 \ start all tasks ready since our last call
