@@ -171,11 +171,11 @@ forth definitions
   r@ __ start @ r@ __ num @ + r@ __ mask  __ *esize
   r@ __ \offset @ r@ + +
 #send {ring-var} !
-  r@ __ num @
+
 #if-flag multi
-  dup
+  r@ __ num @
 #endif
-  1+ r@ __ num !
+  1 r@ __ num +!
   ( num-old ) \ when \multi is on
 
 #if-flag multi
@@ -212,7 +212,7 @@ forth definitions
   r@ __ \offset @ r@ + +
 #send {ring-var} @
   r@ __ start @ 1+ r@ __ mask r@ __ start !
-  r@ __ num @ 1- r@ __ num !
+  -1 r@ __ num +!
 
 #if-flag multi
   \ wake up writer
