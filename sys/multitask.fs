@@ -758,24 +758,6 @@ task \int also
 ;
 : task@ s" (task)" voc-eval ;
 
-\ Helper: decrement a stack pointer and store data there.
-: sp+! ( data sp -- sp-1 )
-  \ ." save " over hex.
-  1 cells -
-  \ ." to " dup hex. cr
-  tuck ! inline ;
-
-: sfill ( addr cells -- )
-\ fill a stack from the bottom
-\ this overwrites the cell which the address points to. That address is not
-\ part of the stack; we do this for stack underrun protection
-  0 ?do
-    poisoned over !
-    1 cells -
-  loop
-  drop
-;
-
 : prep ( XT task -- )
 \ Prepare stacks so that:
 \ The param stack contains

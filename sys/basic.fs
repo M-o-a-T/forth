@@ -14,5 +14,24 @@
 : \halt immediate ;  \ no-op, for now
 #endif
 
+\ Helper: decrement a stack pointer and store data there.
+\ Here because needs modification on systems where the stack
+\ does not predecrement-on-store.
+
+: sp+! ( data sp -- sp-1 )
+  1 cells -
+  tuck ! inline ;
+
+: stackfill ( addr cells -- ) 
+\ fill a stack from the bottom
+\ this overwrites the cell which the address points to. That address is not
+\ part of the stack; we do this for stack underrun protection
+  0 ?do
+    poisoned over !
+    1 cells -
+  loop
+  drop
+;
+
 \ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=
