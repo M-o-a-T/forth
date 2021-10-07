@@ -2,8 +2,6 @@
 \ Copyright 2019 t.porter <terry@tjporter.com.au> and licensed under the BSD license.
 \ Also included is "bin." which prints the binary form of a number with no spaces between numbers for easy copy and pasting purposes
 
-compiletoflash
-
 forth only
 bits also definitions
 

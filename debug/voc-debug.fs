@@ -1,9 +1,10 @@
 \ debug version of some word list scanners
 
+\voc also
+
+#require .wtag debug/voc.fs
+
 \voc also definitions
-
-\ copies of VOC stuff, with debug info
-
 
 : ~search-wl-in-ram ( c-addr u wid -- lfa|0 )
   >r dictionarystart
