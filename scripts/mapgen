@@ -104,12 +104,16 @@ class periph:
     def __init__(self, p):
         self.d = p
         self.name = p.find("name").text
-        self.derivs = []
+        self.derivs = {}
         self.regs = {}
 
         self.analyze(p)
 
         devs[self.name] = self
+
+    def __eq__(self, other):
+        # willfully ignore anything other than regs
+        return self.regs == other.regs
 
     def analyze(self,p):
         self.descr = unws(p.find("description"))
@@ -123,25 +127,34 @@ class periph:
         self.regs[r.name] = r
 
     def add_deriv(self,d):
-        self.derivs[r.name] = d
+        self.derivs[d.name] = d
 
     def emit(self):
-        print("")
-        print(f"\\ {self.descr}")
+        if self.descr:
+            print("")
+            print(f"\\ {self.descr}")
+        if self.par is None and not self.regs:
+            print(f"  \\ {self.name}: no registers found")
+
         if self.par is None:
             print(f"_reg voc: _{self.name}")
-        else:
+        elif self.regs:
             print(f"_{self.par.name} voc: _{self.name}")
         print("")
         if self.regs:
             for r in self.regs.values():
                 r.emit()
+            print(""
             print("  dup set-current")
-            print(f"${self.adr:08x} _{self.name} port: {self.name}")
-        else:
-            print(f"  \\ {self.name}: no registers found")
+            print(""
 
-    def derive_from(p):
+        if self.regs or self.par is None:
+            n = self.name
+        else:
+            n = self.par.name
+        print(f"${self.adr:08x} _{n} port: {self.name}")
+
+    def derive_from(self, p):
         self.par = p
         self.par.add_deriv(self)
 
@@ -157,6 +170,11 @@ class reg:
         self.analyze(p)
 
         g.add_reg(self)
+
+    def __eq__(self, other):
+        if self.name != other.name:
+            return False
+        return self.fields == other.fields
 
     def analyze(self, p):
         self.adr = unhex(p.find("addressOffset"))
@@ -202,6 +220,13 @@ class field:
 
         r.add_field(self)
 
+    def __eq__(self, other):
+        if self.offset != other.offset:
+            return False
+        if self.width != other.width:
+            return False
+        return self.name == other.name
+
     def analyze(self, p):
         self.name = p.find("name").text
         self.descr = unws(p.find("description"))
@@ -223,6 +248,7 @@ class field:
 
 def gen(rp,name):
     global devs
+    global done
 
     print("bits also definitions")
     print("")
@@ -232,17 +258,20 @@ def gen(rp,name):
     for p in rp.iterfind("peripheral"):
         if "derivedFrom" in p.attrib:
             continue
-        gn = p.find("groupName") or p.find("name")
-        if gn.text != name:
-            continue
+        gn = p.find("groupName")
+        if gn is None or gn.text != name:
+            gn = p.find("name")
+            if gn != name:
+                continue
         periph(p)
 
     for p in rp.iterfind("peripheral"):
-        if p.find("group") != name:
+        mn = p.attrib.get("derivedFrom", None)
+        if mn is None:
             continue
-        if "derivedFrom" not in p.attrib:
+        master = devs.get(mn, None)
+        if master is None:
             continue
-        master = devs[p.attrib["derivedFrom"]]
         dev = periph(p)
         dev.derive_from(master)
 
@@ -253,9 +282,12 @@ def gen(rp,name):
             print("\\ ??? no address known")
         else:
             d.emit()
+        for dd in d.derivs.values():
+            dd.emit()
 
     for d in devs.values():
         maybe_emit(d)
+
 
 
 if __name__ == "__main__":
