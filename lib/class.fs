@@ -74,11 +74,6 @@ voc: root-cls
   then postpone definitions
 ;
 
-\ Make the current class compilation context the actual search context.
-: __ ( -- )
-  get-current _csr_ ! immediate
-;
-
 
 \cls definitions
 

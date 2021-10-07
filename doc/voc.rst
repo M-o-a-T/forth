@@ -89,6 +89,15 @@ One use is for debugging: ``??`` and ``.s`` are sticky so you can
 add them to your code freely (assuming that the word before them doesn't
 consume the next token).
 
+__ ( -- )
++++++++++
+
+Look up the next word in the current compilation context.
+
+This is relevant for vocabulary/class inheritance, particularly if you
+recycle words that also occur in Forth itself (or another vocabulary that's
+also on your search list).
+
 @voc ( -- )
 +++++++++++
 

@@ -512,6 +512,11 @@ root-wl set-current   \ Some tools needed in VOC contexts
   get-current (dovoc immediate
 ;
 
+\ Make the current class compilation context the actual search context.
+: __ ( -- )
+  get-current _csr_ ! immediate
+;
+
 2 wflags !
 : root ( -- )   root-wl   (dovoc  immediate ;
 2 wflags !
