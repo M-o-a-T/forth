@@ -431,7 +431,7 @@ task also
 task \int definitions also
 
 \ *** state transition: away from …
-: _table: <builds does> + c@ ;
+: _table: <builds does> @ swap 3 * rshift 7 and ;
 
 0 constant _err
 1 constant _no
@@ -443,14 +443,15 @@ task \int definitions also
 7 constant _ent
 
 _table: state>q
-_no  c, \ =new
-_err c, \ =dead
-_no  c, \ =idle
-_run c, \ =sched
-_chk c, \ =check
-_irq c, \ =irq
-_enq c, \ =wait
-_ent c, \ =timer
+_ent                  \ =timer
+_enq swap 3 lshift or \ =wait
+_irq swap 3 lshift or \ =irq
+_chk swap 3 lshift or \ =check
+_run swap 3 lshift or \ =sched
+_no  swap 3 lshift or \ =idle
+_err swap 3 lshift or \ =dead
+_no  swap 3 lshift or \ =new
+,
 
 task also
 %cls definitions also
