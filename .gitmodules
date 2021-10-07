@@ -1,0 +1,3 @@
+[submodule "cmsis"]
+	path = cmsis
+	url = git@github.com:M-o-a-T/cmsis-svd.git
