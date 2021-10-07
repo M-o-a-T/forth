@@ -1,8 +1,12 @@
 Documentation generation: Sphinx and whatnot
 
-Process AMD's SVD files to generate voc-aware register descriptions.
+Terminal: add a readline frontend for input
 
-more tests for STM32
+SVD files: support enums
+* writing
+* introspection
+
+test on real hardware
 
 add interrupt-based terminal buffers to STM32
 

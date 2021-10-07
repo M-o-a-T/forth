@@ -13,8 +13,8 @@ Generating register defs
 ++++++++++++++++++++++++
 
 The supplied program ``scripts/mapgen`` creates Forth code to build
-register maps. Its arguments are an SVD file, as supplied by
-``git@github.com:posborne/cmsis-svd.git``, and a group or device name.
+register maps. Its arguments are an SVD file and one or more group or
+device names.
 
 Its output will look like this (example: ``mapgen STM32F7x.svd RNG``)::
 
@@ -41,8 +41,8 @@ Its output will look like this (example: ``mapgen STM32F7x.svd RNG``)::
     
     $50060800 _RNG port: RNG
     
-(``&rg`` and ``&bi`` are sub-vocabularies of ``bits`` which contain modified
-and extended words for memory manipulation.)
+(``&rg`` and ``&bi`` are sub-vocabularies of ``bits``, which contain some
+words for memory manipulation.)
 
 All of this means that ``RNG CR IE @`` will retrieve one bit. Likewise, you can
 set or clear this bit by writing ``0 RNG CR IE !`` or `` RNG CR IE +!``.
@@ -59,6 +59,28 @@ Bitfields work similarly::
 
 ``ARPE`` is a single bit, ``CKD`` a bitfield. ``*%`` also works on single
 bits.
+
+Options
+=======
+
+``mapgen`` currently accepts these options:
+
+-v / --voc NAME
++++++++++++++++
+
+Put the peripherals in vocabulary ``NAME`` instead of ``forth``.
+The vocabulary must already exist.
+
+You can use a sub-vocabulary; just quote the space (for the shell).
+
+SVD files
+=========
+
+The core ARM register definitions are available from CMSIS-4, in the
+directory ``svd/core/Device/ARM/SVD/``. The SoC definitions are collected
+in ``svd/soc/data/VENDOR/``.
+
+Run ``git submodule update --init`` to fetch these directories.
 
 Words
 =====
