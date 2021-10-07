@@ -26,9 +26,9 @@ def txt_if(txt):
         return
     return txt.text
 
-def unhex(txt):
+def unhex(txt, default=None):
     if txt is None:
-        return
+        return default
     return int(txt.text, 16)
 
 def acc(f):
@@ -190,7 +190,7 @@ class reg:
     def analyze(self, p):
         self.adr = unhex(p.find("addressOffset"))
         self.access = acc(p.find("access"))
-        self.size = int(p.find("size").text,16)
+        self.size = unhex(p.find("size"), 32)
         self.rgw = "" if self.size == 32 else str(self.size)
 
         self.descr = unws(p.find("description"))
@@ -253,8 +253,16 @@ class field:
     def analyze(self, p):
         self.name = p.find("name").text
         self.descr = unws(p.find("description"))
-        self.offset = int(p.find("bitOffset").text)
-        self.width = int(p.find("bitWidth").text)
+        r = p.find("bitRange")
+        if r is not None:
+            # [23:23]</bitRange>)
+            a,b = r.text.split(":")
+            a,b = int(a[1:]),int(b[:1])
+            self.offset = a
+            self.width = b-a+1
+        else:
+            self.offset = int(p.find("bitOffset").text)
+            self.width = int(p.find("bitWidth").text)
 
     def emit(self):
         fa = self.d.find("access")
