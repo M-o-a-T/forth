@@ -265,8 +265,11 @@ class Miniterm:
         self.line_buf_old = line
 
         text = text.rstrip()
+        line = line.lstrip("\n")
         if line.startswith(text):
             line = line[len(text):]
+        else:
+            sys.stderr.write(f"\nLineD:\n{text!r}\n{line!r}\n")
         self.goahead_flag = None
 
         return line
