@@ -2,6 +2,51 @@
 MoaT Forth
 ==========
 
+--------------
+What's a MoaT?
+--------------
+
+The MoaT system is about tooling a wired bus for home automation using
+simple satellite controllers (where "simple" is anything with a Cortex M0+
+or M3 and at least 64k of Flash; this is the 2020s after all).
+
+Check `the MoaT main archive <https://github.com/M-o-a-T/moat-bus>`_
+to discover more about MoaT itself.
+
+**This** repository contains lots of non-MoaT-specific Forth code that
+supports these satellites, but is (hopefully) suitable for many non-MoaT
+applications.
+
+* There's lots of peripherals to interface to. We want to control I/O
+  ports. And PWM outputs. And PID control loops. And serial ports. And
+  things hanging off I²C or SPI buses. And fancy bit-banged RGB lights.
+  And whatever other interesting peripherals there might be.
+
+  This repository is intended to either contain, or point to, code for
+  doing so.
+
+* Talking to a bus, multiple peripherals, etc., requires interrupts and
+  multitasking and buffers and all that. Or at least, having all that as
+  tested infrastructure makes life a lot easier in the long run.
+
+  This repository contains a sizeable number of these building blocks.
+  More are always welcome, provided that they fit into the rest of the
+  infrastructure.
+
+* Then there's dealing with the actual bus messages. Get a bus address,
+  dispatch a message, send the reply, and all that.
+
+  This is the part that's specific to MoaT. You can find it in the main
+  archive.
+
+* Finally, we want to test all of this without flashing real hardware. It's
+  slow and tends to burn out the Flash storage if you do it excessively.
+  Worse, real-world CI systems tend not to have microcontrollers hanging
+  off them.
+
+  Thus this archive supports Mecrisp-Stellaris, running on Linux, with real
+  (but still cooperative) multitasking instead of a blocking console.
+
 ----------
 Why Forth?
 ----------
@@ -13,17 +58,16 @@ below 20 kBytes.
 You want to introspect *anything* on the target? Just use any
 terminal program.
 
-Its syntax is dead simple. Forth programs consist of words, any characters,
-delimited by spaces. Yes, you can finally write code with emojis as
-commands, though we'd ask you to not to. 🤔
+Forth's syntax is dead simple. Forth programs consist of words (any
+characters), delimited by spaces. Yes, you can finally write code with
+emojis as commands, though we'd ask you to not to. 🤔
 
 On the minus side, Forth does take some getting used to. But so do all
-these elaborate development environments (hello, Arduino).
+these elaborate development environments (hello, Arduino …).
 
 Another and more relevant point against Forth is the lack of libraries for
-common, or not-so-common, peripherals. This project's goal is to fix (some
-of) this, by either including or pointing to a whole lot of Forth code for
-your favorite IoT project.
+common, or not-so-common, peripherals. Well, this project's goal is to fix
+this problem, at least to some extent.
 
 In this author's not-quite-humble opinion, Forth as a language has a lot to
 offer.
@@ -34,31 +78,6 @@ Show me!
 
 You want to dive in? Great. Read the `Get Started <doc/tut/start-here.rst>`_
 document to, well, get started.
-
---------------
-What's a MoaT?
---------------
-
-The MoaT system is about tooling a wired bus for home automation using very
-simple satellite controllers (where "simple" is anything with a Cortex M0+
-or M3 and at least 64k of Flash; this is the 2020s after all).
-
-This repository is about the Forth code that might run on these
-satellites:
-
-* There's a heap of peripherals to interface to. We want to control I/O
-  ports from the bus. And PWM outputs. And PID control loops. And satellite
-  serial ports. And things hanging off I²C or SPI buses. And fancy RGB
-  lights. And whatever other interesting peripherals there might be.
-
-* Talking to a bus, or multiple peripherals at one, or whatever, requires
-  interrupts and multitasking and buffers and all that. Or at least, having
-  all that makes life a lot easier in the long run.
-
-* Then there's dealing with the actual bus messages. Get a bus address,
-  dispatch a message, send the reply, and all that.
-
-  This repository is intended to contain code to support support a lot of this.
 
 I'm not interested in some strange bus!
 +++++++++++++++++++++++++++++++++++++++
