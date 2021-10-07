@@ -51,6 +51,8 @@ bft br <% x5 -% x0 -% 010 x432 *% 1 x76 *% %>!
 
 decimal
 
+bft br ?
+
 forth definitions only
                 
 \ SPDX-License-Identifier: GPL-3.0-only
