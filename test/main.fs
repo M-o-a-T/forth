@@ -84,9 +84,9 @@ test-ram
 #include test/ring.fs
 #endif
 
-test-drop
-
 #if-flag multi
+
+test-drop
 
 compiletoflash
 
@@ -94,12 +94,9 @@ compiletoflash
 #include lib/mt-term.fs
 test-ram
 #include test/mt-term.fs
-
 #endif
 
 test-ram
-
-#include test/mt-term.fs
 
 #if-flag debug
 #if undefined tasks
@@ -124,6 +121,12 @@ test-drop
 #include test/syscall.fs
 
 #endif
+
+#if undefined BFT
+#include test/bits.fs
+#endif
+
+test-drop
 
 \ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=

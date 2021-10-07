@@ -1,0 +1,5 @@
+This directory contains generated files to aid in testing.
+
+Do not check in any of these files. The integrity of the tools making them
+is not tested by comparing them with their previous version, but by
+ensuring that the Forth tests that import them continue to work.

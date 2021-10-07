@@ -115,6 +115,15 @@ free the buffer you need to do that).
 Thus we include a couple of words that help with `non-local error handling
 </doc/errors.rst>`_. Yes, they work when you're multitasking.
 
+Hardware Access
++++++++++++++++
+
+Talking to the bits and bytes of real hardware is, umm, somewhat annoying,
+especially when you need to manually convert random register addresses and
+bit offsets to Forth header files.
+
+Check out our `support for SVD files </doc/bits.rst>`_ which is designed to
+help with this.
 
 The nitty-gritty
 ++++++++++++++++

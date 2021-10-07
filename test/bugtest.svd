@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<device schemaVersion="1.1"
+xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
+xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
+  <name>BugFindCPU</name>
+  <version>1.1</version>
+  <description>Borked CPU</description>
+  <addressUnitBits>8</addressUnitBits>
+  <width>32</width>
+  <!--Register Default Properties-->
+  <size>0x20</size>
+  <resetValue>0x0</resetValue>
+  <resetMask>0xFFFFFFFF</resetMask>
+  <peripherals>
+    <peripheral>
+      <name>BFT</name>
+      <description>Bug Find Test</description>
+      <groupName>BFT</groupName>
+      <baseAddress>0x12343210</baseAddress>
+      <addressBlock>
+        <offset>0x0</offset>
+        <size>0x400</size>
+        <usage>registers</usage>
+      </addressBlock>
+      <interrupt>
+        <name>BUG</name>
+        <description>A realy buggy interrupt</description>
+        <value>42</value>
+      </interrupt>
+      <registers>
+        <register>
+          <name>BR</name>
+          <displayName>Buggy Register</displayName>
+          <description>test register</description>
+          <addressOffset>0x4</addressOffset>
+          <size>0x20</size>
+          <access>read-write</access>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>X0</name>
+              <description>Bit Zero</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-write</access>
+            </field>
+            <field>
+              <name>X1</name>
+              <description>Bit One</description>
+              <bitOffset>1</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-write</access>
+            </field>
+            <field>
+              <name>X432</name>
+              <description>Bits 4:2</description>
+              <bitOffset>2</bitOffset>
+              <bitWidth>3</bitWidth>
+              <access>read-write</access>
+            </field>
+            <field>
+              <name>X5</name>
+              <description>Bit 5</description>
+              <bitOffset>5</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-write</access>
+            </field>
+            <field>
+              <name>X76</name>
+              <description>Bits 7:6</description>
+              <bitOffset>6</bitOffset>
+              <bitWidth>2</bitWidth>
+              <access>read-write</access>
+            </field>
+            <field>
+              <name>X8</name>
+              <description>Bit 8</description>
+              <bitOffset>8</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+
+        <register>
+          <name>DDR</name>
+          <displayName>DDR</displayName>
+          <description>dummy data register</description>
+          <addressOffset>0x8</addressOffset>
+          <size>0x20</size>
+          <access>read-only</access>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>DDDATA</name>
+              <description>Random data in randomness</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+            </field>
+          </fields>
+        </register>
+
+      </registers>
+    </peripheral>
+  </peripherals>
+</device>
+
