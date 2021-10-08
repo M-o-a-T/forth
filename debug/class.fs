@@ -2,6 +2,14 @@
 
 forth only definitions
 
+#if defined .all
+#end
+#endif
+
+#if undefined .idd
+#include debug/voc.fs
+#endif
+
 \voc also
 \cls also
 
