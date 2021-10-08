@@ -143,6 +143,9 @@ that you can teach it to assemble your main program just by a couple of
 flags, or perhaps a configuration file. Learn about ours `here
 </doc/terminal.rst>`_.
 
+Talking about flags: our code uses some of them, to control what actually
+gets sent. `Check this list </doc/flags.rst` for details.
+
 Stop here
 =========
 
