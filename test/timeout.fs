@@ -6,6 +6,10 @@
 #include lib/timeout.fs
 #endif
 
+#if undefined *delay
+#include debug/timeout.fs
+#endif
+
 :task: t1
   ." T1 !" cr
   10000 task sleep
@@ -44,9 +48,18 @@
 
 time first
 
+:task: tm
+  task yield
+  3 *delay
+  ." DLY: " . . . cr
+  task yield
+  3 *delay
+  ." DLY: " . . . cr
+;
+
 \ now let's do some real tests
 
-t1 start  t2 start  t3 start
+t1 start  t2 start  t3 start  tm start
 
 task also
 : yy
