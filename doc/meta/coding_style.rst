@@ -106,6 +106,29 @@ systems.
 Please see the `opinion file <doc/meta/opinion.rst>`_ if you happen to
 disagree.
 
+Structure
++++++++++
+
+In the beginning, add a few lines of comments about what the code in this
+file does, and why.
+
+Protect the whole file against inclusion if it has already been sent. You
+typically do this::
+
+    #if defined my-voc
+    #end
+    #then
+
+    voc my-voc:
+    …
+
+Start and end with ``forth only definitions``.
+
+At the end of the file, add an `SPDX License Identifier <https://spdx.dev/>`_
+and do ``#ok depth 0=`` to protect against spurious nonsense left on the
+stack. This line also serves as our standard end-of-file marker.
+
+
 ---------------
 Code management
 ---------------
@@ -121,6 +144,30 @@ That being said, if contributors object to Github on philosopical or even
 practical grounds, it's certainly possible to mirror or move the code
 someplace else.
 
+Commits
+=======
+
+Commits should be self-contained and contain no unrelated changes, if at all
+possible.
+
+Sometimes you fix bug C D and E while chasing bug B in pursuit of feature
+A. Please do your very best to collect these changes into at five commits,
+not four, and certainly not one. Non-material changes (a typo here, an
+improved comment there, and a fixed indent over yonder) may be collected
+into a single commit, but don't mash them with functional or documentation
+changes.
+
+Updates to working code, its documentation, and the tests for that code
+may be in the same commit, but they're not required to be.
+
+There's no requirement for every commit to work. However, we'd like to
+require every *tagged* version to work. Thus, please run at least ``make
+test`` before updating the main version tag or submitting a merge.
+
+We don't squash-merge or otherwise mutilate our project history. Don't
+rebase public code.
+
+
 Comments
 ========
 
@@ -128,7 +175,7 @@ The basic commenting style this project strives to achieve is mentioned
 above.
 
 *Do not* write words without adding a comment WRT what it does. This
-applies to both its stack effects and its functions.
+applies to both its stack effects and its function.
 
 *Do not* write elaborate comments on how to use a word, or a collection of
 words. That stuff belongs in the accompanying documentation.
@@ -140,7 +187,7 @@ wrong, write a comment with X in it and explain.
 
 *Do not* add issue numbers and other random stuff to the code. Finding the
 reason for the existence of any single line of code is easy, that's what
-``git blame`` is for.
+version control and ``git blame`` are for.
 
 -----------
 Documenting
