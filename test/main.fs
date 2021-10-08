@@ -126,6 +126,8 @@ test-drop
 #include test/bits.fs
 #endif
 
+#include test/mach-id.fs
+
 test-drop
 
 \ SPDX-License-Identifier: GPL-3.0-only

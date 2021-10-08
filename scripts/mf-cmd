@@ -53,6 +53,14 @@ async def main(command, echo, encoding, filter, eol, raw, exit_char, menu_char, 
     else:
         filters = ['direct']
 
+    for f in flag:
+        if f.startswith("machid="):
+            break
+    else:
+        import random
+        if not isinstance(flag,list):
+            flag=[*flag]
+        flag.append(f"machid={random.randint(1<<20,(1<<31)-1)}")
     term = Miniterm(command=command, echo=echo, eol=eol.lower(), filters=filters, go_ahead=go_ahead, file=exec, batch=batch, logfile=log, develop=develop, flags=flag, verbose=verbose)
     term.exit_character = chr(exit_char)
     term.menu_character = chr(menu_char)

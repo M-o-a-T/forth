@@ -24,6 +24,17 @@ The real hardware is of this type.
 You might want to use this value to construct a filename for including
 hardware definitions.
 
+machid
+++++++
+
+Set this flag to a 32-bit number on Linux-emulated systems.
+
+This value defaults to a random number if not set.
+
+Don#t use oon "real" hardware, as that has a built-in random ID.
+
+See ``lib/mach-id.fs`` for details.
+
 debug
 +++++
 
