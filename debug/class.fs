@@ -1,10 +1,5 @@
 \ Debug classes.
 
-#if \voc undefined ~voc:
-#include debug/voc-debug.fs
-#endif
-
-
 forth only definitions
 
 \voc also
