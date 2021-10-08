@@ -1,0 +1,23 @@
+#!/bin/bash
+set -eu
+
+DEV="$1"
+HW=stm
+
+F="forget debug"
+
+trap 'echo "ERROR $FLG"; exit 1' ERR
+
+while read FLG ; do
+
+echo TEST $FLG
+
+if ! env PYTHONPATH=. scripts/mf-term -x test/main.fs -F erase -F real -F hardware=$HW $FLG  -b -q -g ok. "$DEV"
+then
+	env PYTHONPATH=. scripts/mf-term -x test/main.fs -F erase -F real -F hardware=$HW $FLG -D -g ok. "$DEV" </dev/tty >/dev/tty 2>&1
+	exit 1
+fi
+
+done < <(scripts/permute $F)
+
+echo OK
