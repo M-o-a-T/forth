@@ -42,6 +42,29 @@ the bathroom mirror? Fine, but let's please make sure that our
 over-the-wire upgrade *cannot* fail and that the thing will *not* hang due
 to a problem we didn't (or worse, cannot) test for.
 
+Licensing
+=========
+
+Call me an open source radical, but I have a rather strong opinion about
+the licensing mess we find ourselves in.
+
+To put it simply: if you publish your code under a MIT-ish license, then
+you're perfectly OK with people who play with it, enhance it, profit from
+it etc., but don't share *their* work with the community they took it from.
+
+Guess what? I don't like the attitude of people who do that. So I don't
+license my code that way. Easy decision.
+
+If your decision is different, well, then you can write your own code.
+
+Copyright assignment
+++++++++++++++++++++
+
+Doesn't work, either practically (plenty of people who would otherwise
+contribute won't sign such a thing) or legally (plenty of countries simply
+don't allow your copyright to be transferred to somebody else – you create
+it, you own it).
+
 Rants aside …
 =============
 
