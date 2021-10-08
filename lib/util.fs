@@ -241,6 +241,7 @@ forth definitions
 
 forth definitions
 : init init %init! ;
+: forgetram forgetram %init! ;
 \voc ignore
 
 #endif
