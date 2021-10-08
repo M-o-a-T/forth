@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -eu
+
+# usage: gen_all src dest
+
+
+S="$1"
+D="$2"
+
+for fs in $(ls "$S") ; do
+    fl="${fs,,[A-Z]}"
+    # the ,, operator lowercases all matching letters
+    f="$(basename "$fl" .svd)"
+    test "$fl" = "$f" && continue
+
+    mkdir -p "$D/$f"
+    echo $f
+    for r in $(scripts/mapgen "$S/$fs") ; do
+        scripts/mapgen "$S/$fs" $r > "$D/$f/${r,,[A-Z]}.fs"
+    done
+done
