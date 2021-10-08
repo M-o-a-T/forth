@@ -72,14 +72,14 @@ monotonic object: systime
 \ ****************
 
 0 variable next-hour
-%queue object: hourjobs
+%queue object: hourq
 
 :task: hourtask
   now next-hour !
   begin
     3600 1000000 * next-hour +!
     next-hour @ now -  task sleep 
-    hourjobs all
+    hourq all
   again
 ;
 :init hourtask start ; 
@@ -96,7 +96,7 @@ monotonic object: systime
   ?dup if
     \ How far into the current hour is hourtask?
     3600 1000000 * next-hour @ now - -
-    swap 1 ?do  hourjobs wait  loop
+    swap 1 ?do  hourq wait  loop
     \ … which is our additional delay
     task sleep
   then
