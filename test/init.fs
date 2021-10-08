@@ -1,9 +1,3 @@
-#if-flag erase
-#delay 3
-#-ok eraseflash
-#delay 0.5
-#endif
-
 #include sys/init.fs
 
 compiletoflash

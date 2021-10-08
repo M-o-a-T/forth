@@ -6,6 +6,12 @@
 \ We need to load the "vis" extension first, (a) because it doesn't upcall
 \ 'init', second because currently (2021-09) there's a bug in Mecrisp(?)
 \ that prevents it from working when it's not loaded first.
+#if-flag erase
+#delay 3
+#-ok eraseflash
+#delay 0.5
+#endif
+
 #include sys/voc.fs
 
 compiletoflash
