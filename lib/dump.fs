@@ -5,6 +5,10 @@
 forth only definitions
 #endif
 
+#if token dump find drop
+#end
+#endif
+
 : u.4 ( u -- ) 0 <# # # # # #> type ;
 : u.2 ( u -- ) 0 <# # # #> type ;
 

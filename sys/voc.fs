@@ -11,7 +11,11 @@
 \ ??-* => search-in-*
 \ *-wl => *-wordlist
 
-compiletoflash      \ This extension must be compiled in flash.
+#if token \voc find drop
+#end
+#endif
+
+compiletoflash      \ This extension must be compiled to flash.
 
 hex
 
