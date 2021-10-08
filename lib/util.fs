@@ -216,7 +216,7 @@ forth definitions
 
 : (it) ( adr -- adr )
 \ test one word
-    dup lfa>nfa count s" %init" compare if
+    dup lfa>nfa count s" %init" compare over smudged? and if
       ( addr )
 
 #if-flag debug-boot
