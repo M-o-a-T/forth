@@ -116,9 +116,7 @@ forth definitions
   reset \ Trap execution
 ;
 
-: ct-init ['] ct-irq irq-fault ! ;
-: init ct-init init ;
-ct-init
+:init ['] ct-irq irq-fault ! ;
 
 #endif
 
