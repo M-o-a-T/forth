@@ -272,7 +272,7 @@ class field:
             fa = 3 if fa.text == "read-write" else 2 if fa.text == "write-only" else 1 if fa.text == "read-only" else unknown(fa.text)
 
         if self.width == 1:
-            print(f"        &bi{self.reg.rgw} item \\ {self.offset}\n    ${self.offset} constant {self.name} \\ {self.descr}")
+            print(f"        &bi{self.reg.rgw} item \\ {self.offset}\n    ${self.offset:x} constant {self.name} \\ {self.descr}")
         else:
             print(f"        &bf{self.reg.rgw} item \\ {self.width+self.offset-1}:{self.offset}\n    ${(self.width<<5)+self.offset:x} constant {self.name} \\ {self.descr}")
 
