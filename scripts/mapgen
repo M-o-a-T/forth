@@ -21,6 +21,13 @@ def unws(txt):
         return ""
     return _ws.sub(" ",txt.text)
 
+def badid(txt):
+    if " " in txt:
+        return True
+    if "/" in txt:
+        return True
+    return False
+
 def txt_if(txt):
     if txt is None:
         return
@@ -68,7 +75,7 @@ def main(ctx, args, **kw):
             if "derivedFrom" in p.attrib:
                 continue
             g = p.find("groupName")
-            if g is None:
+            if g is None or badid(g.text):
                 g = p.find("name")
             if g.text in seen:
                 continue
@@ -110,6 +117,8 @@ class periph:
         self.d = p
         self.name = p.find("name").text
         self.groupName = txt_if(p.find("groupName"))
+        if badid(self.groupName):
+            self.groupName = self.name
         self.derivs = {}
         self.regs = {}
 
@@ -289,7 +298,6 @@ def gen(rp, names=(), voc=None, **kw):
     for p in rp.iterfind("peripheral"):
         if "derivedFrom" in p.attrib:
             continue
-        gn = p.find("groupName")
         periph(p)
 
     for p in rp.iterfind("peripheral"):

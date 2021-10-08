@@ -2,9 +2,11 @@
 set -eu
 
 DEV="$1"
-HW=stm
+ARCH=$2
+VENDOR=$3
+MCU=$4
 
-F="forget debug"
+F="" # no variants, for now
 
 trap 'echo "ERROR $FLG"; exit 1' ERR
 
@@ -12,9 +14,9 @@ while read FLG ; do
 
 echo TEST $FLG
 
-if ! env PYTHONPATH=. scripts/mf-term -x test/main.fs -F erase -F real -F hardware=$HW $FLG  -b -q -g ok. "$DEV"
+if ! env PYTHONPATH=. scripts/mf-term -x test/main.fs -F erase -F arch=$ARCH -F real=$VENDOR -F mcu=$MCU $FLG  -b -q -g ok. "$DEV"
 then
-	env PYTHONPATH=. scripts/mf-term -x test/main.fs -F erase -F real -F hardware=$HW $FLG -D -g ok. "$DEV" </dev/tty >/dev/tty 2>&1
+	env PYTHONPATH=. scripts/mf-term -x test/main.fs -F erase -F arch=$ARCH -F real=$VENDOR -F mcu=$MCU $FLG -D -g ok. "$DEV" </dev/tty >/dev/tty 2>&1
 	exit 1
 fi
 

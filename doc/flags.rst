@@ -8,21 +8,24 @@ Core flags
 This code base uses several "standard" flags to control what gets sent to
 the device in question, or to the emulated Mecrisp under test.
 
-real=TYPE
+arch=ARCH
 +++++++++
+
+CPU (sub)architecture.
+
+Architecture-specific register files can be included from ``./svd/fs/core/{arch}/``.
+
+real=VENDOR
++++++++++++
 
 This code is running on "real" hardware, as opposed to an emulator.
 
-You might want to use this value to construct a filename for including
-hardware definitions.
-
-hardware=VARIANT
-++++++++++++++++
+mcu=VARIANT
++++++++++++
 
 The real hardware is of this type.
 
-You might want to use this value to construct a filename for including
-hardware definitions.
+MCU-specific register files can be included from ``./svd/fs/soc/{real}/{mcu}/``.
 
 machid
 ++++++

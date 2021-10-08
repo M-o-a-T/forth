@@ -1,7 +1,8 @@
-all: prep regs test
+all: prep test
 
+ARCH ?= armcm3
 VENDOR ?= STMicro
-DEVICE ?= STM32F103xx
+MCU ?= STM32F103xx
 
 prep:: .done
 
@@ -18,23 +19,16 @@ prep:: .done/gen_soc_${VENDOR}
 	scripts/gen_all ./svd/soc/data/${VENDOR}/ ./svd/fs/soc/${VENDOR}/
 	touch .done/gen_soc_${VENDOR}
 
-regs: regs_core regs_soc
-
-regs_core:
-	mkdir -p 
-	scripts/mapgen_all
-	touch regs_core
-
-test: test/gen/bugtest.fs
+test: prep test/gen/bugtest.fs
 	scripts/test
 
-files: test/gen/bugtest.fs
+files: prep test/gen/bugtest.fs
 
 test/gen/bugtest.fs: scripts/mapgen test/bugtest.svd
 	scripts/mapgen test/bugtest.svd BFT > test/gen/bugtest.fs
 
 DEV ?= /dev/ttyUSB0
-rtest:
-	scripts/test_real ${DEV}
+rtest: prep
+	scripts/test_real ${DEV} ${ARCH} ${VENDOR} ${MCU}
 
-.PHONY: files test all regs prep
+.PHONY: files test all prep
