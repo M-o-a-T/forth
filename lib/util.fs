@@ -214,29 +214,69 @@ forth definitions
   drop 0
 ;
 
+: (it) ( adr -- adr )
+\ test one word
+    dup lfa>nfa count s" %init" compare if
+      ( addr )
+
+#if-flag debug-boot
+      dup ." found " hex. cr
+#endif
+      \ run it in its voc context
+      dup lfa>wtag tag>wid voc-context !
+      dup lfa>xt execute
+#if-flag debug-boot
+      ." done " depth . cr
+#endif
+    else  \ check whether the word is in a voc but not itself one
+      ( addr )
+#if-flag debug-boot
+      dup ." check " hex. dup lfa>nfa ctype space
+#endif
+      dup obj-lfa>?cwid ( lfa cwid|0 )
+      ?dup if
+#if-flag debug-boot
+        ." yes "
+#endif
+        over lfa>xt execute
+#if-flag debug-boot
+        ." setup "
+#endif
+        !setup
+#if-flag debug-boot
+        ." done" cr
+#endif
+      else
+#if-flag debug-boot
+        ." no" cr
+#endif
+      then
+    then
+  ( addr )
+;
+
 : %init! ( -- )
+
 \ run everything named "%init"
 \ also setup all objects
 \ ignore RAM here, this is called during init
 
-  dictionarystart begin ( addr )
-    dup lfa>nfa count s" %init" compare if
-      ( addr )
-      \ run it in its voc context
-      dup lfa>wtag tag>wid voc-context !
-      dup lfa>xt execute
-    else  \ check whether the word is in a voc but not itself one
-      ( addr )
-      dup obj-lfa>?cwid ( lfa cwid|0 )
-      ?dup if
-        over lfa>xt execute
-        !setup
-      then
-    then
-  ( addr )
+  compiletoflash
+  dictionarystart 
+#if-flag debug-boot
+  ." Start INIT at " depth .
+#endif
+  begin ( addr )
+    (it)
   dictionarynext until
   drop
+#if-flag debug-boot
+  ." END. Call 'forth ..''"
+#endif
   [ ' forth call, ' .. call, ]
+#if-flag debug-boot
+  ." END INIT" cr
+#endif
 ;
 
 forth definitions

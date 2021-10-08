@@ -32,6 +32,13 @@ Include various files for introspection, including disassembly.
 Using this flag on real hardware is not recommended, as the Flash image may
 easily get larger than 64k.
 
+debug-boot
+++++++++++
+
+Make the startup INIT more verbose.
+
+Use this only if your startup code goes splat.
+
 ram
 +++
 
