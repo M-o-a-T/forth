@@ -84,6 +84,11 @@ monotonic object: systime
 ;
 :init hourtask start ; 
     
+: micros ( µsec -- )
+  task sleep ;
+
+: millis ( msec -- )
+  1000 *  task sleep ;
 
 : seconds ( sec -- )
   1000000 *  task sleep ;
@@ -101,8 +106,6 @@ monotonic object: systime
     task sleep
   then
 ;
-
-
 
 forth definitions only
 

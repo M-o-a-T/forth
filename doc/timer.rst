@@ -48,46 +48,72 @@ Return the current system timer, in microseconds.
 
 ``-1`` is skipped.
 
-+++++++++++++++
-Longer timeouts
-+++++++++++++++
+\*delay ( n -- n*delay )
+------------------------
 
-time hour
----------
+Measure the round-trip through ``yield`` N times.
 
-This queue is triggered by a background task every hour. Just wait on
-it in a loop::
+This word leaves N hopefully-small integers (in microseconds) on the stack,
+for the caller to print / average / maximize / agonize about.
 
-	:task: daily
-	  begin
-	    \ do whatever
-	    24 0 do  time hour wait loop
-	  again
-	;
+++++++
+Timers
+++++++
 
-time next-hour
---------------
+Timers are tied to tasks. Any task can be in the "wait for some time to
+pass" state.
 
-This variable contains the ``now`` value of the next time when all jobs in
-the ``time hour`` queue will be started. You can use it to calculate how
-long to delay, for more accurate long-term timing.
+If you want to wait for a timer *or* some event, get an interrupt to
+trigger on the event; its code should set a flag and then simply wake up
+your task prematurely, with ``your-task continue``. This is interrupt safe.
 
-time hours
-----------
+time micros ( n -- )
+--------------------
 
-This helper delays your task for this number of hours, exactly. Your system
-is unlikely to run continuously for a quarter million years (OK, 245146,
-but still), so there's no practical upper limit.
+Wait for this number of microseconds to pass. In the interest of forward
+compatibility, please pretend that it can't do more than 50000 µs (50 ms).
 
-time minutes
-------------
+Don't confuse this word with Arduino; there, the function with this name
+would simply return a microsecond counter. We don't do that.
 
-Same, but minutes. Don't use this for delays longer than 60 (OK, actually
-71) minutes.
+Don't assume that this is in any way exact; your value is a lower bound.
+Check the data from ``*delay``, or write your own delay estimator along
+its lines, for the actual accurracy of ``micros``.
 
-time seconds
-------------
+time millis ( n -- )
+--------------------
 
-Same, but seconds. Don't use this for delays longer than 60 seconds. OK,
-the real number is 4294, but let's pretend you didn't read that.
+Same, but milliseconds. In the interest of forward compatibility, please
+pretend that it's no good for delays of more than a minute (60000).
 
+Don't confuse this word with Arduino; there, the function with this name
+would simply return a millisecond counter. We don't do that.
+
+time seconds ( n -- )
+---------------------
+
+Same, but seconds. Don't use this for delays (much) longer than 60 seconds.
+The real upper bound is likely to be higher, but the details vary depending
+on the implementation.
+
+time minutes ( n -- )
+---------------------
+
+Same, but minutes. Don't use this for delays (much) longer than 60 minutes.
+Again, the actual limit may be higher.
+
+time hours ( n -- )
+-------------------
+
+Same, but hours.
+
+There is no reasonable upper bound for ``n``; at most, it is internally
+converted to seconds, and your system will not run continuously for 136
+years.
+
+time days ( n -- )
+------------------
+
+Not implemented. Let's be real – I *told* you there's no upper limit for
+``hours``, didn't I? Thus, you can write ``24 * time hours`` yourself,
+should you need it.

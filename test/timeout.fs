@@ -10,39 +10,41 @@
 #include debug/timeout.fs
 #endif
 
+time also
+
 :task: t1
   ." T1 !" cr
-  10000 task sleep
+  10 millis
   ." T1 A" cr
-  20000 task sleep
+  20 millis
   ." T1 B" cr
-  30000 task sleep
+  30 millis
   ." T1 C" cr
-  40000 task sleep
+  40 millis
   ." T1 D" cr
 ;
 
 :task: t2
   ." T2 !" cr
-  30000 task sleep
+  30 millis
   ." T2 A" cr
-  20000 task sleep
+  20 millis
   ." T2 B" cr
-  10000 task sleep
+  10 millis
   ." T2 C" cr
-  40000 task sleep
+  40 millis
   ." T2 D" cr
 ;
 
 :task: t3
   ." T3 !" cr
-  5000 task sleep
+  5 millis
   ." T3 A" cr
-  55000 task sleep
+  55 millis
   ." T3 B" cr
-  100000 task sleep
+  100 millis
   ." T3 C" cr
-  1000 task sleep
+  1 millis
   ." T3 D" cr
 ;
 
