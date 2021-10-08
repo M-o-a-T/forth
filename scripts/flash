@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# This program flashes a Blue Pill.
+# Take a TTL-Serial adapter with 3.3V output.
+# Connect:
+#   A10   -- Tx
+#   A9    -- Rx
+#   BOOT0 -- BOOT0
+#   R     -- RTS
+#   G     -- GND
+#   3     -- 3.3V
+# BOOT0 is the center pin of the outer jumper (i.e. the one not next to the Reset button).
+
+if test $# -lt 1 ; then
+    echo Usage: $0 /dev/ttyUSBx moat-term-arguments…
+    exit 1
+fi
+
+T="$1"
+shift
+
+test -v MECRISP || MECRISP=../mecrisp-stellaris/stm32f103-ra/mecrisp-stellaris-stm32f103.bin
+set -exu
+stm32flash -R -i 'rts,-dtr,-rts,,:rts,dtr,-rts' -v -w "$MECRISP" "$T"
+
+exec scripts/mf-term "$@" "$T"

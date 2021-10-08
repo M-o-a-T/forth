@@ -1,11 +1,54 @@
+======================
 So, where do we start?
 ======================
+
+++++++++++++
+Give it a go
+++++++++++++
+
+Get Mecrisp Stellaris. You can download the latest release (including
+pre-built binaries) it from Sourceforge, or clone MoaT's archive from `its
+Github copy <git@github.com:M-o-a-T/mecrisp-stellaris.git>`_ and build it
+yourself.
+
+Install the ``qemu-user-static`` package.
+
+Run ``scripts/mf-cmd -x test/main.fs -F multi -F debug  -D -g ok.
+../mecrisp-stellaris/linux-ra/mecrisp-stellaris-linux``. This starts a
+Linux version of Mecrisp Stellaris, force-feeds it a lot fo additional
+Forth code, and then reports "END OF TEST. SUCCESS.". At this point you
+can experiment with all the festures described in the rest of this
+document.
+
+For running our code on Real Hardware you need a Mecrisp
+Stellaris-compatible controller with at least 64k of Flash, and a serial
+adapter (if your development board doesn't already include it).
+
+Our Flash script expects RTS to be connected to the controller's ``RESET``
+pin and DTR to ``Boot0``. You can do that manually (i.e. remove the Boot
+jumper and/or press the Reset button) if necessary.
+
+Run ``env
+MECRISP=../mecrisp-stellaris/stm32f103-ra/mecrisp-stellaris-stm32f103.bin
+scripts/flash /dev/ttyUSB0 -x test/main.fs -F real  -D -g ok.``. With any
+luck, this should reset your board to Flash mode, flash Mecrisp, then feed
+a non-debug and non-multitask version of the core our code to it.
+(Multitask support is on the TODO list; the multitask mainloop can't
+poll the serial port fast enough.)
+
+You can send additional files by typing Control-T followed by Control-U.
+
+++++++++++++++++++
+Included Batteries
+++++++++++++++++++
+
+This section provides an overview on what's in this archive, and why.
 
 We'll start from the bottom up, because that's how you build a Forth
 system. Ours is no different. You might want to skim over the stuff you
 think you don't need, but chances are that you'll need it anyway. 😛
 
-Actually, this documentation skips the bottom two rungs of the ladder.
+Actually, we skip the bottom two rungs of the ladder.
 
 It will not teach you how to write Forth programs in general. An old but
 still very good primer is `Starting FORTH
