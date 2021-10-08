@@ -45,7 +45,7 @@ compiletoflash
 
 #require r>ctx sys/base.fs
 #if-flag debug
-#require ct lib/crash.fs
+#require ct debug/crash.fs
 #if-flag multi
 #include debug/multitask.fs
 #endif

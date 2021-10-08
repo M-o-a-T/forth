@@ -172,7 +172,7 @@ forth definitions
 \ #include debug/voc.fs
 \ #endif
 
-\ #require .idd lib/crash.fs
+\ #require .idd debug/crash.fs
 \voc definitions also
 
 : !setup ( cvoc obj -- )

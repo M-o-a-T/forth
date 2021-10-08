@@ -1,6 +1,6 @@
 \ debug multitasking: add `?` to tasks
 
-#require .word fs/lib/crash.fs
+#require .word debug/crash.fs
 #if \voc \d-list undefined ?
 #include debug/linked-list.fs
 #endif

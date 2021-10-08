@@ -26,7 +26,7 @@ forth definitions only  decimal
 
 #if undefined .word
 #if-flag debug
-#include lib/crash.fs
+#include debug/crash.fs
 #else
 : .word drop inline ;
 #endif
@@ -36,7 +36,7 @@ forth definitions only  decimal
 #require class: lib/class.fs
 #require d-list-item lib/linked-list.fs
 #if-flag debug
-#require .word lib/crash.fs
+#require .word debug/crash.fs
 #endif
 
 voc: task

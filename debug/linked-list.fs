@@ -1,6 +1,6 @@
 \ Add `?` to linked lists
 
-#require .word-off lib/crash.fs
+#require .word-off debug/crash.fs
 
 \voc \d-list definitions also
 
