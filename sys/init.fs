@@ -12,6 +12,13 @@
 #delay 0.5
 #endif
 
+#if-flag mcu=STM32F103xx
+compiletoram
+#include snips/72mhz.bluepill.fs
+72mhz
+#endif
+compiletoflash
+
 #include sys/voc.fs
 
 compiletoflash
