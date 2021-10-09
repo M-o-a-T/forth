@@ -29,11 +29,11 @@ bits also definitions
 : h.8 ( u -- ) base @ hex swap  u.8  base ! ;
 : b.n ( u n -- ) base @ binary -rot  u.n  base ! ;
 : b.0 ( u -- ) base @ binary swap  u.0  base ! ;
-: b.1 ( u -- ) base @ binary swap  u.1  base ! ;
-: b.2 ( u -- ) base @ binary swap  u.2  base ! ;
-: b.3 ( u -- ) base @ binary swap  u.3  base ! ;
-: b.4 ( u -- ) base @ binary swap  u.4  base ! ;
-: b.8 ( u -- ) base @ binary swap  u.8  base ! ;
+\ : b.1 ( u -- ) base @ binary swap  u.1  base ! ;
+\ : b.2 ( u -- ) base @ binary swap  u.2  base ! ;
+\ : b.3 ( u -- ) base @ binary swap  u.3  base ! ;
+\ : b.4 ( u -- ) base @ binary swap  u.4  base ! ;
+\ : b.8 ( u -- ) base @ binary swap  u.8  base ! ;
 
 _rg definitions
 \voc also
