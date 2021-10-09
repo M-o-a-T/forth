@@ -40,7 +40,7 @@ test-ram
 
 \ call tracing, system abort exceptions
 #if undefined ct
-#include lib/crash.fs
+#include debug/crash.fs
 #endif
 
 \ word disassembly
