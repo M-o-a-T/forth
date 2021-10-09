@@ -27,6 +27,12 @@ The real hardware is of this type.
 
 MCU-specific register files can be included from ``./svd/fs/soc/{real}/{mcu}/``.
 
+clock=HZ
+++++++++
+
+The frequency of your decice's system clock crystal. Used for baud rate and
+systick calculation.
+
 machid
 ++++++
 

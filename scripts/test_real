@@ -5,6 +5,7 @@ DEV="$1"
 ARCH=$2
 VENDOR=$3
 MCU=$4
+CLK=$5
 
 F="" # no variants, for now
 
@@ -14,9 +15,9 @@ while read FLG ; do
 
 echo TEST $FLG
 
-if ! env PYTHONPATH=. scripts/mf-term -x test/main.fs -F erase -F arch=$ARCH -F real=$VENDOR -F mcu=$MCU $FLG  -b -q -g ok. "$DEV"
+if ! env PYTHONPATH=. scripts/mf-term -x test/main.fs -F erase -F arch=$ARCH -F real=$VENDOR -F mcu=$MCU -F clock=$CLK $FLG  -b -q -g ok. "$DEV"
 then
-	env PYTHONPATH=. scripts/mf-term -x test/main.fs -F erase -F arch=$ARCH -F real=$VENDOR -F mcu=$MCU $FLG -D -g ok. "$DEV" </dev/tty >/dev/tty 2>&1
+	env PYTHONPATH=. scripts/mf-term -x test/main.fs -F erase -F arch=$ARCH -F real=$VENDOR -F mcu=$MCU -F clock=$CLK $FLG -D -g ok. "$DEV" </dev/tty >/dev/tty 2>&1
 	exit 1
 fi
 

@@ -3,6 +3,7 @@ all: prep test
 ARCH ?= armcm3
 VENDOR ?= STMicro
 MCU ?= STM32F103xx
+CLK ?= 72000000
 
 prep:: .done
 
@@ -29,6 +30,6 @@ test/gen/bugtest.fs: scripts/mapgen test/bugtest.svd
 
 DEV ?= /dev/ttyUSB0
 rtest: prep
-	scripts/test_real ${DEV} ${ARCH} ${VENDOR} ${MCU}
+	scripts/test_real ${DEV} ${ARCH} ${VENDOR} ${MCU} ${CLK}
 
 .PHONY: files test all prep
