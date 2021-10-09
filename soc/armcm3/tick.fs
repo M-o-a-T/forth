@@ -32,7 +32,15 @@ bits definitions also
 \ counter values. If the current value is not 
 
 compiletoflash
+forth only
+bits also
+
+#if defined tick
+tick definitions also
+#else
+definitions
 voc: tick
+#endif
 
 #if undefined gcd
 : gcd ( a b -- gcd )
