@@ -68,7 +68,7 @@ class Miniterm:
     line_buf:str = None
     goahead_buf:str = ""
     goahead_flag:anyio.Event = None
-    goahead_delay:float = 0.3
+    goahead_delay:float = 0.5
     layer:int = 0 # skipped nested '#if…' statements
     layer_:int = 0 # total nested '#if…' statements
     console = None
