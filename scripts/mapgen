@@ -36,7 +36,7 @@ def txt_if(txt):
 def unhex(txt, default=None):
     if txt is None:
         return default
-    return int(txt.text, 16)
+    return int(txt.text, 0) # recognizes prefixes like 0x
 
 def acc(f):
     if f is not None:
