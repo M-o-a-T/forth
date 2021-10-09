@@ -5,6 +5,10 @@
 forth only
 bits also definitions
 
+#if defined u.n
+#end
+#endif
+
 \ -------------------
 \  Beautiful output
 \ -------------------
