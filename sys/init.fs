@@ -13,9 +13,13 @@
 #endif
 
 #if-flag mcu=STM32F103xx
+#if $40013808 @ 200 >
+\ if this is already in-core remember not to do it again
+#set-flag on72
+#else
 compiletoram
 #include snips/72mhz.bluepill.fs
-72mhz
+#endif
 #endif
 compiletoflash
 
@@ -48,6 +52,13 @@ compiletoflash
 #if-flag multi
 #include sys/multitask.fs
 #include lib/syscall2.fs
+#endif
+
+#if-flag mcu=STM32F103xx
+#if-flag !on72
+compiletoflash
+#include snips/72mhz.bluepill.fs
+#endif
 #endif
 
 #if-flag multi
