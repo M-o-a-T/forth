@@ -4,10 +4,6 @@
 forth only
 bits definitions also
 
-#if-flag !arch
-#error ARCH unknown
-#endif
-
 #if-flag !clk
 #error CLK unknown
 #endif
