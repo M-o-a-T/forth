@@ -32,7 +32,13 @@ _rg voc: &rg
   -rot and or swap !
 ;
 : %>! ( addr bits mask )
-  __ m!  postpone previous
+  state @ if \ compiling
+    __ postpone m!
+  else
+    __ m!
+  then
+  postpone previous
+  immediate
 ;
 
 previous definitions
