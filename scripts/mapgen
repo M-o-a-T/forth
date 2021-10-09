@@ -22,6 +22,8 @@ def unws(txt):
     return _ws.sub(" ",txt.text)
 
 def badid(txt):
+    if txt is None:
+        return False
     if " " in txt:
         return True
     if "/" in txt:
