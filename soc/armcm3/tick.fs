@@ -8,8 +8,13 @@ bits definitions also
 #error CLK unknown
 #endif
 
-#if undefined rcc
+#if undefined systick
 #include svd/fs/core/{arch}/systick.fs
+bits definitions also
+#endif
+
+#if undefined nvic
+#include soc/armcm3/nvic.fs
 #endif
 
 forth only
