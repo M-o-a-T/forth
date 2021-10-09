@@ -71,22 +71,30 @@ _systick _rvr reload .. 5 rshift
 lshift \ 1 << 24-or-whatever
 1 - constant clk_max \ width of register
 
-#send {clk}
-1000000 ratio
-variable clk_div
-variable clk_mul
+1 variable clk_div
+1 variable clk_mul
 
-: µs>clk clk_mul @ clk_div @ */ 1-foldable ;
+: setclk  ( clock -- )
+  1000000 ratio
+  clk_div !
+  clk_mul !
+;
+
+: µs>clk ( µsec -- clock )
+  clk_mul @ clk_div @ */ 1-foldable
+;
+: clk>µs ( clock -- rem µsec )
+  clk_div @ clk_mul @ */mod 1-foldable
+;
 
 10 µs>clk variable clk_min
-clk_max clk>µs constant µs_max
+clk_max clk>µs constant µs_max  drop  \ remainder
 
 
 
 0 variable _now
 
 0 variable clk_cur \ current countdown
-0 variable clk_next \ timestamp when the next clock tick happens
 
 0 variable td_delta
 
@@ -97,7 +105,7 @@ clk_max clk>µs constant µs_max
   systick cvr current @  clk_cur @ ( current initial )
   over -
   ( cur ini-cur )
-  clk_div @ clk_mul @ */mod ( cur rem µs )
+  clk>µs ( cur rem µs )
   \ add the remainder back, for next time
   -rot + clk_cur !
 ;
@@ -110,14 +118,17 @@ clk_max clk>µs constant µs_max
 ;
 
 : tick-irq ( -- )
-  clk_cur @ clk>µs _now +!
-  clk_next @ clk_cur !
-  1 triggered !
+\ As the IRQ is triggered, the just-passed clock is converted
+\ to µsec and added to _NOW. RVR is used as the next starting point,
+\ we add our division's remainder to it, to stay accurate.
+  clk_cur @ clk>µs ( rem µs )
+  _now +!
+  systick rvr reload @ + clk_cur !
 ;
 
 : update-no ( -- )
 \ turn off as far as possible, nobody wants us
-  clk_max dup clk_next ! systick rvr reload !
+  clk_max systick rvr reload !
 ;
 
 : latest ( clk -- flag )
@@ -126,18 +137,19 @@ clk_max clk>µs constant µs_max
   systick cvr current @ ( max cur )
   \ if we get triggered soon anyway, don't bother now
   \ but store a new limit for later
-  dup clk_min @ over > if 2drop clk_next ! 1 exit then
+  dup clk_min @ over > if 2drop systick rvr ! 1 exit then
 
   \ at this point our own interrupt is far off, but some other IRQ
   \ might delay us sufficiently anyway.
 
   \ Some tolerance?
   ( max cur min )
-  1 rshift + swap < if drop 0 exit then
+  1 rshift + over < if drop 0 exit then
   ( max )
   clk_cur @
   \ now quickly replace the value.
-  \ We know that there won't be an interrupt any time soon.
+  \ We know that CVR won't roll over any time soon,
+  \ so no need to account for that.
   systick cvr current @
   ( max cur now )
   rot dup systick rvr !
@@ -150,30 +162,31 @@ clk_max clk>µs constant µs_max
   \ TODO add some fudge value to make up for the lost ticks
   clk_div @ clk_mul @ */mod ( rem µs )
   _now +! clk_cur +!
+  0  \ no need to loop quickly
 ;
 
-: update ( now next -- )
-  dup -1 <> if µs>clk then clk_max umax
-  dup clk_min < if drop clk_max then
+: update ( now next -- flg )
+  dup -1 <> if µs>clk then clk_max umin
+  dup clk_min @ < if drop clk_max then
   swap µs>clk ( next now )
   dint
   latest if
     \ LATEST already updated clk_next
     drop -1
   else
-    clk_next ! 0
+    systick rvr ! 0
   eint
   then
 ;
 
-: setup
-  dint
+:init
+#send {clk}
+  setclk
+  systick csr <% clksource +% tickint -% enable +% %>!
   0 _now !
-  clk_max systick rvr !
+  clk_max dup systick rvr ! clk_cur !
   ['] tick-irq irq-systick !
-  systick csr <% clksource +% tickint +% enable +% %>!
-  0 systick cvr !
-  eint
+  systick csr tickint +!
 ;
 
 forth definitions only
