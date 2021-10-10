@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -eu
+
+find doc -name \*.rst -print | while read f ; do
+    scripts/rstcheck "$f" && continue
+    echo ERROR "$f"
+    exit 1
+done

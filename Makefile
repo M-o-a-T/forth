@@ -22,6 +22,7 @@ prep:: .done/gen_soc_${VENDOR}
 
 test: prep test/gen/bugtest.fs
 	scripts/test
+	scripts/testdocs
 
 files: prep test/gen/bugtest.fs
 
