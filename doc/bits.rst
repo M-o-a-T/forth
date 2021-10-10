@@ -78,9 +78,26 @@ SVD files
 
 The core ARM register definitions are available from CMSIS-4, in the
 directory ``svd/core/Device/ARM/SVD/``. The SoC definitions are collected
-in ``svd/soc/data/VENDOR/``.
+in ``svd/soc/data/VENDOR/``. List these directories to discover for which
+vendors and MCU families SVDs are available. (The answer *should* be "all of
+them".)
 
 Run ``git submodule update --init`` to fetch these directories.
+
+Run ``make prep VENDOR=STMicro`` to prepare all register files for a
+specific MCU vendor. This also builds all core-specific register files.
+Be aware that the core-specific files are incomplete; `this Github issue
+<https://github.com/ARM-software/CMSIS_5/issues/844>`_ tracks one attempt
+to get this problem fixed, unfortunately without much success (as of late
+2021).
+
+We'd appreciate if you'd weigh in there; any help towards fixing this
+problem would be very much appreciated. In the meantime, the ``soc/ARCH``
+subdirectory contains a couple of hand-written and somewhat incomplete
+workarounds.
+
+The code for the NVIC ("Nested Vectored Interrupt Controller") contains
+some specialized words. See `here </doc/arch/nvic.rst>`_ for details.
 
 Words
 =====
