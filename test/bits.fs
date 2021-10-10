@@ -12,6 +12,9 @@ bits also
 
 #include test/gen/bugtest.fs
 
+forth definitions only
+bits also
+
 #ok BFT .. $12343210 =
 \ need to override that
     

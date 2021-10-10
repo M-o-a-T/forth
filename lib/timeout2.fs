@@ -27,6 +27,16 @@ monotonic object: systime
   1000000, f* nip
 ;
 
+#else
+
+\ include the real MCU's tick configuration here
+
+#if-flag !real
+#error On virtual hardware but no syscall? doesn't work
+#endif
+
+#include soc/{arch}/tick.fs
+
 #endif
 
 :init
