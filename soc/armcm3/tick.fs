@@ -180,6 +180,7 @@ clk_max clk>µs constant µs_max  drop  \ remainder
 ;
 
 :init
+  nvic aiarc <% 7 prigroup *% MAGIC VECTKEY *% %>!
 #send {clk}
   setclk
   systick csr <% clksource +% tickint -% enable +% %>!
