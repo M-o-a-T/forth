@@ -2,51 +2,44 @@
 Timers
 ======
 
-Tasks need to be able to wake up after some time. For instance, you might
-want to hold a signal for a second, or raise an error when a signal doesn't
-get released after some time.
-
-There are thus two kinds of timer: those you can check yourself because you
-have something to do anyway, and those that the system manages for you.
-
-++++++++++++++++
-Self-timed tasks
-++++++++++++++++
-
-The system maintains a "now" variable which, when read, returns a
-microsecond tick value, which. yields timers of more than an hour. Simply
-take the current value, subtract your starting value from it, and compare
-the result to your target. (All in unsigned arithmetic of course.)
-
-+++++++++++
-Timed tasks
-+++++++++++
-
-If you want a task to sleep for some time, just say ``DELAY task sleep``.
+Tasks need to be able to suspend themselves for some time. For instance,
+you might want to hold an output low for more-or-less-exactly one second,
+or raise an error when an input doesn't get released after some time.
 
 Words
 =====
 
-task sleep ( µs -- )
----------------------
-
-Suspends the current task for the given time.
-
-TASK sleep ( µs task -- )
--------------------------
-
-Suspends another task for the given time.
-
-Unlike ``task sleep``, if you apply this to the current task (i.e. you
-write ``task this sleep``,), your task will not be suspended until the next
-time you call ``yield``.
-
-now
----
+now-hq ( -- u )
+---------------
 
 Return the current system timer, in microseconds.
 
-``-1`` is skipped.
+This value is an unsigned number which wraps around. You should only
+compare differences between times, never times directly.
+
+The value returned by ``now-hq`` is as accurate as possible given the
+system tick's frequency.
+
+now ( -- u )
+------------
+
+Like ``now-hq`` but with lower overhead and accuracy.
+
+The returned value will lag behind ``now-hq`` by some random number of
+microseconds that depends on system load and any other task that insists on
+using ``now-hq``, but it will never go entirely out of sync.
+
+It is guaranteed to be updated during ``yield``.
+
+setclk ( freq -- )
+------------------
+
+Tell the timing system that ``freq`` is the (new) frequency of the system's 
+input to the ``SysTick`` counter.
+
+As there are a myriad of ways to configure the system clocks and their
+external input(s), if any, this timer module does not even pretend to try
+infering the actual clock from the system's registers.
 
 \*delay ( n -- n*delay )
 ------------------------
@@ -60,8 +53,8 @@ for the caller to print / average / maximize / agonize about.
 Timers
 ++++++
 
-Timers are tied to tasks. Any task can be in the "wait for some time to
-pass" state.
+This system does not support explicit timers. Instead, time is tied to
+the task that's waiting for the time in question to pass.
 
 If you want to wait for a timer *or* some event, get an interrupt to
 trigger on the event; its code should set a flag and then simply wake up
@@ -79,6 +72,8 @@ would simply return a microsecond counter. We don't do that.
 Don't assume that this is in any way exact; your value is a lower bound.
 Check the data from ``*delay``, or write your own delay estimator along
 its lines, for the actual accurracy of ``micros``.
+
+This is equivalent to ``task sleep``.
 
 time millis ( n -- )
 ====================
@@ -117,3 +112,97 @@ time days ( n -- )
 Not implemented. Let's be real – I *told* you there's no upper limit for
 ``hours``, didn't I? Thus, you can write ``24 * time hours`` yourself,
 should you need it.
+
++++++++++++++++++++++++
+Suspending another task
++++++++++++++++++++++++
+
+TASK sleep ( µs task -- )
+-------------------------
+
+Suspends another task for the given time.
+
+Unlike ``task sleep``, if you apply this to the current task (i.e. you
+write ``task this sleep``,), your task will not be suspended until the next
+time you call ``yield``.
+
+You commonly use this on a task that's already suspended, thus telling it
+to start some time later. One possible use case for this is error handling
+/ recovery.
+
+Common patterns on how to do that will be described later.
+
++++++++++++++++++++
+Non-sleeping timers
++++++++++++++++++++
+
+You might want to time-limit some activity. There are two distinct
+use cases for this:
+
+* yield after some time (but not *too* often) to let other tasks have some
+  CPU time
+
+* work for some amount of time, then e.g. complain that nothing happened 😒
+
+The first case is supported by ``nyield-reset`` and ``nyield?``, described below.
+
+As for the second case, the main thing to remember is never to compare
+specific timestamps (as returned by ``now``) directly. *Always* compare
+intervals. Thus you might write::
+
+	: work
+	  now
+	  begin
+	    do-some-work
+		30 nyield?
+		now over - TIMEOUT >
+	  until
+	  drop nyield-reset
+	;
+
+A different way to do this would be::
+
+	:task: worker
+	  begin
+	    do-some-work
+		30 nyield?
+	  again
+	;
+	:task: killer
+	  TIMEOUT time micros \ or whateher
+	  12345 worker signal \ or whatever
+	;
+	worker start  killer start
+
+In this case, of course, using one task just to limit another task's run
+time doesn't make sense. However, this strategy might be more appealing if
+your worker has multiple points which call ``yield``, and/or cannot easily
+be adapted to ``do-some-work``-ish chunks.
+
+nyield-reset ( -- )
+===================
+
+Clear the *n-yield* counter. You should do this at the end of your work,
+in order to not leave it in an inconsistent state.
+
+?nyield ( n -- )
+================
+
+This word calls ``yield`` after every ``n``\th invocation. This is a
+low-overhead way of ceding runtime to other tasks; repeatedly calling
+``now-hq`` to determine out whether to yield control is hideously expensive
+by comparison.
+
+.. note::
+	The second example above doesn't call ``nyield-reset`` because when the
+	killer task runs, the worker task has yielded. As ``?nyield`` always
+	leaves the counter at zero when it does yield, there's nothing to
+	reset.
+
+If you have a loop counter (or can put one onto the stack without too much
+overhead), this style ::
+
+    100000 0 do … i 50 mod 0= if yield then loop
+
+is even less expensive. However, if you can't do it that way easily,
+``?nyield`` is a good option.
