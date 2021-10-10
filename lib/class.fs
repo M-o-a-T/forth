@@ -5,7 +5,7 @@
 #endif
 
 
-forth definitions
+forth definitions only
 
 voc: \cls
 
