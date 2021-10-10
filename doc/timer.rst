@@ -68,7 +68,7 @@ trigger on the event; its code should set a flag and then simply wake up
 your task prematurely, with ``your-task continue``. This is interrupt safe.
 
 time micros ( n -- )
---------------------
+====================
 
 Wait for this number of microseconds to pass. In the interest of forward
 compatibility, please pretend that it can't do more than 50000 µs (50 ms).
@@ -81,7 +81,7 @@ Check the data from ``*delay``, or write your own delay estimator along
 its lines, for the actual accurracy of ``micros``.
 
 time millis ( n -- )
---------------------
+====================
 
 Same, but milliseconds. In the interest of forward compatibility, please
 pretend that it's no good for delays of more than a minute (60000).
@@ -90,20 +90,20 @@ Don't confuse this word with Arduino; there, the function with this name
 would simply return a millisecond counter. We don't do that.
 
 time seconds ( n -- )
----------------------
+=====================
 
 Same, but seconds. Don't use this for delays (much) longer than 60 seconds.
 The real upper bound is likely to be higher, but the details vary depending
 on the implementation.
 
 time minutes ( n -- )
----------------------
+=====================
 
 Same, but minutes. Don't use this for delays (much) longer than 60 minutes.
 Again, the actual limit may be higher.
 
 time hours ( n -- )
--------------------
+===================
 
 Same, but hours.
 
@@ -112,7 +112,7 @@ converted to seconds, and your system will not run continuously for 136
 years.
 
 time days ( n -- )
-------------------
+==================
 
 Not implemented. Let's be real – I *told* you there's no upper limit for
 ``hours``, didn't I? Thus, you can write ``24 * time hours`` yourself,

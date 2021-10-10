@@ -189,8 +189,9 @@ flags, or perhaps a configuration file. Learn about ours `here
 Talking about flags: our code uses some of them, to control what actually
 gets sent. `Check this list </doc/flags.rst` for details.
 
++++++++++
 Stop here
-=========
++++++++++
 
 … unless you want to read boring stuff like which `license
 </doc/license.rst>`_ this code is released under, what to keep in mind
