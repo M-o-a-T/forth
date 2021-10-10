@@ -117,6 +117,26 @@ monotonic object: systime
   then
 ;
 
+\ The following implements a way to yield every n'th pass through a loop,
+\ or something.
+
+0 variable \yield
+
+: nyield-reset ( -- )
+\ reset. Call after finishing your work.
+  0 \yield !
+;
+: ?nyield ( n -- )
+\ maybe yield. Call every time through your loop.
+  \yield @ ?dup if
+    1- \yield ! drop
+  else
+    yield
+    \yield ! 
+  then
+;
+
+
 forth definitions only
 
 \ SPDX-License-Identifier: GPL-3.0-only
