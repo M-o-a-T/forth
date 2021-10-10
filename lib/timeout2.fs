@@ -27,6 +27,8 @@ monotonic object: systime
   1000000, f* nip
 ;
 
+: now-hq now ;
+
 #else
 
 \ include the real MCU's tick configuration here
@@ -40,7 +42,7 @@ monotonic object: systime
 #endif
 
 :init
-  now  last-check !
+  now-hq  last-check !
 ;
 
 
@@ -62,7 +64,7 @@ monotonic object: systime
 : check ( -- delay )
 \ start all tasks ready since our last call
   \ get µs since last call
-  now  last-check @  over last-check !  -
+  now-hq  last-check @  over last-check !  -
   (check)
 ;
 

@@ -110,11 +110,16 @@ clk_max clk>µs constant µs_max  drop  \ remainder
   -rot + clk_cur !
 ;
 
-: now ( -- µsec )
+: now-hq ( -- µsec )
 \ return the current µsec value
   dint
   _delta _now @ + dup _now !
   eint
+;
+
+: now ( -- µsec )
+\ return the current µsec value as of the last yield
+  _now @
 ;
 
 : tick-irq ( -- )
