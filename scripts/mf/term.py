@@ -18,10 +18,12 @@ import re
 import stat
 import sys
 import anyio
+import math
 import subprocess
 from contextlib import asynccontextmanager
 from anyio.streams.stapled import StapledByteStream
-from asyncclick.exceptions import UsageError
+from anyio_serial import Serial
+from click.exceptions import UsageError
 
 from serial.tools import hexlify_codec
 
@@ -32,8 +34,6 @@ codecs.register(lambda c: hexlify_codec.getregentry() if c == 'hexlify' else Non
 from serial.tools.miniterm import (
     EOL_TRANSFORMATIONS,
     TRANSFORMATIONS,
-    Console,
-    key_description,
 )
 
 class EarlyEOFError(EOFError):
@@ -54,7 +54,56 @@ class AsyncDummy:
     async def __aexit__(self, *tb):
         self.val = None
 
-class Miniterm:
+class _MsgOut:
+    msg = "??"
+    timeout = False
+    good = None
+
+    def __init__(self, s):
+        self.s = s
+    def __repr__(self):
+        return f"<{self.__class__.__name__} msg={self.msg!r} t={self.timeout} ok={self.good}>"
+
+def green(s):
+    return f"\x1b[32m{s}\x1b[39m"
+class WithNothing(_MsgOut):
+    msg = ""
+    timeout = True
+class WithTimeout(_MsgOut):
+    msg = "🕠"
+    good = False
+class WithOK(_MsgOut):
+    msg = green("✓")
+class WithACK(_MsgOut):
+    msg = green("🗸")
+class WithNAK(_MsgOut):
+    msg = "❌"
+class WithEnd(_MsgOut):
+    msg = "🔚"
+
+class SendLine:
+    def __init__(self, line):
+        self.line = line
+class MsgLine(SendLine):
+    def __init__(self, line, timeout):
+        super().__init__(line)
+        self.timeout = timeout
+        self.recv_w,self.recv_r = anyio.create_memory_object_stream(10)
+
+    async def evt(self,evt):
+        self.recv_w.send(evt)
+
+    def __aiter__(self):
+        return self.recv_r.__aiter__()
+
+def utflen(b):
+    bit = 8-(b^255).bit_length()
+    if bit < 2: # 0xxx_xxxx == 1, # 10xx_xxxx, continuation == 0
+        return 1-bit
+    else: # number of initial 1-bits == sequence length
+        return bit
+
+class Terminal:
     """\
     Terminal application. Copy data from command stdin/stdout to console and vice versa.
     Handle special keys from the console to show menu etc.
@@ -65,9 +114,7 @@ class Miniterm:
     reader_task = None
     rx_decoder = None
     tx_decoder = None
-    line_buf:str = None
     goahead_buf:str = ""
-    goahead_flag:anyio.Event = None
     goahead_delay:float = 0.5
     layer:int = 0 # skipped nested '#if…' statements
     layer_:int = 0 # total nested '#if…' statements
@@ -75,6 +122,8 @@ class Miniterm:
     log = None
     _data = b""
     _exc = None
+    port = None
+    command = None
 
     _subst = re.compile('{\S+}')
 
@@ -83,34 +132,54 @@ class Miniterm:
             return self.flags[m.group(0)[1:-1]]
         return self._subst.sub(sub, line)
 
-    def __init__(self, command=None, stream=None, name=None, echo=False, eol='lf', filters=(), go_ahead = None, file=None, batch=None, logfile=None, develop=False, verbose=1, flags=()):
-        if bool(command) == bool(stream):
-            raise UsageError("Specify one of 'command' and 'stream'")
-        self.command = command
-        self.stream = stream
+    def __init__(self, command=False, port=("/dev/ttyUSB0","115200"), name=None, echo=False, eol='lf', filter=(), go_ahead = None, go_ack=None, go_nak=None, batch=None, log=None, develop=False, verbose=1, flag=(), ack=-1,nak=-1, timeout=0.2, reset=None, inv_reset=None, exec=()):
+        if command:
+            self.command = port
+        else:
+            self.port = port[0]
+            self.speed = int(port[1]) if len(port) > 1 else 115200
         self.name = name or '?'
         self.echo = echo
-        self.raw = False
-        self.input_encoding = 'UTF-8'
-        self.output_encoding = 'UTF-8'
         self.eol = eol
-        self.filters = filters
+        self.filters = filter
         self.update_transformations()
         self.exit_character = chr(0x1D)  # GS/CTRL+]
         self.menu_character = chr(0x14)  # Menu: CTRL+T
+        if isinstance(go_ahead,str):
+            go_ahead = go_ahead.encode("utf-8")
         self.go_ahead = go_ahead
-        self.file = file
-        self.logfile = logfile
+        self.go_ack = None if ack == -1 else ack
+        self.go_nak = None if nak == -1 else nak
+        if go_ack is not None and self.go_ahead is not None:
+            self.go_check = None
+        else:
+            self.go_check = self.go_ahead is not None
+        self.go_lf = 10
+        self.go_cr = 13
+        self.raw_in_w,self.raw_in_r = anyio.create_memory_object_stream(10)
+        self.logfile = log
         self.develop = develop
         self.verbose = verbose
+        self.goahead_delay = timeout
+        self.rx_decoder = codecs.getincrementaldecoder("utf-8")("replace")
+        self.tx_encoder = codecs.getincrementalencoder("utf-8")("replace")
+        self.reset = reset,inv_reset
+        self.batch = batch
+        self.files = exec
+
         if batch is None:
             batch = not sys.stdin.isatty()
-        if not batch:
-            self.console = Console()
-        elif not file:
-            raise UsageError("You need a file to send if you send a batch job")
+        if batch:
+            if not exec:
+                raise UsageError("You need a file to send if you send a batch job")
+            from .dummy import NoWindow
+            self.console = NoWindow()
+        else:
+            from .gtk import Window
+            self.console = Window(self.port if self.port else self.command[0] if self.command else "Stream")
+
         self.flags = {}
-        for fl in flags:
+        for fl in flag:
             try:
                 fl,v = fl.split("=",1)
             except ValueError:
@@ -119,34 +188,61 @@ class Miniterm:
 
     def _stop_reader(self):
         """Stop reader thread only, wait for clean exit of thread"""
+        self.raw_reader_task.cancel()
         self.reader_task.cancel()
+
+
+    async def _out_wrapper(self):
+        if self.port:
+            return Serial(self.port, self.speed)
+        elif self.command:
+            return await anyio.open_process(self.command, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        else:
+            return AsyncDummy(self.stream)
 
     async def run(self):
         proc = None
         async with anyio.create_task_group() as tg:
             self.tg = tg
-            self._closing = anyio.Event()
             if self.logfile is not None:
                 self.log = await anyio.open_file(self.logfile,"w")
-            async with AsyncDummy(self.stream) if self.stream is not None else await anyio.open_process(self.command, stdin=subprocess.PIPE, stdout=subprocess.PIPE) as proc:
-                if self.stream is None:
+            async with await self._out_wrapper() as proc:
+                if self.port:
+                    self.stream = proc
+                    self.stream.dtr = True
+                    reset,inv_reset = self.reset
+                    if reset:
+                        self.stream.rts = not inv_reset
+                        await anyio.sleep(0.1)
+                    stream.rts = bool(inv_reset)
+
+                elif self.command is not None:
                     self.stream = StapledByteStream(proc.stdin, proc.stdout)
+                elif self.port is not None:
+                    self.stream = proc
+                else:
+                    assert self.stream == proc
+
                 await self.start()
                 try:
-                    if self.file:
+                    for f in self.files:
                         await anyio.sleep(0.1)
                         try:
-                            await self.send_file(self.file)
+                            await self.send_file(f)
                         except AllEOFError as err:
                             pass
                         except Errors as e:
-                            sys.stderr.write(f'\n--- ERROR: {e !r} ---\n')
-                            if not self.develop:
+                            self.console.set_error(repr(e))
+                            if self.develop:
+                                break
+                            else:
                                 raise
 
-                        self.file = None
-                    if self.console is not None:
-                        await self._closing.wait()
+                    if self.batch:
+                        self.tg.cancel_scope.cancel()
+                    else:
+                        while True:
+                            await anyio.sleep(99999)
                     # otherwise we're done after the file is processed
                 except Exception as exc:
                     self._exc = exc
@@ -172,10 +268,16 @@ class Miniterm:
         if self.log is not None:
             await self.tg.start(self.logger)
         await self.tg.start(self.reader)
-        # enter console->serial loop
-        if self.console is not None:
-            await self.tg.start(self.writer)
-            self.console.setup()
+        await self.tg.start(self.raw_reader)
+        await self.tg.start(self.writer)
+
+    async def writer(self, *, task_status):
+        task_status.started()
+        async for msg in self.console:
+            if isinstance(msg,str):
+                msg = SendLine(msg)
+            await self.raw_in_w.send(msg)
+
 
     async def logger(self, *, task_status):
         self.log_w,log_r = anyio.create_memory_object_stream(10)
@@ -188,9 +290,10 @@ class Miniterm:
     async def stop(self):
         """set flag to stop worker threads"""
         self.alive = False
-        await self.stream.aclose()
+        if self.stream is not None:
+            await self.stream.aclose()
         if self.console is not None:
-            self.console.cancel()
+            self.console.close()
         if self.log is not None:
             await self.log_w.aclose()
 
@@ -213,197 +316,150 @@ class Miniterm:
         self.tx_transformations = [t() for t in transformations]
         self.rx_transformations = list(reversed(self.tx_transformations))
 
-    def set_rx_encoding(self, encoding, errors='replace'):
-        """set encoding for received data"""
-        self.input_encoding = encoding
-        self.rx_decoder = codecs.getincrementaldecoder(encoding)(errors)
-
-    def set_tx_encoding(self, encoding, errors='replace'):
-        """set encoding for transmitted data"""
-        self.output_encoding = encoding
-        self.tx_encoder = codecs.getincrementalencoder(encoding)(errors)
-
-    def dump_port_settings(self):
-        """Write current settings to sys.stderr"""
-        p=self.stream
-
-        try:
-            sys.stderr.write(f"\n--- Port: {self.name}  {p.baudrate},{p.bytesize},{p.parity},{p.stopbits}\n")
-
-            sys.stderr.write('--- RTS: {:8}  DTR: {:8}  BREAK: {:8}\n'.format(
-                ('active' if self.stream.rts else 'inactive'),
-                ('active' if self.stream.dtr else 'inactive'),
-                ('active' if self.stream.break_condition else 'inactive')))
-            sys.stderr.write('--- CTS: {:8}  DSR: {:8}  RI: {:8}  CD: {:8}\n'.format(
-                ('active' if self.stream.cts else 'inactive'),
-                ('active' if self.stream.dsr else 'inactive'),
-                ('active' if self.stream.ri else 'inactive'),
-                ('active' if self.stream.cd else 'inactive')))
-        except AttributeError:
-            pass
-        sys.stderr.write(f"\n--- Settings: {self.name}\n")
-        sys.stderr.write(f'--- serial input encoding: {self.input_encoding}\n')
-        sys.stderr.write(f'--- serial output encoding: {self.output_encoding}\n')
-        sys.stderr.write(f'--- EOL: {self.eol.upper()}\n')
-        sys.stderr.write(f"--- filters: {' '.join(self.filters)}\n")
-
     async def chat(self, text, timeout=False):
         """Send a line, return whatever was printed"""
-        if not self.go_ahead:
-            raise UsageError("I need a go-ahead string")
-        if not text.endswith("\n"):
-            text += "\n"
+        msg = MsgLine(text, timeout)
+        await self.raw_in_w.send(msg)
+        for m in msg:
+            if m.good:
+                break
+            if m.good is None:
+                continue
 
-        self.goahead_flag = anyio.Event()
-        self.line_buf = ""
-
-        await self.stream.send(self.tx_encoder.encode(text))
-        with anyio.move_on_after(self.goahead_delay) if timeout is False else anyio.fail_after(self.goahead_delay) if timeout is True else anyio.fail_after(timeout):
-            await self.goahead_flag.wait()
-
-        line,self.line_buf = self.line_buf,None
-        self.line_buf_old = line
+            # error case
+            if isinstance(m,WithTimeout):
+                raise TimeoutError(m.msg)
+            else:
+                raise ForthError(m.msg)
 
         text = text.rstrip()
-        line = line.lstrip("\n")
-        if line.startswith(text):
+        line = m.msg
+        # filter echo. XXX do this in the reader instead?
+        if self.go_ahead and line.startswith(text):
             line = line[len(text):]
-        self.goahead_flag = None
 
         return line
 
-    async def reader(self, *, task_status):
+    async def raw_reader(self, *, task_status):
         """loop and copy serial->console"""
         task_status.started()
         try:
             while True:
-                # read all that is there or wait for one byte
+                if self.stream is None:
+                    return
                 data = await self.stream.receive(4096)
-                self._data += data
-                if self.raw:
-                    if self.console is not None:
-                        self.console.write_bytes(data)
-                    if self.log is not None:
-                        await self.log_w.send(repr(data)+"\n")
-                else:
-                    text = self.rx_decoder.decode(data)
-                    if not text:
-                        continue
-                    i = -1
-                    if self.go_ahead and self.goahead_flag:
-                        buf = self.goahead_buf + text
-                        i = buf.find(self.go_ahead)
-                        if i >= 0:
-                            if self.line_buf is not None:
-                                i += len(self.line_buf) - len(self.goahead_buf)
-                            self.goahead_buf = ""
-                            self.goahead_flag.set()
-                        else:
-                            self.goahead_buf = buf[-len(self.go_ahead):] if len(self.go_ahead)>1 else ""
-
-                    for transformation in self.rx_transformations:
-                        text = transformation.rx(text)
-                    if self.console is not None:
-                        self.console.write(text)
-                    if self.line_buf is not None:
-                        self.line_buf += text
-                        if i >= 0:
-                            self.line_buf = self.line_buf[:i]
-                    if self.log is not None:
-                        await self.log_w.send(text)
-
-        except (anyio.EndOfStream, anyio.ClosedResourceError):
-            return
+                if data == b"":
+                    print("EOF")
+                    return
+                await self.raw_in_w.send(data)
         finally:
-            self._closing.set()
+            await self.raw_in_w.send(WithEnd)
 
-    async def writer(self, *, task_status):
+    async def reader(self, *, task_status):
+        """loop and copy serial->console"""
         task_status.started()
-        await anyio.to_thread.run_sync(self._writer, cancellable=True)
-        self._closing.set()
 
-    def _writer(self):
-        """\
-        Loop and copy console->serial until self.exit_character character is
-        found. When self.menu_character is found, interpret the next key
-        locally.
-        """
-        menu_active = False
+        msg = None
+
+        async def out(cls):
+            nonlocal line, prev_len, do_wait, msg, need_lf
+            line = self.rx_decoder.decode(line)
+            wrt = line+cls.msg
+            await self.console.send(wrt)
+            need_lf = True
+            if self.log is not None:
+                await self.log_w.send(text)
+            if msg is not None:
+                await msg.send(cls(line))
+                if cls.good is not None:
+                    msg = None
+
+            line = bytearray()
+            prev_len = 0
+            do_wait = cls.timeout
+
+        line = bytearray()
+        prev_len = 0
+        do_wait = False
+
+        in_utf = 0
+        go_late = False
+        need_lf = False
+
+        # Theory of operation.
+        # We can either wait for "ok." / timeout (go_check is True), or
+        # for ack/nak (go_check is False), or we might not know which
+        # (go_check is None). In the latter case we recognize the
+        # "ok." after a timeout and set `self.go_check` so that we
+        # won't have to wait again; conversely when we see an ack/nack
+        # we clear it so we won't delay unnecessarily.
+        # 
         while True:
             try:
-                c = self.console.getkey()
-            except KeyboardInterrupt:
-                c = '\x03'
-            if not self.alive:
-                break
-            if menu_active:
-                self.handle_menu_key(c)
-                menu_active = False
-            elif c == self.menu_character:
-                menu_active = True  # next char will be for menu
-            elif c == self.exit_character:
-                break
+                with anyio.fail_after(self.goahead_delay if do_wait or go_late else math.inf):
+                    data = await self.raw_in_r.receive()
+                    print("Got",data)
+            except TimeoutError:
+                if go_late:
+                    if line.endswith(self.go_ahead):
+                        self.go_check = True
+                        await out(WithPrompt)
+                    else:
+                        await out(WithNothing)
+                    go_late = False
+                    continue
+                await out(WithTimeout if self.go_ahead is None else WithNAK)
+                continue
+            except (anyio.EndOfStream, anyio.ClosedResourceError):
+                await out(WithEnd)
+                return
             else:
-                # ~ if self.raw:
-                text = c
-                for transformation in self.tx_transformations:
-                    text = transformation.tx(text)
-                anyio.from_thread.run(self.stream.send, self.tx_encoder.encode(text))
-                if self.echo:
-                    echo_text = c
-                    for transformation in self.tx_transformations:
-                        echo_text = transformation.echo(echo_text)
-                    self.console.write(echo_text)
+                if data is WithEnd:
+                    return
+                if isinstance(data,MsgLine):
+                    if msg is not None:
+                        await msg.evt(WithEnd("collision"))
+                    msg = data
+                if isinstance(data,SendLine):
+                    need_lf = False
+                    await self.console.send("\r\n" + data.line + "\u2003⁣") # em space
+                    await self._send_line(data.line)
+                    continue
 
-    def handle_menu_key(self, c):
-        """Implement a simple menu / settings"""
-        if c == self.menu_character or c == self.exit_character:
-            # Menu/exit character again -> send itself
-            anyio.from_thread.run(self.stream.send,self.tx_encoder.encode(c))
-            if self.echo:
-                self.console.write(c)
-        elif c == '\x01':  # CTRL+A -> set encoding
-            self.change_encoding()
-        elif c == '\x04':                       # CTRL+D -> Toggle DTR
-            try:
-                self.stream.dtr = not self.stream.dtr
-                sys.stderr.write('--- DTR {} ---\n'.format('active' if self.stream.dtr else 'inactive'))
-            except AttributeError:
-                pass
-        elif c == '\x05':  # CTRL+E -> toggle local echo
-            self.echo = not self.echo
-            sys.stderr.write(
-                '--- local echo {} ---\n'.format('active' if self.echo else 'inactive'))
-        elif c == '\x06':  # CTRL+F -> edit filters
-            self.change_filter()
-        elif c == '\x07':  # CTRL+U -> upload file
-            self.change_goahead()
-        elif c in '\x08hH?':  # CTRL+H, h, H, ? -> Show help
-            sys.stderr.write(self.get_help_text())
-        elif c == '\x0c':  # CTRL+L -> EOL mode
-            modes = list(EOL_TRANSFORMATIONS)  # keys
-            eol = modes.index(self.eol) + 1
-            if eol >= len(modes):
-                eol = 0
-            self.eol = modes[eol]
-            sys.stderr.write('--- EOL: {} ---\n'.format(self.eol.upper()))
-            self.update_transformations()
-        elif c == '\x12':  # CTRL+R -> Toggle RTS
-            try:
-                self.stream.rts = not self.stream.rts
-                sys.stderr.write('--- RTS {} ---\n'.format('active' if self.stream.rts else 'inactive'))
-            except AttributeError:
-                pass
-        elif c == '\x15':  # CTRL+U -> upload file
-            self.upload_file()
-        elif c == '\x09':  # CTRL+I -> info
-            self.dump_port_settings()
-        # ~ elif c == '\x01':                       # CTRL+A -> cycle escape mode
-        # ~ elif c == '\x0c':                       # CTRL+L -> cycle linefeed mode
-        elif c in 'qQ':
-            self.stop()  # Q -> exit app
-        else:
-            sys.stderr.write('--- unknown menu character {} --\n'.format(key_description(c)))
+            for b in data:
+                if b == self.go_lf:
+                    if self.go_check is None:
+                        go_late = True
+                    elif self.go_check and line.endswith(self.go_ahead):
+                        line = line[:-len(self.go_ahead)].rstrip()
+                        await out(WithPrompt)
+                    else:
+                        await out(WithNothing)
+                else:
+                    do_wait = True
+                    if b == self.go_cr:
+                        pass
+                    elif self.go_ack is not None and b == self.go_ack and (b < 32 or not in_utf):
+                        self.go_check = False
+                        await out(WithACK)
+                    elif self.go_nak is not None and b == self.go_nak and (b < 32 or not in_utf):
+                        self.go_check = False
+                        await out(WithNAK)
+                    elif b >= 32:
+                        if go_late:
+                            await out(WithNothing)
+                            go_late = False
+                        if need_lf:
+                            await self.console.send("\r\n")
+                            need_lf = False
+                        line.append(b)
+                        if in_utf and not utflen(b): # continuation
+                            in_utf -= 1
+                        else: # the codec will complain if utflen(b) is zero
+                            in_utf = max(utflen(b)-1,0)
+                    else:
+                        # some random control character
+                        line.extend(chr(0x2400+b).encode("utf-8"))
 
     async def preprocess(self, line, fn,li):
         """Filter lines read from a file.
@@ -524,7 +580,7 @@ class Miniterm:
         if code == "echo":
             if self.verbose:
                 line = self.subst_flags(line)
-                sys.stderr.write(f"{line}\n")
+                await self.console.send(f"{line}")
             return
         if code == "ok":
             res = await self.chat(f"{line} .", timeout=True)
@@ -589,13 +645,16 @@ class Miniterm:
 
         return line+"\n"
 
+    async def _send_line(self, line):
+        """Send a single line."""
+        await self.stream.send(self.tx_encoder.encode(line+"\n"))
+
     async def send_file(self, filename):
         """Send a file. Runs in write thread."""
         async with await anyio.open_file(filename, 'r') as f:
             layer,self._layer = self.layer_,0
 
-            if self.verbose:
-                sys.stderr.write(f'--- Sending file {filename} ---\n')
+            self.console.set_info('--- Sending file {filename} ---')
             num = 0
             try:
                 while True:
@@ -606,18 +665,15 @@ class Miniterm:
                             break
                         line = await self.preprocess(line,filename,num)
                     except AllEOFError as err:
-                        if self.verbose:
-                            sys.stderr.write(f'--- END {filename} : {num}\n')
+                        self.console.set_info(f'--- END {filename} : {num}')
                         self.layer = self.layer_ = 0
                         raise
                     except EarlyEOFError as err:
-                        if self.verbose:
-                            sys.stderr.write(f'--- END {filename} : {num}\n')
+                        self.console.set_info(f'--- END {filename} : {num}')
                         self.layer, self.layer_ = 0,layer
                         break
                     except EOFError as err:
-                        if self.verbose:
-                            sys.stderr.write(f'--- EOF {filename} ---\n')
+                        self.console.set_info(f'--- EOF {filename} ---')
                         if self.layer_:
                             self.layer = self.layer_ = 0
                             raise ScriptError(f"{line[9:]}: '#if…' without corresponding '#endif'")
@@ -625,108 +681,54 @@ class Miniterm:
                         break
                     if not line:
                         continue
-                    if self.go_ahead:
-                        await self.chat(line, timeout=True)
-                    else:
-                        await self.stream.send(self.tx_encoder.encode(line))
-                    # sys.stderr.write('.')  # Progress indicator.
+
+                    await self.chat(line, timeout=True)
+                    self.console.set_fileinfo(filename,num)
+
             except AllEOFError as err:
                 # already printed above
                 raise
             except Exception as exc:
-                sys.stderr.write(f'--- in {filename} : {num}\n')
+                self.console.set_error(f'--- in {filename} : {num}')
                 raise
 
-    def upload_file(self):
+    def upload_file(self, filename):
         """Ask user for filename and send its contents"""
-        sys.stderr.write('\n--- File to upload: ')
-        sys.stderr.flush()
-        with self.console:
-            filename = sys.stdin.readline().rstrip('\r\n')
-            if filename:
-                try:
-                    anyio.from_thread.run(self.send_file, filename)
-                    sys.stderr.write(f'\n--- File {filename} sent ---\n')
-                except AllEOFError as err:
-                    pass
-                except Errors as e:
-                    if not self.develop:
-                        raise
-                    sys.stderr.write(f'\n--- ERROR on file {filename}: {e !r} ---\n')
-                finally:
-                    self.layer_,self.layer = 0,0
+        try:
+            anyio.from_thread.run(self.send_file, filename)
+            self.console.set_info(f'--- File {filename} sent ---')
+        except AllEOFError as err:
+            pass
+        except Errors as e:
+            if not self.develop:
+                raise
+            self.console.set_error(f'--- ERROR on file {filename}: {e !r} ---')
+        finally:
+            self.layer_,self.layer = 0,0
 
-    def change_filter(self):
+    async def change_filter(self, filters=()):
         """change the i/o transformations"""
-        sys.stderr.write('\n--- Available Filters:\n')
-        sys.stderr.write(
-            '\n'.join(
-                '---   {:<10} = {.__doc__}'.format(k, v)
-                for k, v in sorted(TRANSFORMATIONS.items())
-            )
-        )
-        sys.stderr.write('\n--- Enter new filter name(s) [{}]: '.format(' '.join(self.filters)))
-        with self.console:
-            new_filters = sys.stdin.readline().lower().split()
-        if new_filters:
-            for f in new_filters:
+        if filters:
+            for f in filters:
                 if f not in TRANSFORMATIONS:
-                    sys.stderr.write('--- unknown filter: {!r}\n'.format(f))
+                    await self.term.show_line(f'\\ --- unknown filter: {f !r}')
                     break
             else:
-                self.filters = new_filters
+                self.filters = filters
                 self.update_transformations()
-        sys.stderr.write('--- filters: {}\n'.format(' '.join(self.filters)))
+        await self.term.show_line(f'#filter {" ".join(self.filters)}')
 
-    def change_encoding(self):
+    async def change_encoding(self, encoding):
         """change encoding"""
-        sys.stderr.write('\n--- Enter new encoding name [{}]: '.format(self.input_encoding))
-        with self.console:
-            new_encoding = sys.stdin.readline().strip()
-        if new_encoding:
-            try:
-                codecs.lookup(new_encoding)
-            except LookupError:
-                sys.stderr.write('--- invalid encoding name: {}\n'.format(new_encoding))
-            else:
-                self.set_rx_encoding(new_encoding)
-                self.set_tx_encoding(new_encoding)
-        sys.stderr.write('--- serial input encoding: {}\n'.format(self.input_encoding))
-        sys.stderr.write('--- serial output encoding: {}\n'.format(self.output_encoding))
+        try:
+            codecs.lookup(encoding)
+        except LookupError:
+            await self.term.show_line(f'\\ --- invalid encoding name: {encoding}')
+        else:
+            self.set_rx_encoding(encoding)
+            self.set_tx_encoding(encoding)
+        await self.term.show_line(f'#encode {encoding}')
 
-    def change_goahead(self):
+    def change_goahead(self, goahead):
         """Change go-ahead sequence"""
-        sys.stderr.write('\n--- Enter new go-ahead sequence: ')
-        with self.console:
-            new_goahead = sys.stdin.readline().strip()
-        self.go_ahead= new_goahead
-
-    def get_help_text(self):
-        """return the help text"""
-        # help text, starts with blank line!
-        return """
---- mpy-term --- help
----
---- {exit:8} Exit program (alias {menu} Q)
---- {menu:8} Menu escape key, followed by:
---- Menu keys:
----    {menu:7} Send the menu character itself to remote
----    {exit:7} Send the exit character itself to remote
----    {info:7} Show info
----    {upload:7} Upload file (prompt will be shown)
----    {goahead:7} Go-ahead prompt for line-by-line uploads
----    {repr:7} encoding
----    {filter:7} edit filters
---- Toggles:
----    {echo:7} echo  {eol:7} EOL
-""".format(
-            exit=key_description(self.exit_character),
-            menu=key_description(self.menu_character),
-            echo=key_description('\x05'),
-            info=key_description('\x09'),
-            upload=key_description('\x15'),
-            goahead=key_description('\x07'),
-            repr=key_description('\x01'),
-            filter=key_description('\x06'),
-            eol=key_description('\x0c'),
-        )
+        self.go_ahead = goahead

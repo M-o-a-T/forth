@@ -5,13 +5,12 @@ MoaT comes with a terminal-ish front-end that's been lightly adapted to
 talking to a Forth system. It understands a number of processing statements
 which minimize the amount of code you need to send to the client.
 
-The terminal comes in two versions: ``moat-term`` opens a serial port,
-while ``moat-cmd`` talks to a Forth program via its stdin/stdout.
+The terminal can open a serial port, or talk to a program via its stdin/stdout.
 
-There is no networking option. Use ``moat-term socat …`` if you need it.
+There is no networking option. Use ``moat-term -c socat …`` if you need it.
 
 This terminal strips backslashed comments, leading or trailing whitespace,
-and empty lines.
+and empty lines as it sends things.
 
 .. warning
 
@@ -40,6 +39,27 @@ Go Ahead
 Forth sends "ok" (or some variation thereof) after each valid line of
 input. The terminal waits for this sequence. You can modify it with the
 ``-g TEXT`` flag.
+
+This mode cannot recognize invalid lines; the workaround is to assume such
+after some timeout.
+
+Ack/Nack mode
++++++++++++++
+
+If you have a suitably modified Forth (such as our Mecrisp variant),
+you can trigger on control characters that signal successful execution / an
+error. The default is Control-C for errors and Control-D for success. This
+is somewhat non-optimal, but we'd like to reserve the "real" ACK and NACK
+codes for running a "real" protocol on the serial line.
+
+To turn off the default, use ``-a -1 -A -1``.
+
+If you use both go-ahead and ack options, the terminal will wait for it
+the first time it encounters the go-ahead prompt.
+
+Ack/Nack mode can use C1 control characters (0x80…0x9F). While these
+characters do show up as legitimate parts of UTF-8 sequences, we can
+recognize that situation.
 
 Batch mode
 ++++++++++

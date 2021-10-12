@@ -13,7 +13,7 @@ yourself.
 
 Install the ``qemu-user-static`` package.
 
-Run ``scripts/mf-cmd -x test/main.fs -F multi -F debug  -D -g ok.
+Run ``scripts/mf-term -x test/main.fs -F multi -F debug  -D -g ok. -c
 ../mecrisp-stellaris/linux-ra/mecrisp-stellaris-linux``. This starts a
 Linux version of Mecrisp Stellaris, force-feeds it a lot fo additional
 Forth code, and then reports "END OF TEST. SUCCESS.". At this point you
@@ -36,7 +36,7 @@ a non-debug and non-multitask version of the core our code to it.
 (Multitask support is on the TODO list; the multitask mainloop can't
 poll the serial port fast enough.)
 
-You can send additional files by typing Control-T followed by Control-U.
+You can send additional files by clicking on the Upload button.
 
 ++++++++++++++++++
 Included Batteries
@@ -57,7 +57,9 @@ still very good primer is `Starting FORTH
 It also won't wax eloquently you about `Mecrisp Stellaris
 <https://mecrisp.sourceforge.net/>`_, the Forth variant this
 library is (mostly) based on. You can read more there, including how to
-tell your favorite STM-32 microcontroller to run it.
+tell your favorite STM-32 microcontroller to run it. `Our version
+<https://github.com/M-o-a-T/mecrisp/>`_ includes some changes which might
+improve your experience.
 
 Instead, let's talk about what we're building on top of that foundation,
 and why.
@@ -65,9 +67,9 @@ and why.
 Vocabularies
 ++++++++++++
 
-Let's face it, Forth is good at abstracting things but abysmal at
-separating different abstractions from each other, because it only has one
-flat vocabulary.
+Let's face it, "standard" Forth (we'll ignore the fact that there may or
+may not be such a thing) is good at abstracting, but abysmal at separating
+different abstractions from each other: it only has one flat vocabulary.
 
 Thus we split that up, mostly by using somewhat-mangled code by Manfred
 Mahlow (clarification: this project somewhat-mangles Manfred's code) that's

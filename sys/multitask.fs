@@ -1044,7 +1044,7 @@ task \int definitions also
 ;
 
 : busy? ( this -- this flag )
-\ Checks if all other tasks are currently in idle state
+\ Check if any other task is on our queue
   dup %cls next @ .. over <>
 ;
 
@@ -1056,6 +1056,8 @@ task \int definitions also
   check-tasks each: i-check drop ( n )
   \ "busy" checkers or more work present? exit
 
+  \ update timer
+  bits tick check
   \ disable IRQs and walk the IRQ list
   dint
   irq-tasks each: i-check drop ( n )
