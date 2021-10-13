@@ -430,12 +430,12 @@ class Terminal:
                 if go_late:
                     if line.endswith(self.go_ahead):
                         self.go_check = True
-                        await out(WithPrompt)
+                        await out(WithOK)
                     else:
                         await out(WithNothing)
                     go_late = False
                     continue
-                await out(WithTimeout if self.go_ahead is None else WithNAK)
+                await out(WithNAK if self.go_ahead is False else WithTimeout)
                 continue
             except (anyio.EndOfStream, anyio.ClosedResourceError):
                 await out(WithEnd)
@@ -460,7 +460,7 @@ class Terminal:
                         go_late = True
                     elif self.go_check and line.endswith(self.go_ahead):
                         line = line[:-len(self.go_ahead)].rstrip()
-                        await out(WithPrompt)
+                        await out(WithOK)
                     else:
                         await out(WithNothing)
                 else:
