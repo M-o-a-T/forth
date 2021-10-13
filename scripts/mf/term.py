@@ -396,7 +396,7 @@ class Terminal:
             if self.log is not None:
                 await self.log_w.send(text)
             if msg is not None:
-                await msg.send(cls(line, bold=self.bold))
+                await msg.send(cls(line))
                 if cls.good is not None:
                     msg = None
 
