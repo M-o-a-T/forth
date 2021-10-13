@@ -2,3 +2,4 @@ __pycache__/
 test/gen/bugtest.fs
 /svd/fs/
 /.done/
+*~
