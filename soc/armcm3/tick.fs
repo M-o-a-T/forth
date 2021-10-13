@@ -2,6 +2,10 @@
 \ system tick implementation
 
 forth only
+#if undefined bits
+#include lib/bits.fs
+forth only
+#endif
 bits definitions also
 
 #if-flag !clk
