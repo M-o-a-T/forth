@@ -57,6 +57,9 @@ shortcut, or via the menu button in the top left corner.
 
 The terminal uses Unicode / UTF-8.
 
+There is no cursor in the terminal window. It's distracting and pointless;
+your cursor is in the text entry box below it.
+
 Command line options
 ~~~~~~~~~~~~~~~~~~~~
 

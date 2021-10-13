@@ -76,6 +76,7 @@ class Window(NoWindow):
         # Terminal. It has an inobtrusive cursor and cannot focus.
         self.terminal = Vte.Terminal()
         self.terminal.set_cursor_shape(Vte.CursorShape.UNDERLINE)
+        self.terminal.set_color_cursor_foreground(Gdk.RGBA(0,0,0,0))
         self.terminal.set_can_focus(False)
         term_scroller = self['term_scroller']
         term_scroller.set_hexpand(True)
