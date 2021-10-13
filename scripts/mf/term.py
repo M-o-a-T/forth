@@ -644,7 +644,7 @@ class Terminal:
             self.goahead_delay = float(self.subst_flags(line))
             return
         if code == "include":
-            await self.upsend_file(line)
+            await self.upsend_file(self.subst_flags(line))
             return
         if code == "require":
             try:
@@ -657,7 +657,7 @@ class Terminal:
                     fn += f"{word}.fs"
             res = await self.chat(f"token {word} find drop 0= .", timeout=True)
             if int(res.strip()):
-                await self.upsend_file(fn)
+                await self.upsend_file(self.subst_flags(fn))
             return
 
         # code not recognized: ordinary Forth word
