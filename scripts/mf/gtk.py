@@ -91,7 +91,9 @@ class Window(NoWindow):
         # accel. Doesn't work via Glade.
         acgroup = Gtk.AccelGroup()
         self.window.add_accel_group(acgroup)
+
         self["menu_send"].add_accelerator("activate", acgroup, ord("O"), Gdk.ModifierType.CONTROL_MASK, Gtk.AccelFlags.VISIBLE)
+        self["menu_quit"].add_accelerator("activate", acgroup, ord("Q"), Gdk.ModifierType.CONTROL_MASK, Gtk.AccelFlags.VISIBLE)
 
         # finish
         self.window.show_all()
