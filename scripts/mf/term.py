@@ -281,7 +281,6 @@ class Terminal:
     async def writer(self, *, task_status):
         task_status.started()
         async for msg in self.console:
-            print("Cons",msg)
             if isinstance(msg,str):
                 msg = SendLine(msg)
             elif isinstance(msg, StopSendFile):
@@ -343,10 +342,8 @@ class Terminal:
     async def chat(self, text, timeout=False):
         """Send a line, return whatever was printed"""
         msg = MsgLine(text, timeout)
-        print("SEND",repr(msg))
         await self.raw_in_w.send(msg)
         async for m in msg:
-            print("GETS",repr(m))
             if m.good:
                 break
             if m.good is None:
@@ -358,7 +355,6 @@ class Terminal:
             else:
                 raise ForthError(m.line.strip())
 
-        print("SEND DONE",m.line)
         text = text.rstrip()
         line = m.line
         # filter echo. XXX do this in the reader instead?
@@ -376,7 +372,6 @@ class Terminal:
                     return
                 data = await self.stream.receive(4096)
                 if data == b"":
-                    print("EOF")
                     return
                 await self.raw_in_w.send(data)
         finally:
@@ -425,7 +420,6 @@ class Terminal:
             try:
                 with anyio.fail_after(self.goahead_delay if do_wait or go_late else math.inf):
                     data = await self.raw_in_r.receive()
-                    print("Got",data)
             except TimeoutError:
                 need_lf = False
                 if go_late:

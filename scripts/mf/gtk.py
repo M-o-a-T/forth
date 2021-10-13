@@ -146,7 +146,6 @@ class Window(NoWindow):
             Gtk.main_iteration()
         keyname = Gdk.keyval_name(evt.keyval)
         if keyname != "Escape":
-            print(keyname)
             return False
         d.hide()
         return True
@@ -185,7 +184,6 @@ class Window(NoWindow):
             except ValueError:
                 self.history.append(txt)
                 self.pos = len(self.history)
-                print("pos:",self.pos)
         return True
 
     def key_pressed(self, widget, data):
@@ -202,7 +200,6 @@ class Window(NoWindow):
             self.entry.set_position(-1)
             return True
         elif keyname not in ("Up", "Down"):
-            print(keyname)
             return False
         elif not self.history:
             return
@@ -227,7 +224,6 @@ class Window(NoWindow):
             else:
                 self.entry.set_text(self.last)
                 self.pos = len(self.history)
-        print("pos",self.pos)
         if self.pos < len(self.history):
             self.entry.set_text(self.history[self.pos])
             self.entry.select_region(0,-1)
