@@ -14,17 +14,18 @@ from __future__ import absolute_import
 
 import codecs
 import os
+import io
 import re
 import stat
 import sys
 import anyio
 import math
 import subprocess
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, contextmanager
 from anyio.streams.stapled import StapledByteStream
 from anyio_serial import Serial
 from click.exceptions import UsageError
-from .dummy import SendFile, StopSendFile, Data
+from .dummy import SendFile, StopSendFile, Data, SendBuffer
 from pathlib import Path
 
 from serial.tools import hexlify_codec
@@ -292,10 +293,10 @@ class Terminal:
                     self.file_sender.cancel()
                 continue
             elif isinstance(msg, SendFile):
-                if self.file_sender is not None:
-                    self.console.set_error(f'Already sending a file')
-                    continue
                 await self.tg.start(self.upload_file, msg.data)
+                continue
+            elif isinstance(msg, SendBuffer):
+                await self.tg.start(self.upload_buffer, msg.data)
                 continue
             elif isinstance(msg,Data):
                 msg = SendLine(msg.data)
@@ -395,7 +396,7 @@ class Terminal:
             if self.log is not None:
                 await self.log_w.send(text)
             if msg is not None:
-                await msg.send(cls(line))
+                await msg.send(cls(line, bold=self.bold))
                 if cls.good is not None:
                     msg = None
 
@@ -683,49 +684,63 @@ class Terminal:
         if len(filename) > len(file_rel):
             filename = file_rel
 
-        self.file_ended = False
-        self.console.send(f'⮞ {filename} : start', lf=True)
         async with await anyio.open_file(filename, 'r') as f:
-            layer,self._layer = self.layer_,0
-            num = 0
-            try:
-                while True:
-                    if self.file_ended:
-                        self.console.send(f'⮞ {filename} : {num}', lf=True)
-                    try:
-                        num += 1
-                        line = await f.readline()
-                        if line == "":
-                            break
-                        line = await self.preprocess(line,filename,num)
-                    except AllEOFError as err:
-                        self.console.send(f'⮞ {filename} : {num} (stop)', lf=True)
-                        self.layer = self.layer_ = 0
-                        raise
-                    except EarlyEOFError as err:
-                        self.console.send(f'⮞ {filename} : {num} (exit)', lf=True)
-                        self.layer, self.layer_ = 0,layer
-                        break
-                    except EOFError as err:
-                        self.console.send(f'⮞ {filename} : end', lf=True)
-                        self.file_ended = True
-                        if self.layer_:
-                            self.layer = self.layer_ = 0
-                            raise ScriptError(f"{line[9:]}: '#if…' without corresponding '#endif'")
-                        self.layer_ = layer
-                        break
-                    if not line:
-                        continue
+            await self._file_send(filename, f.__aiter__())
 
-                    await self.chat(line, timeout=True)
-                    self.console.set_fileinfo(filename,num)
+    async def send_buffer(self, buf):
+        async def sdr():
+            for line in buf:
+                i = line.find("\u2003")
+                if i > -1:
+                    line = line[:i]
+                yield line
+        await self._file_send("‹pastebuf›", sdr().__aiter__())
 
-            except AllEOFError as err:
-                # already printed above
-                raise
-            except Exception as exc:
-                self.console.send(f'⮞ {filename} : {num}', lf=True)
-                raise
+    async def _file_send(self, filename, lines):
+        self.console.send(f'⮞ {filename} : start', lf=True)
+        layer,self.layer_ = self.layer_,0
+        num = 0
+        self.file_ended = False
+        try:
+            while True:
+                if self.file_ended:
+                    self.console.send(f'⮞ {filename} : {num}', lf=True)
+                try:
+                    num += 1
+                    line = await lines.__anext__()
+                    if line == "":
+                        break
+                    line = await self.preprocess(line,filename,num)
+                except AllEOFError as err:
+                    self.console.send(f'⮞ {filename} : {num} (stop)', lf=True)
+                    self.layer = self.layer_ = 0
+                    return
+                except EarlyEOFError as err:
+                    self.console.send(f'⮞ {filename} : {num} (exit)', lf=True)
+                    self.layer, self.layer_ = 0,layer
+                    return
+                except (StopAsyncIteration,EOFError):
+                    break
+                if not line:
+                    continue
+
+                await self.chat(line, timeout=True)
+                self.console.set_fileinfo(filename,num)
+
+        except AllEOFError as err:
+            # already printed above
+            raise
+        except Exception as exc:
+            self.console.send(f'⮞ {filename} : {num} error', lf=True)
+            raise
+
+        self.file_ended = True
+        if self.layer_:
+            self.layer = self.layer_ = 0
+            self.console.send(f'⮞ {filename} : end error', lf=True)
+            raise ScriptError(f"{filename} : {num} '#if…' without corresponding '#endif'")
+        self.layer_ = layer
+        self.console.send(f'⮞ {filename} : end', lf=True)
 
     async def upsend_file(self, path):
         if self.file_sender is None:
@@ -733,32 +748,44 @@ class Terminal:
         else:
             await self.send_file(path)
 
-    async def upload_file(self, *files, task_status):
-        """Ask user for filename and send its contents"""
+    @contextmanager
+    def upload_scope(self):
+        if self.file_sender is not None:
+            self.console.set_error(f'Already sending a file')
+            return
         with anyio.CancelScope() as sc:
             self.file_sender = sc
             self.console.started_sending()
-            task_status.started()
             try:
-                for path in files:
-                    await anyio.sleep(0.1)
-                    try:
-                        await self.send_file(path)
-                        self.console.set_info(f'--- File {path} sent ---')
-                    except Errors as e:
-                        if not self.develop:
-                            raise
-                        self.console.set_error(f'--- ERROR on file {path}: {e !r} ---')
-                        return
+                yield self
             except AllEOFError as err:
                 pass
-
+            except Errors as e:
+                if self.develop:
+                    self.console.set_error(repr(e))
+                else:
+                    raise
             finally:
                 self.file_sender = None
                 self.layer_,self.layer = 0,0
                 self.console.stopped_sending()
                 if self.batch:
                     self.tg.cancel_scope.cancel()
+
+
+    async def upload_buffer(self, buffer, task_status):
+        with self.upload_scope():
+            task_status.started()
+            await self.send_buffer(buffer)
+
+    async def upload_file(self, *files, task_status):
+        """Ask user for filename and send its contents"""
+        with self.upload_scope():
+            task_status.started()
+
+            for path in files:
+                await anyio.sleep(0.1)
+                await self.send_file(path)
 
     async def change_filter(self, filters=()):
         """change the i/o transformations"""

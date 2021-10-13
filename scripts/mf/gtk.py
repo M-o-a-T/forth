@@ -3,14 +3,14 @@ gi.require_version('Vte', '2.91')
 from gi.repository import Gtk, Vte, Gdk, Pango, GLib, Gio
 #Gtk, Vte, and GLib are required.
 
-
+import io
 import os
 #os.environ['HOME'] helps to keep from hard coding the home string.
 #os is not required unless you want that functionality.
 
 import trio
 
-from .dummy import NoWindow, Evt, Data, SendFile, StopSendFile
+from .dummy import NoWindow, Evt, Data, SendFile, SendBuffer, StopSendFile
 
 class Window(NoWindow):
 
@@ -31,6 +31,7 @@ class Window(NoWindow):
         self.widgets.add_from_file("scripts/mf/gtk.glade")
 
         self.build_window(title)
+        self.clip = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
 
         d = {k:getattr(self,k) for k in dir(self) if k[0] != "_"}
 
@@ -240,6 +241,24 @@ class Window(NoWindow):
 
     def __aiter__(self):
         return self.in_r.__aiter__()
+
+    def do_paste(self, widget, text):
+        if "\n" in text:
+            self.entry.stop_emission("paste-clipboard")
+            self.send_paste(text)
+            return True
+
+    def do_insert(self, widget, text, *x):
+        if "\n" in text:
+            self.entry.stop_emission("insert-text")
+            self.send_paste(text)
+            return True
+
+    def send_paste(self, text):
+        f = io.StringIO()
+        f.write(text+"\n")
+        f.seek(0)
+        self.in_w.send_nowait(SendBuffer(f))
 
 
 if __name__ == "__main__":

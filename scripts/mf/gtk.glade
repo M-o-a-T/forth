@@ -119,7 +119,9 @@
                 <property name="hexpand">True</property>
                 <property name="width-chars">30</property>
                 <signal name="activate" handler="do_btn_send" swapped="no"/>
+                <signal name="insert-text" handler="do_insert" swapped="no"/>
                 <signal name="key-press-event" handler="key_pressed" swapped="no"/>
+                <signal name="paste-clipboard" handler="do_paste" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>

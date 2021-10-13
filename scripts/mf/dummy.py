@@ -51,3 +51,6 @@ class Data(Evt):
 class SendFile(Data):
     pass
 
+class SendBuffer(Data):
+    pass
+
