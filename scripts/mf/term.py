@@ -228,7 +228,7 @@ class Terminal:
                     if reset:
                         self.stream.rts = not inv_reset
                         await anyio.sleep(0.1)
-                    stream.rts = bool(inv_reset)
+                    self.stream.rts = bool(inv_reset)
 
                 elif self.command is not None:
                     self.stream = StapledByteStream(proc.stdin, proc.stdout)
