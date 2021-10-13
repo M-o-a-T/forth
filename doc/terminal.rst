@@ -21,6 +21,42 @@ and empty lines as it sends things.
     It's still possible to do the latter: a ``\\`` at the end of the line
     will not be filtered if it's preceded by exactly one space.
 
+
+Special Features
+~~~~~~~~~~~~~~~~
+
+The terminal has its own input line. It will only send complete lines to
+Forth. It never sends a backspace.
+
+The input line has command history. Use the `Up` and `Down` keys to page
+through it. TODO: save the history between invocations.
+
+You can insert text into the input line. If the text contains a newline,
+it is transmitted line by line and the current contents are ignored.
+
+The output window uses em-spaces (Unicode 0x2003) between the
+input and the output, should the latter be in the same line.
+When you do a multi-line insert, the Forth output is skipped. Thus you can
+select a few lines of Forth in the output window, and directly paste them
+back in.
+
+.. note::
+    An em-space is supposed to be about as wide as the letter `M`.
+    That is not very interesting given a monospace font, but you can easily
+    see the difference in a normal text editor.
+
+The terminal uses helpful colorful characters to show what the Forth
+interpreter thought of your input. Thus you get a nice green checkmark
+instead of the ``Ok.`` prompt, and an ❌ if there was an error. Assuming
+that you use our modified Mecrisp, that is. Standard Forth doesn't print
+anything when there's an error, so you get a timeout instead, which we show
+using a 🕠.
+
+You can send a file from the terminal by using the standard ``Control-O``
+shortcut, or via the menu button in the top left corner.
+
+The terminal uses Unicode / UTF-8.
+
 Command line options
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -32,6 +68,12 @@ Reset
 
 The ``-r`` and ``-R`` options control whether the ``RTS`` line should be
 asserted or not, and whether to briefly invert it before proceeding.
+
+Boldface
+++++++++
+
+The ``-B`` option shows all output from Forth in bold typeface. This may or
+may not be annoying, so the default is not to do this.
 
 Go Ahead
 ++++++++
@@ -64,23 +106,23 @@ recognize that situation.
 Batch mode
 ++++++++++
 
-If you use ``-b`` then no interactive session will be created. Instead the
-session will end, possibly after sending a file to the client.
+If you use ``-b`` then no interactive session will be created and no window
+will be opened. Instead, the session will end after sending any file(s)
+to the client.
 
 Sending data
 ++++++++++++
 
 You can use ``-x PATH`` to send the contents of a (text, ASCII / UTF-8) file.
 
-(OK, so batch mode is pretty useless without this option …)
+This option can be used multiple times.
 
 Development mode
 ++++++++++++++++
 
-This mode is activared with the ``-D`` option and tells the terminal 
-to return to the terminal instead of exiting with an error if/when sending
-data fails (defined as "the terminal sent a line and Forth didnt reply with
-OK").
+This mode is activated with the ``-D`` option and tells the terminal 
+to stay in the terminal after sending data. This is obviously the default
+when no file is given on the command line.
 
 Batch and development mode are mutually exclusive.
 
@@ -90,7 +132,7 @@ Logging
 Use ``-l PATH`` to send the terminal output to this file.
 
 This option is required in batch mode if you want to capture the terminal
-output. For display on your terminal, use ``-l /dev/stdout``.
+output. For display to your terminal, use ``-l /dev/stdout``.
 
 Test flags and values
 +++++++++++++++++++++
@@ -100,16 +142,6 @@ this flag's presence (or absence) and proceed accordingly.
 
 Uses include seeding a gateway node with different parameters, or changing
 various tests while keeping the source code unified.
-
-Terminal control
-~~~~~~~~~~~~~~~~
-
-Use ``Ctrl+]`` (located on ``Ctrl+5`` on some European keyboards), or
-``Ctrl+T`` followed by ``Q``, to exit the terminal.
-
-Use ``Ctrl+T Ctrl+U``, then type the file name, to send a text file.
-
-Use ``Ctrl+T Ctrl+H`` to display help, and for other actions.
 
 Processing statements
 ~~~~~~~~~~~~~~~~~~~~~
