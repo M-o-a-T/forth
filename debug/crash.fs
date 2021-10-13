@@ -32,11 +32,13 @@ forth definitions only
   dictionarystart
   begin
     \ check the word itself
-    dup dup r@ closest-chk
-    \ is it a buffer or a "ramallot" variable?  XXX Mecrisp specific
-    dup lfa>flags h@ $180 and
-    if
-      dup dup lfa>xt execute r@ closest-chk
+    dup smudged? if
+      dup dup r@ closest-chk
+      \ is it a buffer or a "ramallot" variable?  XXX Mecrisp specific
+      dup lfa>flags h@ $180 and
+      if
+        dup dup lfa>xt execute r@ closest-chk
+      then
     then
     dictionarynext
   until
