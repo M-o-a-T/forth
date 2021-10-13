@@ -24,6 +24,8 @@ from contextlib import asynccontextmanager
 from anyio.streams.stapled import StapledByteStream
 from anyio_serial import Serial
 from click.exceptions import UsageError
+from .dummy import SendFile, StopSendFile, Data
+from pathlib import Path
 
 from serial.tools import hexlify_codec
 
@@ -56,13 +58,14 @@ class AsyncDummy:
 
 class _MsgOut:
     msg = "??"
+    line = None
     timeout = False
     good = None
 
     def __init__(self, s):
-        self.s = s
+        self.line = s
     def __repr__(self):
-        return f"<{self.__class__.__name__} msg={self.msg!r} t={self.timeout} ok={self.good}>"
+        return f"<{self.__class__.__name__} line={self.line!r} msg={self.msg!r} t={self.timeout} ok={self.good}>"
 
 def green(s):
     return f"\x1b[32m{s}\x1b[39m"
@@ -74,24 +77,33 @@ class WithTimeout(_MsgOut):
     good = False
 class WithOK(_MsgOut):
     msg = green("✓")
+    good = True
 class WithACK(_MsgOut):
     msg = green("🗸")
+    good = True
 class WithNAK(_MsgOut):
     msg = "❌"
+    good = False
 class WithEnd(_MsgOut):
     msg = "🔚"
 
 class SendLine:
     def __init__(self, line):
         self.line = line
+    def __repr__(self):
+        return f"<{self.__class__.__name__} line={self.line!r}>"
+
 class MsgLine(SendLine):
     def __init__(self, line, timeout):
         super().__init__(line)
         self.timeout = timeout
         self.recv_w,self.recv_r = anyio.create_memory_object_stream(10)
 
-    async def evt(self,evt):
-        self.recv_w.send(evt)
+    def __repr__(self):
+        return f"<{self.__class__.__name__} line={self.line!r} tm={self.timeout!r}>"
+
+    async def send(self,evt):
+        await self.recv_w.send(evt)
 
     def __aiter__(self):
         return self.recv_r.__aiter__()
@@ -124,6 +136,8 @@ class Terminal:
     _exc = None
     port = None
     command = None
+    file_sender = None
+    file_ended = False
 
     _subst = re.compile('{\S+}')
 
@@ -224,26 +238,19 @@ class Terminal:
                     assert self.stream == proc
 
                 await self.start()
-                try:
-                    for f in self.files:
-                        await anyio.sleep(0.1)
-                        try:
-                            await self.send_file(f)
-                        except AllEOFError as err:
-                            pass
-                        except Errors as e:
-                            self.console.set_error(repr(e))
-                            if self.develop:
-                                break
-                            else:
-                                raise
 
-                    if self.batch:
-                        self.tg.cancel_scope.cancel()
-                    else:
-                        while True:
-                            await anyio.sleep(99999)
-                    # otherwise we're done after the file is processed
+                try:
+                    if self.files:
+                        await self.tg.start(self.upload_file, self.files)
+                    await anyio.sleep(0.1)
+                    while True:
+                        await anyio.sleep(99999)
+
+                except Errors as e:
+                    self.console.set_error(repr(e))
+                    if not self.develop:
+                        raise
+                    self.console.set_error(e)
                 except Exception as exc:
                     self._exc = exc
                 finally:
@@ -274,8 +281,25 @@ class Terminal:
     async def writer(self, *, task_status):
         task_status.started()
         async for msg in self.console:
+            print("Cons",msg)
             if isinstance(msg,str):
                 msg = SendLine(msg)
+            elif isinstance(msg, StopSendFile):
+                if self.file_sender is not None:
+                    self.file_sender.cancel()
+                continue
+            elif isinstance(msg, SendFile):
+                if self.file_sender is not None:
+                    self.console.set_error(f'Already sending a file')
+                    continue
+                await self.tg.start(self.upload_file, msg.data)
+                continue
+            elif isinstance(msg,Data):
+                msg = SendLine(msg.data)
+            else:
+                print("Unknown Msg",repr(msg))
+                continue
+
             await self.raw_in_w.send(msg)
 
 
@@ -319,8 +343,10 @@ class Terminal:
     async def chat(self, text, timeout=False):
         """Send a line, return whatever was printed"""
         msg = MsgLine(text, timeout)
+        print("SEND",repr(msg))
         await self.raw_in_w.send(msg)
-        for m in msg:
+        async for m in msg:
+            print("GETS",repr(m))
             if m.good:
                 break
             if m.good is None:
@@ -330,10 +356,11 @@ class Terminal:
             if isinstance(m,WithTimeout):
                 raise TimeoutError(m.msg)
             else:
-                raise ForthError(m.msg)
+                raise ForthError(m.line.strip())
 
+        print("SEND DONE",m.line)
         text = text.rstrip()
-        line = m.msg
+        line = m.line
         # filter echo. XXX do this in the reader instead?
         if self.go_ahead and line.startswith(text):
             line = line[len(text):]
@@ -365,7 +392,7 @@ class Terminal:
             nonlocal line, prev_len, do_wait, msg, need_lf
             line = self.rx_decoder.decode(line)
             wrt = line+cls.msg
-            await self.console.send(wrt)
+            self.console.send(wrt, lf=need_lf)
             need_lf = True
             if self.log is not None:
                 await self.log_w.send(text)
@@ -418,12 +445,13 @@ class Terminal:
                     return
                 if isinstance(data,MsgLine):
                     if msg is not None:
-                        await msg.evt(WithEnd("collision"))
+                        await msg.send(WithEnd("collision"))
                     msg = data
+                    # fall thru
                 if isinstance(data,SendLine):
                     need_lf = False
-                    await self.console.send("\r\n" + data.line + "\u2003⁣") # em space
-                    await self._send_line(data.line)
+                    self.console.send(data.line + "\u2003", lf=True) # em space
+                    await self.send_line(data.line)
                     continue
 
             for b in data:
@@ -450,7 +478,7 @@ class Terminal:
                             await out(WithNothing)
                             go_late = False
                         if need_lf:
-                            await self.console.send("\r\n")
+                            self.console.send("\n")
                             need_lf = False
                         line.append(b)
                         if in_utf and not utflen(b): # continuation
@@ -580,7 +608,7 @@ class Terminal:
         if code == "echo":
             if self.verbose:
                 line = self.subst_flags(line)
-                await self.console.send(f"{line}")
+                self.console.send(f"{line}", lf=True)
             return
         if code == "ok":
             res = await self.chat(f"{line} .", timeout=True)
@@ -616,7 +644,7 @@ class Terminal:
             self.goahead_delay = float(self.subst_flags(line))
             return
         if code == "include":
-            await self.send_file(line)
+            await self.upsend_file(line)
             return
         if code == "require":
             try:
@@ -629,7 +657,7 @@ class Terminal:
                     fn += f"{word}.fs"
             res = await self.chat(f"token {word} find drop 0= .", timeout=True)
             if int(res.strip()):
-                await self.send_file(fn)
+                await self.upsend_file(fn)
             return
 
         # code not recognized: ordinary Forth word
@@ -643,21 +671,27 @@ class Terminal:
         if not line:
             return
 
-        return line+"\n"
+        return line
 
-    async def _send_line(self, line):
+    async def send_line(self, line):
         """Send a single line."""
         await self.stream.send(self.tx_encoder.encode(line+"\n"))
 
     async def send_file(self, filename):
-        """Send a file. Runs in write thread."""
+        """Send a file. Runs in upload_file task."""
+        file_rel = str(Path(filename).resolve().relative_to(Path.cwd()))
+        if len(filename) > len(file_rel):
+            filename = file_rel
+
+        self.file_ended = False
+        self.console.send(f'⮞ {filename} : start', lf=True)
         async with await anyio.open_file(filename, 'r') as f:
             layer,self._layer = self.layer_,0
-
-            self.console.set_info('--- Sending file {filename} ---')
             num = 0
             try:
                 while True:
+                    if self.file_ended:
+                        self.console.send(f'⮞ {filename} : {num}', lf=True)
                     try:
                         num += 1
                         line = await f.readline()
@@ -665,15 +699,16 @@ class Terminal:
                             break
                         line = await self.preprocess(line,filename,num)
                     except AllEOFError as err:
-                        self.console.set_info(f'--- END {filename} : {num}')
+                        self.console.send(f'⮞ {filename} : {num} (stop)', lf=True)
                         self.layer = self.layer_ = 0
                         raise
                     except EarlyEOFError as err:
-                        self.console.set_info(f'--- END {filename} : {num}')
+                        self.console.send(f'⮞ {filename} : {num} (exit)', lf=True)
                         self.layer, self.layer_ = 0,layer
                         break
                     except EOFError as err:
-                        self.console.set_info(f'--- EOF {filename} ---')
+                        self.console.send(f'⮞ {filename} : end', lf=True)
+                        self.file_ended = True
                         if self.layer_:
                             self.layer = self.layer_ = 0
                             raise ScriptError(f"{line[9:]}: '#if…' without corresponding '#endif'")
@@ -689,22 +724,41 @@ class Terminal:
                 # already printed above
                 raise
             except Exception as exc:
-                self.console.set_error(f'--- in {filename} : {num}')
+                self.console.send(f'⮞ {filename} : {num}', lf=True)
                 raise
 
-    def upload_file(self, filename):
+    async def upsend_file(self, path):
+        if self.file_sender is None:
+            await self.tg.start(self.upload_file, path)
+        else:
+            await self.send_file(path)
+
+    async def upload_file(self, *files, task_status):
         """Ask user for filename and send its contents"""
-        try:
-            anyio.from_thread.run(self.send_file, filename)
-            self.console.set_info(f'--- File {filename} sent ---')
-        except AllEOFError as err:
-            pass
-        except Errors as e:
-            if not self.develop:
-                raise
-            self.console.set_error(f'--- ERROR on file {filename}: {e !r} ---')
-        finally:
-            self.layer_,self.layer = 0,0
+        with anyio.CancelScope() as sc:
+            self.file_sender = sc
+            self.console.started_sending()
+            task_status.started()
+            try:
+                for path in files:
+                    await anyio.sleep(0.1)
+                    try:
+                        await self.send_file(path)
+                        self.console.set_info(f'--- File {path} sent ---')
+                    except Errors as e:
+                        if not self.develop:
+                            raise
+                        self.console.set_error(f'--- ERROR on file {path}: {e !r} ---')
+                        return
+            except AllEOFError as err:
+                pass
+
+            finally:
+                self.file_sender = None
+                self.layer_,self.layer = 0,0
+                self.console.stopped_sending()
+                if self.batch:
+                    self.tg.cancel_scope.cancel()
 
     async def change_filter(self, filters=()):
         """change the i/o transformations"""
@@ -717,17 +771,6 @@ class Terminal:
                 self.filters = filters
                 self.update_transformations()
         await self.term.show_line(f'#filter {" ".join(self.filters)}')
-
-    async def change_encoding(self, encoding):
-        """change encoding"""
-        try:
-            codecs.lookup(encoding)
-        except LookupError:
-            await self.term.show_line(f'\\ --- invalid encoding name: {encoding}')
-        else:
-            self.set_rx_encoding(encoding)
-            self.set_tx_encoding(encoding)
-        await self.term.show_line(f'#encode {encoding}')
 
     def change_goahead(self, goahead):
         """Change go-ahead sequence"""

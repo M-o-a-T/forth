@@ -22,16 +22,32 @@ class NoWindow:
     async def send(self, data):
         pass
 
-    async def set_error(self, e):
+    def set_error(self, e):
         print(f"--- error: {e} ---", file=sys.stderr)
 
-    async def set_info(self, e):
+    def set_info(self, e):
         print(f"--- info: {e} ---", file=sys.stderr)
 
-    async def set_fileinfo(self, name,num):
+    def set_fileinfo(self, name,num):
         pass
 
     def close(self):
         pass
 
+class Evt:                        
+    """generic event to send to the app"""
+    pass
+        
+class StopSendFile(Evt):
+    def __repr__(self):
+        return f"<{self.__class__.__name__}>"
+
+class Data(Evt):
+    def __init__(self, data):
+        self.data = data
+    def __repr__(self):
+        return f"<{self.__class__.__name__} data={self.data!r}>"
+    
+class SendFile(Data):
+    pass
 
