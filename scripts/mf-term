@@ -86,6 +86,7 @@ async def main(**kw):
     batch = kw.get("batch")
     develop = kw.get("develop")
     filter = kw.get("filter")
+    exec = kw.get("exec")
     verbose = kw.get("verbose",0)
     quiet = kw.pop("quiet",0)
     verbose = 1+verbose-quiet
@@ -104,6 +105,8 @@ async def main(**kw):
 
     if batch and develop:
         raise click.UsageError("Batch and development mode don't like each other.")
+    if not develop and not exec:
+        kw["develop"] = True
 
     if filter:
         if "help" in filter:
