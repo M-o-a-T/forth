@@ -427,6 +427,7 @@ class Terminal:
                     data = await self.raw_in_r.receive()
                     print("Got",data)
             except TimeoutError:
+                need_lf = False
                 if go_late:
                     if line.endswith(self.go_ahead):
                         self.go_check = True
@@ -449,8 +450,9 @@ class Terminal:
                     msg = data
                     # fall thru
                 if isinstance(data,SendLine):
-                    need_lf = False
-                    self.console.send(data.line + "\u2003", lf=True) # em space
+                    if not self.go_check:
+                        need_lf = False
+                        self.console.send(data.line + "\u2003", lf=True) # em space
                     await self.send_line(data.line)
                     continue
 
@@ -461,6 +463,7 @@ class Terminal:
                     elif self.go_check and line.endswith(self.go_ahead):
                         line = line[:-len(self.go_ahead)].rstrip()
                         await out(WithOK)
+                        need_lf = True
                     else:
                         await out(WithNothing)
                 else:
