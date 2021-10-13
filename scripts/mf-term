@@ -18,6 +18,7 @@ from mf.term import Terminal, Errors
 @click.option("--eol", type=click.Choice(['CR', 'LF', 'CRLF'], case_sensitive=False), help="end of line mode", default="LF")
 @click.option("-q", "--quiet", is_flag=True, help="suppress non-error messages")
 @click.option("-v", "--verbose", is_flag=True, help="be more chatty")
+@click.option("-B", "--bold", is_flag=True, help="print Forth output in boldface")
 @click.option("-r", "--reset", is_flag=True, help="Send reset sequence")
 @click.option("-R", "--inv-reset", is_flag=True, help="Is the reset wire inverted?")
 @click.option("-x", "--exec", type=click.Path(), multiple=True, help="send this file to the MCU")

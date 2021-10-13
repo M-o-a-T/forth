@@ -69,6 +69,9 @@ class _MsgOut:
 
 def green(s):
     return f"\x1b[32m{s}\x1b[39m"
+def bold(s):
+    return f"\x1b[1m{s}\x1b[0m"
+
 class WithNothing(_MsgOut):
     msg = ""
     timeout = True
@@ -146,7 +149,7 @@ class Terminal:
             return self.flags[m.group(0)[1:-1]]
         return self._subst.sub(sub, line)
 
-    def __init__(self, command=False, port=("/dev/ttyUSB0","115200"), name=None, echo=False, eol='lf', filter=(), go_ahead = None, go_ack=None, go_nak=None, batch=None, log=None, develop=False, verbose=1, flag=(), ack=-1,nak=-1, timeout=0.2, reset=None, inv_reset=None, exec=()):
+    def __init__(self, command=False, port=("/dev/ttyUSB0","115200"), name=None, echo=False, eol='lf', filter=(), go_ahead = None, go_ack=None, go_nak=None, batch=None, log=None, develop=False, verbose=1, flag=(), ack=-1,nak=-1, timeout=0.2, reset=None, inv_reset=None, exec=(), bold=False):
         if command:
             self.command = port
         else:
@@ -155,6 +158,7 @@ class Terminal:
         self.name = name or '?'
         self.echo = echo
         self.eol = eol
+        self.bold = bold
         self.filters = filter
         self.update_transformations()
         self.exit_character = chr(0x1D)  # GS/CTRL+]
@@ -386,8 +390,7 @@ class Terminal:
         async def out(cls):
             nonlocal line, prev_len, do_wait, msg, need_lf
             line = self.rx_decoder.decode(line)
-            wrt = line+cls.msg
-            self.console.send(wrt, lf=need_lf)
+            self.console.send((bold(line) if self.bold else line) + cls.msg, lf=need_lf)
             need_lf = True
             if self.log is not None:
                 await self.log_w.send(text)
