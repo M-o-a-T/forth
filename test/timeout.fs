@@ -6,6 +6,10 @@
 #include lib/timeout.fs
 #endif
 
+#if time undefined now
+#include lib/timeout2.fs
+#endif
+
 #if undefined *delay
 #include debug/timeout.fs
 #endif
