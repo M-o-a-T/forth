@@ -1,4 +1,7 @@
-#if undefined \halt
+#if defined \halt
+#end
+#endif
+
 \ Push / pop register-based context
 \ TODO this is specific to Mecrisp Stellaris.
 \ CTX is R4+R5, the innermost loop count+end
