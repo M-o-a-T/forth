@@ -79,7 +79,7 @@ var> cint item
     $05FA constant MAGIC
         previous definitions
   _AIARC item
-$ED00ED0C constant AIARC
+$E000ED0C constant AIARC
 
 \ SHCSR: System Handler Control and State Register
   &rg voc: _SHCSR
@@ -141,7 +141,7 @@ $E000ED24 constant SHCSR
 
         previous definitions
   _ICSR item
-$ED00ED04 constant ICSR
+$E000ED04 constant ICSR
 
 voc: irq
 -14 constant  NMI
