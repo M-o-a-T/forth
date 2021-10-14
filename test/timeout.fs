@@ -73,7 +73,9 @@ task also
   begin t2 state @ =dead <> while yield repeat
   begin t3 state @ =dead <> while yield repeat
 ;
+#delay 5
 yy
+#delay 0.5
 
 \ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=
