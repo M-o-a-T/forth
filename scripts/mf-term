@@ -135,8 +135,7 @@ def show_error(exc, verbose):
     elif isinstance(exc, click.ClickException):
         raise
     elif isinstance(exc, Errors):
-        if verbose > 1:
-            print(f"\nError: {exc !r}", file=sys.stderr)
+        print(f"\nError: {exc !r}", file=sys.stderr)
         sys.exit(1)
     else:
         #traceback.print_exception(type(exc), exc, exc.__traceback__)
