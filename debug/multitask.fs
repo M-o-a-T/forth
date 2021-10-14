@@ -8,7 +8,6 @@
 #if task %cls undefined ?
 
 #include debug/linked-list.fs
-get-current
 
 task %cls definitions also
 task also
@@ -73,7 +72,6 @@ task also
   drop
 ;
 
-set-current
 #endif
 
 forth definitions

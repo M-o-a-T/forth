@@ -920,7 +920,7 @@ task \int definitions
 : (task:) ( -- )
 \ Part 2 of declaring a named task.
 \ run the subclass to set its context
-  get-current  \twid @ set-current ( subclass )
+  \voc get-current  \twid @ \voc set-current ( subclass )
   dup \voc (dovoc  \ set temp context to the subclass
   \voc lfa>nfa
   count [with] object: \ make our object
@@ -931,8 +931,8 @@ task \int definitions
 task %cls definitions
 : :task: ( "name" code… ; -- )
 \ Declare a named task
-  get-current \twid !                     \ save our current voc
-  [ task \int (' sub literal, ] set-current \ voc for one-off subclasses
+  \voc get-current \twid !                       \ save our current voc
+  [ task \int (' sub literal, ] \voc set-current \ voc for one-off subclasses
   token
   \voc _sop_ @ dup \voc context <> if
     @
@@ -942,8 +942,8 @@ task %cls definitions
   \voc (dovoc
   [with] class:
   \ now the one-off subclass is current
-  ['] (task:) \voc post-def !               \ second step
-  s" \main" [with] : \                      \ … start defining its "\main" method
+  ['] (task:) \voc post-def !               \ second step:
+  s" \main" [with] : \                      \ start defining its "\main" method
 ;
 
 forth definitions

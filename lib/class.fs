@@ -64,7 +64,7 @@ voc: root-cls
 
 : ;class
 \ end a class definition, go back to previous state
-  get-current
+  \voc get-current
   dup lfa>wtag 2 and if
     ?wid
     dup lfa>xt execute postpone ignore

@@ -67,7 +67,7 @@ dictionarystart constant _sof_
 #vocs 1+ cells buffer: c2r-context
 
   \voc-wl ,
-\ Return the addr of the actual search order depending on the compile mode.
+\ Return the addr of the current search order depending on the compile mode.
 : context ( -- a-addr )
   compiletoram? if c2r-context else c2f-context then
 ;
@@ -257,13 +257,13 @@ compiletoflash
   0 context begin dup @ while swap 1+ swap cell+ repeat drop
 ; 
 
-  forth-wl ,
+  \voc-wl ,
 : get-order ( -- wid1 ... widn n )
   w/o dup >r  cells context +  ( past-end |R: len )
   begin 1 cells - dup @ swap dup context = until drop r>
 ;
 
-  forth-wl ,
+  \voc-wl ,
 : set-order ( wid1 ... widn n | -1 )
   dup -1 = if
     drop root-wl forth-wl 2
@@ -275,13 +275,24 @@ compiletoflash
   0 r> cells context + !  \ zero terminated order
 ;
 
+compiletoram
+forth-wl ,
+: init-order
+  \ we need this helper because wlst-init switches off \voc, thus
+  \ we cannot get at "SET-ORDER" any more. Catch-22.
+  compiletoram
+  \voc-wl forth-wl root-wl 3 set-order
+  compiletoflash
+  \voc-wl forth-wl root-wl 3 set-order
+;
 
-  forth-wl ,
+compiletoflash
+
+  \voc-wl ,
 : set-current ( wid -- ) current ! ;
 
-  forth-wl ,
+  \voc-wl ,
 : get-current ( -- wid ) current @ ;
-
 
 \ We have to redefine all defining words of the Mecrisp Core to make them add
 \ a wordlist tag when creating a new word:
@@ -320,16 +331,13 @@ wlst-init
 
 \ This is only needed for compiling the rest. VOC-INIT replaces the hook.
 compiletoram ' find-in-dict hook-find !
-compiletoflash
+init-order
 
 \ ===================================
 \ Here's the actual "vocabulary" part
 \ ===================================
 
 decimal
-
-\ \voc-wl first
-get-order \voc-wl swap 1+ set-order
 
 \voc-wl set-current
 
@@ -511,13 +519,8 @@ root-wl set-current   \ Some tools needed in VOC contexts
   (def [ ' .. call, ] immediate ;
 
 
-\ Make the current compilation context the new search context.
-: @voc ( -- )
-  get-current (dovoc immediate
-;
-
-\ Make the current class compilation context the actual search context.
 : __ ( -- )
+\ Make the current class compilation context the temporary search context.
   get-current _csr_ ! immediate
 ;
 
@@ -637,10 +640,11 @@ root-wl set-current
 : sticky ( -- ) align 1 , 1 wflags ! ;
 
 
-root-wl set-current   \ Some tools needed in VOC contexts
+root-wl set-current
 
-\ Create a VOC that extends (inherits from) the actual VOC context.
 : voc: ( "name" -- )
+\ Create a VOC that extends (inherits from) the current VOC context.
+  \ Needed in all VOC contexts, otherwise we can't use inheritance
   _sop_ @ context = if 0 else VOC-context @ then voc-extend
 ;
 
@@ -656,7 +660,7 @@ get-order nip \voc-wl swap set-order
 \ Make the next created word a context switching one (assign a ctag).
 \ Usage: <voc> item <defining word> ...   i.e.:  123 item variable i1
 : item ( -- )
-  \ compile the actual VOCs wid as the next created words ctag
+  \ compile the current VOCs wid as the next created words ctag
     align voc-context @ ,
   \ set bit 0 of the wflags in the next created words wtag
     1 wflags !
@@ -665,8 +669,8 @@ get-order nip \voc-wl swap set-order
 root-wl set-current   \ Some tools needed in VOC contexts
 
 \ Print the data stack and stay in the current context.
-sticky
-: .s ( -- ) .s ;
+\ sticky
+\ : .s ( -- ) .s ;
 
 
 \voc-wl set-current
@@ -692,12 +696,7 @@ forth-wl set-current
 forth-wl set-current
 
 voc-init  \ now vocs can be used.
-
-get-order nip forth-wl swap set-order
-
-compiletoflash
-\ this is necessary to clean ecerything up.
-\ TODO this is a bug; figure out why the *censored* this is.
+compiletoram init-order
 
 root definitions  \voc only
 

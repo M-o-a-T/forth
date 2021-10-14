@@ -111,11 +111,6 @@ This is relevant for vocabulary/class inheritance, particularly if you
 recycle words that also occur in Forth itself (or another vocabulary that's
 also on your search list).
 
-@voc ( -- )
-+++++++++++
-
-Make the current compilation context the actual search context.
-
 .named ( "name" -- )
 ++++++++++++++++++++
 
