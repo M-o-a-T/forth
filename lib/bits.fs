@@ -28,8 +28,10 @@ _rg voc: &rg
 : @ @ inline ;
 : ! ! inline ;
 : m! ( addr bits mask )
+  \ cr ." ST " #2 pick hex. ." B " over hex. ." M " dup hex.
   #2 pick @ over not and ( addr bits mask oval )
   -rot and or swap !
+  \ ." OK" cr
 ;
 : %>! ( addr bits mask )
   state @ if \ compiling

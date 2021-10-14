@@ -2,6 +2,11 @@
 
 forth definitions only
 
+#if defined time
+..
+#end
+#endif
+
 voc: time
 
 task also

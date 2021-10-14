@@ -47,6 +47,7 @@ voc: tick
 #endif
 
 #if undefined gcd
+forth definitions
 : gcd ( a b -- gcd )
   begin
   ?dup while
@@ -60,7 +61,7 @@ voc: tick
   / -rot / swap
   2-foldable
 ;
-  
+bits tick definitions
 #endif
 
 \ compiletoflash \ not while testing
@@ -69,16 +70,17 @@ forth only
 bits also
 tick definitions also
 
-1
-\ get bit width of RELOAD register
+\ get bit width of the RELOAD register
 _systick _rvr reload .. 5 rshift
-lshift \ 1 << 24-or-whatever
-1 - constant clk_max \ width of register
+1 swap lshift \ 1 << 24-or-whatever
+1 - constant clk_max \ max value we can store there
 
 1 variable clk_div
 1 variable clk_mul
 
 : setclk  ( clock -- )
+\ simplify the clock-to-µsec quotient and just save it
+\ we expect UPDATE, below, to be called next
   1000000 ratio
   clk_div !
   clk_mul !
@@ -114,6 +116,8 @@ clk_max clk>µs constant µs_max  drop  \ remainder
   -rot + clk_cur !
 ;
 
+time also definitions
+
 : now-hq ( -- µsec )
 \ return the current µsec value
   dint
@@ -126,6 +130,7 @@ clk_max clk>µs constant µs_max  drop  \ remainder
   _now @
 ;
 
+bits tick definitions
 : tick-irq ( -- )
 \ As the IRQ is triggered, the just-passed clock is converted
 \ to µsec and added to _NOW. RVR is used as the next starting point,
@@ -143,13 +148,14 @@ clk_max clk>µs constant µs_max  drop  \ remainder
 : latest ( clk -- flag )
 \ ensure that the timer triggers in at most clk clocks
 \ the return flag says that we shouldn't halt
+\ call this with interrupts disabled!
   systick cvr current @ ( max cur )
   \ if we get triggered soon anyway, don't bother now
   \ but store a new limit for later
   dup clk_min @ over > if 2drop systick rvr ! 1 exit then
 
   \ at this point our own interrupt is far off, but some other IRQ
-  \ might delay us sufficiently anyway.
+  \ might delay us sufficiently anyway, so interrupts stay off.
 
   \ Some tolerance?
   ( max cur min )
@@ -168,13 +174,15 @@ clk_max clk>µs constant µs_max  drop  \ remainder
   ( cur now )
   -
   \ The difference needs to be accounted for.
-  \ TODO add some fudge value to make up for the lost ticks
+  \ TODO add a small fudge value to make up for the lost ticks
   clk_div @ clk_mul @ */mod ( rem µs )
   _now +! clk_cur +!
   0  \ no need to loop quickly
 ;
 
 : update ( now next -- flg )
+\ given the time until the next timeout, and the one after that,
+\ set up the clock and return whether the caller should not call WFI
   dup -1 <> if µs>clk then clk_max umin
   dup clk_min @ < if drop clk_max then
   swap µs>clk ( next now )

@@ -38,11 +38,14 @@ monotonic object: systime
 #endif
 
 #include soc/{arch}/tick.fs
+time also
+task also
+bits tick also definitions
 
 #endif
 
 :init
-  now-hq  last-check !
+  time now-hq  last-check !
 ;
 
 
@@ -96,6 +99,8 @@ monotonic object: systime
 ;
 :init hourtask start ; 
     
+time definitions
+
 : micros ( µsec -- )
   task sleep ;
 
@@ -122,7 +127,11 @@ monotonic object: systime
 \ The following implements a way to yield every n'th pass through a loop,
 \ or something.
 
+bits tick definitions
+
 0 variable \yield
+
+time definitions
 
 : nyield-reset ( -- )
 \ reset. Call after finishing your work.
