@@ -34,30 +34,45 @@ voc: ( "name" -- )
 
 Create a stand-alone vocabulary prefix; it extends the root vocabulary.
 
-<voc> voc ( "name" -- )
+‹voc› voc ( "name" -- )
 +++++++++++++++++++++++
 
 Create a vocabulary prefix that extends, i.e. inherits words from, the given voc.
 
-<voc> ?? ( -- )
+‹voc› ?? ( -- )
 +++++++++++++++
 
-Show all words of the actual VOC search order and stay in that VOC's context.
+Show a list of all words in the current VOC search order.
+
+This word stays in the current VOC's context. The intent is that, if you
+want to call word ``baz`` which is in vocabulary ``bar`` which is itself in
+vocabulary ``foo``, but don't remember its spelling, you can enter ``foo
+bar ??`` for lookup, then follow that directly with ``baz`` without having
+to re-type the ``foo bar`` part. This is particularly relevant when ``foo``
+or ``bar`` are *item* words (see below) instead of vocabularies.
+
+‹voc› ??? ( -- )
++++++++++++++++
+
+Like ``??``, but display one word per line and also show context flags and
+assorted addresses.
 
 \.. ( -- )
 ++++++++++
 
-Switch back from a VOC search order to the default Forth search order.
+Switch back from a temporary VOC search to the default Forth search order.
 
-<voc> definitions ( -- )
+‹voc› definitions ( -- )
 ++++++++++++++++++++++++
 
-Make <voc> the current compilation context.
+Make *‹voc›* the current compilation context.
 
-<voc> item ( -- )
+‹voc› item ( -- )
 +++++++++++++++++
 
-Make the next created word a context switching one.
+Make the next created word a context switching one: along with any other
+effect that calling this word may have, it sets the temporary search context
+to *‹voc›* at compile time.
 
 One use of this is for describing register maps::
 
@@ -69,11 +84,9 @@ One use of this is for describing register maps::
     : port: ( "name" a -- ) item constant ;
     $40004C00 gpio port: p1 ( -- a1 )
 
-We can now write ``p1 out ( -- a2 )``. This will compile to a single
-integer address if you use an optimizing Forth compiler.
-
-This avoids the long constant names and the combinatorial explosion you get
-when you have five GPIO registers with five accessors each.
+We can now write ``p1 out ( -- a2 )``. This avoids the long constant names
+and the combinatorial explosion you get when you have five GPIO registers
+with five accessors each.
 
 ``offset:`` is defined in ``lib/util.fs``.
 
@@ -183,20 +196,18 @@ Word resolution
 
 The main word is ``vocs-find``. It is hooked to ``hook-find`` by ``init``.
 
+Context switching is done by ``??-dictionary`` which is a replacement for
+``find`` (i.e. its address is stored in ``hook-find``):
 
+* Before searching the dictionary ``_?csr_`` checks whether the last
+  interpreted word requested a temporary search context. If so, that
+  context is used instead of the default search.
 
+* After a successful dictionary search ``_!csr_`` records if the word in
+  question requests a context switch.
 
-\ Context switching is done by FIND-IN-Dictionary which is hooked to HOOK-FIND :
-
-\ * Before searching the dictionary, it is checked ( by _?csr_ ), if the last
-\   interpreted word requested to change the search context. Then it's done.
-
-\ * After a successful dictionary search it is recorded ( by _!csr_ ) if a context
-\   switch is requested. Then it will then be done ( by ?csp ) before the next
-\   search.
-
-\ * If an error occures, the search context is reset to the systems default
-\   search order.
+* If an error occurs (i.e. ``quit`` is called), the temporary search
+  context is cleared.
 
 
 Support words
