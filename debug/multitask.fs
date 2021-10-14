@@ -62,7 +62,7 @@ task also
     ." Link:" dup __ link ?
   then
   dup __ state @ =timer = if
-    dup __ timeout @ ." Timer:" .
+    dup __ timeout @ ." Timer:" u.
   else
   \ dup __ abortptr @ ?dup if ." Abort:" hex. then
     dup __ abortcode @ ?dup if ." Sig:" . then
