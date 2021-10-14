@@ -55,7 +55,7 @@ task also
   dup __ pstack @ if
     dup __ pstack @  over __ task-ps find-beef ." S:" .
   then
-  dup rstack @ if
+  dup __ rstack @ if
     dup __ rstack @  over __ task-rs find-beef ." R:" .
   then
   space
