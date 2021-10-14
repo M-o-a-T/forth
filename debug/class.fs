@@ -33,22 +33,24 @@ forth definitions
   >r
   dictionarystart begin
     ( test )
-    dup obj-lfa>?cwid ?dup if
-      ( test cwid )
-      r@ over is-sub? if
-        dup s" ?" rot ??-vocs-no-root
-        ( test cwid lfa-? )
-        ?dup if
-          cr
-          2 pick .idd ." :: " swap .idd cr
-          over lfa>xt execute ( test lfa-? obj )
-          swap lfa>xt execute
-          cr
+    dup smudged? if
+      dup obj-lfa>?cwid ?dup if
+        ( test cwid )
+        r@ over is-sub? if
+          dup s" ?" rot ??-vocs-no-root
+          ( test cwid lfa-? )
+          ?dup if
+            cr
+            2 pick .idd ." :: " swap .idd cr
+            over lfa>xt execute ( test lfa-? obj )
+            swap lfa>xt execute
+            cr
+          else
+            drop
+          then
         else
           drop
         then
-      else
-        drop
       then
     then
   dictionarynext until
