@@ -263,6 +263,15 @@ class Window(NoWindow):
         f.seek(0)
         self.in_w.send_nowait(SendBuffer(f))
 
+    def set_error(self, e):
+        super().set_error(e)
+        self.send(repr(e), lf=True)
+
+    def set_info(self, e):
+        super().set_error(e)
+        self.send(repr(e), lf=True)
+
+
 
 if __name__ == "__main__":
     win = TheWindow()
