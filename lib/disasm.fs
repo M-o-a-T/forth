@@ -59,8 +59,8 @@ voc: \disasm
 \   dup 6 + dup skipstring r@ = if ."   --> " ctype else drop then
     dup 6 + skipstring  r@ =
     if ."   -->  "
-#[if] token .nid find drop
-      dup .nid
+#[if] token .idd find drop
+      dup .idd
 #then
     then  \ MM-200522
     dictionarynext

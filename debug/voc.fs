@@ -180,35 +180,12 @@ root definitions
   _sof_ @ u>= over forth-wl u< and
 ;
 
-\ Given a words lfa print its name with allVOCabulary prefixes. If it's  a
-\ word from the Stellaris core do not print the prefix forth.
-: .nid ( lfa -- )
-  dup core? if .id exit then
-  0 swap
-  begin
-    dup lfa>wtag tag>wid
-    dup forth-wl =
-    if
-      over dup forth-wl u>= swap root-wl u<= and if drop then -1
-    else
-      dup wid?
-    then
-  until
-  over if dup forth-wl = if drop then then
-  begin
-    dup
-  while
-    .wid
-  repeat
-  drop
-;
-
 \ Given a wid of a VOCabulary print the VOCabulary name, given a wid of a
 \ wordlist print the address.
 : .vid ( wid -- )
   tag>wid
   dup wid? if .wid exit then
-  .nid
+  .idd
 ;
 
 root definitions
