@@ -1056,8 +1056,6 @@ task \int definitions also
   check-tasks each: i-check drop ( n )
   \ "busy" checkers or more work present? exit
 
-  \ update timer
-  bits tick check
   \ disable IRQs and walk the IRQ list
   dint
   irq-tasks each: i-check drop ( n )
