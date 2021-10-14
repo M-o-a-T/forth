@@ -78,6 +78,8 @@ class Window(NoWindow):
         self.terminal.set_cursor_shape(Vte.CursorShape.UNDERLINE)
         self.terminal.set_color_cursor_foreground(Gdk.RGBA(0,0,0,0))
         self.terminal.set_can_focus(False)
+        self.terminal.set_scrollback_lines(10000)
+
         term_scroller = self['term_scroller']
         term_scroller.set_hexpand(True)
         term_scroller.set_vexpand(True)
