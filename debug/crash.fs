@@ -8,6 +8,7 @@ forth definitions only
 \voc also
 
 #require .idd debug/voc.fs
+#require dump lib/dump.fs
 
 \voc definitions also
 
@@ -110,11 +111,13 @@ forth definitions
   cr cr
   unhandled
   cr
-  \ h.s
-  sp@ ." SP=" hex.
+  \ h.s \ not if we're somewhere random
   rp@ ." RP=" hex.
-  cr
-  \ ." Calltrace:" ct
+  sp@ ." SP=" hex. cr
+  sp@ $40 dump
+  cr cr
+  ." Calltrace:" ct
+  cr cr
   reset \ Trap execution
 ;
 
