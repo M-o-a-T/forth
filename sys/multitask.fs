@@ -652,7 +652,7 @@ task definitions
 ;
 
 :init
-  ['] yield  dup h.s drop  task \int yield-hook !
+  ['] yield  task \int yield-hook !
 ;
 
 : caught ( -- )
