@@ -353,8 +353,21 @@ forth definitions
 
 forth definitions
 
-: words ( -- ) 0 \?? cr ;
+: .named ( "name" -- )
+\ list all words with that name, in different vocabularies
+  token 2>r
+  cr
+  dictionarystart begin
+    dup smudged? if
+      dup lfa>nfa count 2r@ compare if
+        dup dup hex. .idd cr
+      then
+    then
+  dictionarynext until
+  drop 2rdrop
+;
 
+: words ( -- ) 0 \?? cr ;
 
 : list ( f -- )
   cr

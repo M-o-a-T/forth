@@ -103,6 +103,17 @@ also on your search list).
 
 Make the current compilation context the actual search context.
 
+.named ( "name" -- )
+++++++++++++++++++++
+
+This word solves the "oh boy in which vocabulary did I put that word"
+problem. You're likely to run into this when you come back to your code
+base after a few months and remember a word but not where to find it.
+
+``.named`` scans the dictionary and prints every occurrence of the word
+``name``, along with its address and the vocabulary it is in.
+You can then say ``voc… ??? ..`` to display what else is in there.
+
 -----------
 Word search
 -----------
