@@ -15,10 +15,6 @@ forth only definitions
   ?wid lfa>nfa ctype space
 ;
 
-: .wid ( lfa|wid -- )
-  dup wid? if u. else .id then
-;
-
 : (idd) ( lfa -- )
   dup forth-wl > if
     dup lfa>wtag tag>wid
@@ -39,8 +35,10 @@ forth only definitions
   then
 ;
 
-: .wid ( wid -- ) ?wid .wid ;
-
+: .wid ( lfa|wid -- )
+  ?wid  \ resolve the "nameless" vocabularies
+  dup wid? if u. else .idd then
+;
 
 : .header ( lfa -- )
   ." lfa: " dup hex. dup ." xt: " lfa>xt hex.    \ print lfa and xt
