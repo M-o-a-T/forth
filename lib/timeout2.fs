@@ -127,11 +127,9 @@ time definitions
 \ The following implements a way to yield every n'th pass through a loop,
 \ or something.
 
-bits tick definitions
+time definitions
 
 0 variable \yield
-
-time definitions
 
 : nyield-reset ( -- )
 \ reset. Call after finishing your work.
