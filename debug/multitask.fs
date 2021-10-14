@@ -19,10 +19,10 @@ task also
   over 1 do
     cell+
     dup @ poisoned <> if drop
-      i if i - else -2 then unloop exit
+      i if i - else drop -2 then unloop exit
     then
   loop
-  drop -3  \ should never happen
+  2drop -3  \ should never happen
 ;
 
 : .state ( state -- )
