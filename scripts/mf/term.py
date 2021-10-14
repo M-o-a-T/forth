@@ -703,14 +703,15 @@ class Terminal:
         self.file_ended = False
         try:
             while True:
-                if self.file_ended:
-                    self.console.send(f'⮞ {filename} : {num}', lf=True)
                 try:
                     num += 1
                     line = await lines.__anext__()
                     if line == "":
                         break
                     line = await self.preprocess(line,filename,num)
+                    if self.file_ended:
+                        self.console.send(f'⮞ {filename} : {num}', lf=True)
+                        self.file_ended = False
                 except AllEOFError as err:
                     self.console.send(f'⮞ {filename} : {num} (stop)', lf=True)
                     self.layer = self.layer_ = 0
