@@ -56,7 +56,7 @@ forth definitions
     over __ next @ >r ( this xt |R: xt head next )
     execute ( flag )
     ?dup if
-      rdrop rdrop rdrop exit
+      rdrop 2rdrop exit
     then
     r> r> swap ( head next )
   repeat ( head head )
