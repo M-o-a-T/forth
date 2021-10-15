@@ -714,7 +714,7 @@ class Terminal:
                 except AllEOFError as err:
                     self.console.send(f'⮞ {filename} : {num} (stop)', lf=True)
                     self.layer = self.layer_ = 0
-                    return
+                    raise
                 except EarlyEOFError as err:
                     self.console.send(f'⮞ {filename} : {num} (exit)', lf=True)
                     self.layer, self.layer_ = 0,layer
