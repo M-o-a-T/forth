@@ -378,10 +378,10 @@ __seal
 
 \ Unlike select/poll, EPOLL doesn't handle multiple requests on the
 \ same file descriptor.
-\ If you want to both read and write, clone the descriptor with DUP.
+\ If you want to poll on both read and write, clone the descriptor with DUP.
 \ 
-\ if we're not multitasking, these don't wait. Instead "poll" returns our
-\ FD when it's read- or writeable.
+\ if we're not built for multitasking, these functions don't wait.
+\ Instead, "poll" returns the FD when it's read- or writeable.
 
 : wait-read ( fd epcb -- flag )
 \ wait for fd to be readable
@@ -402,18 +402,22 @@ __seal
   ( timeout |R: epcb )
   begin
     r@ __ fd @  r@ evt ..  rot 1 swap ( epfd evt 1 timeout )
-    252 sys call4
-    dup err EINTR +
-  until
-  ?err \ epoll_wait
+    252 sys call4 \ epoll_wait
+    dup  err EINTR +
+  until  \ loop if EINTR
+  ?err
+  ( 0|1 )
   if
     r>
     __ evt u32 @
 #if-flag multi
-    task %cls continue  0
+    \ if we're multitasking, the epoll evt contains the task that should wake up.
+    task %cls continue  false
 #endif
+    \ Otherwise it's the file descriptor, which we return directly.
   else
-    rdrop -1
+    rdrop true
+    \ Nothing to do, timed out.
   then
 ;
 
