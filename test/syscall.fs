@@ -45,25 +45,18 @@ rfd nonblock
 
 rdr start
 :task: wrt
-  task yield
-  task yield
+  5 time millis
   okr @ abort" early"
   wfd poll wait-write
   wfd bla call write 4 <> abort" WRT"
-  task yield
+  10 time millis
   okr @ 1 <> abort" RES"
 ;
 wrt start
-: pol
-  0 okr !
-  10 0 do
-    task yield
-    0 poll poll .
-    okr @ if unloop exit then
-  loop
-;
-pol
 
+0 okr !
+20 time millis
+#ok okr @
 #else
 
 epcb object: ep
