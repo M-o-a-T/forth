@@ -413,7 +413,7 @@ class Terminal:
         # (go_check is None). In the latter case we recognize the
         # "ok." after a timeout and set `self.go_check` so that we
         # won't have to wait again; conversely when we see an ack/nack
-        # we clear it so we won't delay unnecessarily.
+        # we clear `self.go_check` so we won't delay unnecessarily.
         # 
         while True:
             try:
