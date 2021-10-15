@@ -48,23 +48,58 @@ bits tick also definitions
   time now-hq  last-check !
 ;
 
+\ Theory of operation:
+\ 
+\ For "real" hardware we want two return values from our time check:
+\ how much time shall pass until the next task is ready, plus the delay
+\ required after that. Why? we don't want to update the actual tick
+\ counter if we can possibly help it, because that introduces an
+\ inaccurracy. Instead, we want to update the value the counter is
+\ reloaded with.
+\ 
+\ Thus initially we pass in "delta 0". check1 compares that to the
+\ current task's remaining time; if the latter is smaller/equal (case A),
+\ it is \ executed immediately and "delta" is decremented. Otherwise we leave
+\ the initial delay on the stack (no zero).
+\ The following task(s) may have a zero (incremental) timeout. They are skipped (case B).
+\ The timeout of the task after that then stays on the stack and the scan ends (case C).
 
-: check1 ( time task  -- time 0 | 1 )
+: check1 ( time1 0? task  -- time2 time 0|1 )
   >r
-  r@ %cls timeout @ 2dup u< if \ task needs more time. Bow out.
-    swap - dup r> %cls timeout !
-  else
-    -
-    r> %cls continue
+  ?dup if  ( r1 )
+    r> %cls timeout @ ( r1 r2|0 )  \ case c|b
+  else ( t1 )
+    r@ %cls timeout @ 2dup u< if \ task needs more time. Bow out.
+      swap - ( t1-r1 )
+      dup r> %cls timeout !  \ case b
+    else
+      - ( r1-t1 )
+      r> %cls continue
+      0 \ case a, continue
+    then
     0
   then
 ;
 
-: (check) ( elapsed -- delay )
-  queue each: check1
-  dup 0= if 2drop -1 then \ if we ran past the end, the time is still on-stack
+: (check) ( elapsed -- r2 r1 | 0 )
+  0  queue each: check1
+  \ Three cases.
+  ?dup if \ (c) we see r1 r2.
+    swap
+  else
+    \ the scan ran out of elements.
+    \ The stack is now either "t1 0" (case a) or "t1" (case b)
+    ?dup if \ case b: first wait for t1, then infinite
+      0 swap
+    else \ case a: no more timeouts, wait infinite
+      drop 0 queue empty? 0= if 1 then
+      \ except that if the queue isn't empty after all,
+      \ we need to repeat this dance. Better safe than sorry.
+    then
+  then
 ;
-: check ( -- delay )
+
+: check ( -- delay2 delay1 )
 \ start all tasks ready since our last call
   \ get µs since last call
   now-hq  last-check @  over last-check !  -

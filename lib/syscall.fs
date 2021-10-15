@@ -391,14 +391,14 @@ __seal
 \ wait for fd to be writeable
   =OUT swap __ (wait) ;
 
-: poll  ( ms|-1 epcb -- work? )
+: poll  ( µs|0 epcb -- work? )
 \ Wait until the timeout runs out or a registered epoll succeeds.
 \ Return -1 if no work. Otherwise on multitask return 0, singletask
 \ returns the file descriptor that is ready.
   >r
   0 r@ __ evt events !
   0 r@ __ evt u32 !
-  \ dup 0 >= if r@ __ timeout ! 0 then 
+  ?dup if 1000 / else -1 then \ -1 for "forever"
   ( timeout |R: epcb )
   begin
     r@ __ fd @  r@ evt ..  rot 1 swap ( epfd evt 1 timeout )

@@ -1043,14 +1043,22 @@ task \int definitions also
   0
 ;
 
-: busy? ( this -- this flag )
+: busy? ( this -- flag )
 \ Check if any other task is on our queue
-  dup %cls next @ .. over <>
+  this .. dup %cls next @ .. <>
 ;
 
 : run-irqs ( this -- this )
 \ walks through the check- and irq-task list
-  0 time poll drop
+
+  \ scan the timers
+  time check
+  ( t2 t1 | 0 )
+
+#[if] defined syscall
+  \ don't allow other tasks to starve us
+  begin 1 forth poll poll until
+#endif
 
   \ walk the check list
   check-tasks each: i-check drop ( n )
@@ -1060,13 +1068,21 @@ task \int definitions also
   dint
   irq-tasks each: i-check drop ( n )
   \ exit if checkers present or work found
-  busy? if eint exit then
-  check-tasks empty? not if eint exit then
+
+  busy? if  if drop then  eint  exit then
+
+  \ if there are any task checks left, we cannot sleep
+  check-tasks empty? not if  if drop then  eint  exit then
+
 #[if] defined syscall
-  \ check timeouts and epoll
-  ?multi time poll drop
+  \ we don't need t2 for polling
+  dup if  ( t2 t1 ) nip then ( t1 )
+  \ if multitasking is currently off we can't sleep
+  ?multi 0= if drop 1  then
+  forth poll poll  drop
 #else
   \ the timer code will have arranged an interrupt
+  bits tick update if  eint  exit then
   \halt
 #endif
   eint
@@ -1075,7 +1091,6 @@ task \int definitions also
 task \int definitions
 
 looped :task: idle
-  this ..
   begin
     run-irqs
     busy? if
