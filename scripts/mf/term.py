@@ -331,11 +331,6 @@ class Terminal:
         if not transmit_only:
             self.receiver_thread.join()
 
-    async def aclose(self):
-        if self.stream is not None:
-            await self.stream.aclose()
-            self.stream = None
-
     def update_transformations(self):
         """take list of transformation classes and instantiate them for rx and tx"""
         transformations = [EOL_TRANSFORMATIONS[self.eol]] + [
