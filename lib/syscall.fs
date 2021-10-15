@@ -421,30 +421,6 @@ __seal
   then
 ;
 
-
-#if-flag multi
-: poll ( timeout epcb -- work? )
-\ repeatedly call poll with zero timeout until it has no more work for us.
-\ Call with the specified timeout only if no work has been found.
-\ Return as in poll1.
-  >r
-  0 r@ __ poll
-  if \ no work. Call with original timeout if that was not zero.
-    ?dup if ( timeout )
-      dup -1 < if drop 1000000000 then
-      r@ __ poll
-    else
-      -1
-    then ( return )
-  else \ found work. Repeat until no more work.
-    drop
-    begin 0 r@ __ poll until
-    0 
-  then
-  rdrop
-;
-#endif
-
 ;class
 
 
