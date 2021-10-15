@@ -377,9 +377,9 @@ class Terminal:
                     return
                 data = await self.stream.receive(4096)
                 if data == b"":
-                    return
+                    raise anyio.EndOfStream()
                 await self.raw_in_w.send(data)
-        finally:
+        except anyio.EndOfStream:
             await self.raw_in_w.send(WithEnd)
 
     async def reader(self, *, task_status):
@@ -437,11 +437,8 @@ class Terminal:
                 await out(WithNAK if self.go_ahead is False else WithTimeout)
                 continue
             except (anyio.EndOfStream, anyio.ClosedResourceError):
-                await out(WithEnd)
-                return
+                data = WithEnd
             else:
-                if data is WithEnd:
-                    return
                 if isinstance(data,MsgLine):
                     if msg is not None:
                         await msg.send(WithEnd("collision"))
@@ -453,6 +450,10 @@ class Terminal:
                         self.console.send(data.line + "\u2003", lf=True) # em space
                     await self.send_line(data.line)
                     continue
+
+            if data is WithEnd:
+                await out(WithEnd)
+                return
 
             for b in data:
                 if b == self.go_lf:
