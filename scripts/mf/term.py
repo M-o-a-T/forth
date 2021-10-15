@@ -393,8 +393,8 @@ class Terminal:
             line = self.rx_decoder.decode(line)
             self.console.send((bold(line) if self.bold else line) + cls.msg, lf=need_lf)
             need_lf = True
-            if self.log is not None:
-                await self.log_w.send(text)
+            if line and self.log is not None:
+                await self.log_w.send(line+"\n")
             if msg is not None:
                 await msg.send(cls(line))
                 if cls.good is not None:
@@ -445,6 +445,9 @@ class Terminal:
                     msg = data
                     # fall thru
                 if isinstance(data,SendLine):
+                    if self.log is not None:
+                        await self.log_w.send("➤"+data.line+"\n")
+
                     if not self.go_check:
                         need_lf = False
                         self.console.send(data.line + "\u2003", lf=True) # em space
