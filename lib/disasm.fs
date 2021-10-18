@@ -17,7 +17,10 @@
 \ This is free software under GNU General Public License v3.
 \ Knows all M0 and some M3/M4 machine instructions,
 \ resolves call entry points, literal pools and handles inline strings.
-\ Usage: Specify your target address in disasm-$ and give disasm-step some calls.
+\ Usage: target-addr seec  or  see target-word
+
+\ unlike the rest of our library, this is specifically written
+\ to use but not require \voc
 
 forth definitions only
 

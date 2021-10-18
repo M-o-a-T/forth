@@ -17,7 +17,7 @@ voc: _rg  \ common register-based words
 : <% 0 0
   postpone first
   \ XXX This is evil: 0-foldable words are always run at
-  \ compile time, and we depend FIRST adding our vocabulary.
+  \ compile time, and we depend on FIRST to add the current vocabulary.
   \ Workaround for other Forth systems would be to make it immediate
   \ and LITERAL, two zeroes instead. We don't do that here because
   \ constant folding wouldn't work then.
