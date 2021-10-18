@@ -39,6 +39,11 @@ Create a stand-alone vocabulary prefix; it extends the root vocabulary.
 
 Create a vocabulary prefix that extends, i.e. inherits words from, the given voc.
 
+;voc ( -- )
++++++++++++
+
+Undoes the effect of ``voc:``, i.e. switch back to the parent context.
+
 ‹voc› ?? ( -- )
 +++++++++++++++
 

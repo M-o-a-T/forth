@@ -648,6 +648,14 @@ root-wl set-current
   _sop_ @ context = if 0 else VOC-context @ then voc-extend
 ;
 
+: ;voc
+\ end a vocabulary definition, go back to previous state
+  get-current
+  dup (ign
+  lfa>wtag tag>wid
+  dup (also) set-current
+;
+
 
 \ restore basic system state
 
