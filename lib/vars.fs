@@ -50,7 +50,7 @@ __seal
 
 ;class
 
-class: dint
+class: 2int
 
 __data
   cell+ cell+
@@ -63,7 +63,7 @@ __seal
 
 ;class
 
-dint class: fixed
+2int class: fixed
 \ same as double, but fixcomma: print sensibly
 : ? ( a -- )  2@ 3 f.n ;
 
