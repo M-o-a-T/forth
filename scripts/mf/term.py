@@ -143,7 +143,7 @@ class Terminal:
     file_sender = None
     file_ended = False
 
-    _subst = re.compile('{\S+}')
+    _subst = re.compile('{[^}]+}')
 
     def subst_flags(self, line):
         def sub(m):
