@@ -14,7 +14,8 @@ bits also
 _reg voc: NVIC
 
 : _msk ( nr -- mask offset )
-  dup 3 rshift $3 bic swap $1F and 1 swap lshift
+  dup $1F and 1 swap lshift
+  swap 3 rshift $3 bic
   1-foldable
 ;
 
