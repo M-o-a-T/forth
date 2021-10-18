@@ -19,7 +19,7 @@ time also
 
 compiletoram
 
-:task: t1
+:task: tt1
   ." T1 !" cr
   10 millis
   ." T1 A" cr
@@ -31,7 +31,7 @@ compiletoram
   ." T1 D" cr
 ;
 
-:task: t2
+:task: tt2
   ." T2 !" cr
   30 millis
   ." T2 A" cr
@@ -43,7 +43,7 @@ compiletoram
   ." T2 D" cr
 ;
 
-:task: t3
+:task: tt3
   ." T3 !" cr
   5 millis
   ." T3 A" cr
@@ -57,7 +57,7 @@ compiletoram
 
 time first
 
-:task: tm
+:task: ttm
   task yield
   3 *delay
   ." DLY: " . . . cr
@@ -68,14 +68,15 @@ time first
 
 \ now let's do some real tests
 
-t1 start  t2 start  t3 start  tm start
+tt1 start  tt2 start  tt3 start  ttm start
 
 task also
 : yy
-  begin t1 state @ =dead <> while yield repeat
-  begin t2 state @ =dead <> while yield repeat
-  begin t3 state @ =dead <> while yield repeat
+  begin tt1 state @ =dead <> while yield repeat
+  begin tt2 state @ =dead <> while yield repeat
+  begin tt3 state @ =dead <> while yield repeat
 ;
+
 #delay 5
 yy
 #delay 0.5
