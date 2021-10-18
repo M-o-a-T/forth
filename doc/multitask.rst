@@ -310,6 +310,17 @@ add ( task queue -- )
 
 Insert some other task into the queue.
 
+each ( xt queue -- flag )
+-------------------------
+
+Call XT with each member of the task queue in turn, until it returns a 
+non-zero value (return that) or the list is exhausted (return zero).
+
+XT sees the task's address on the stack.
+
+See the `linked-list documentation </doc/linked-list.rst>`_ for a more
+detailed explanation.
+
 External signals, no interrupt
 ==============================
 
