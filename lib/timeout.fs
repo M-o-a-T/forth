@@ -50,8 +50,8 @@ task also
 
 : insert ( task -- )
 \ add to the queue, at its correct position
-  dup %cls timeout @ ( task time,f )
-  queue each: insert1
+  dup %cls timeout @ ( task time )
+  ['] insert1 queue each
   0= if \ task time
     \ store the remaining delta in our task
     over %cls timeout !

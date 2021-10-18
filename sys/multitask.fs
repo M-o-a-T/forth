@@ -395,13 +395,6 @@ task also
   nip
 ;
 
-\ duplicate from lib/linked-list.fs, unfortunately
-: each: ( head "name" -- )
-\ run NAME with each item
-  postpone .. ' literal, postpone swap postpone each  
-  immediate
-;
-
 ;class
 
 \ There are other lists. Specifically we need one for tasks that are waiting.
@@ -1061,12 +1054,12 @@ task \int definitions also
 #endif
 
   \ walk the check list
-  check-tasks each: i-check drop ( n )
+  ['] i-check check-tasks each drop ( n )
   \ "busy" checkers or more work present? exit
 
   \ disable IRQs and walk the IRQ list
   dint
-  irq-tasks each: i-check drop ( n )
+  ['] i-check irq-tasks each drop ( n )
   \ exit if checkers present or work found
 
   busy? if  if drop then  eint  exit then

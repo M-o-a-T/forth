@@ -81,26 +81,25 @@ Adds a new item to this list.
 
 The item is inserted at the end, i.e. before the head.
 
-each: ( "name" X* head -- Y* )
+each ( "name" X* xt head -- Y* )
 ------------------------------
 
-Execute NAME with each list member's address, in turn, on the stack.
+Execute XT (the result of ``'`` or ``[']``) for each list member.
 
 This word must take the address of each element from the list. It can
 freely access the rest of the stack; ``head`` has already been removed.
 
-NAME may remove the current item. It can freely add items to the list.
+XT may remove the current item. It can freely add items to the list.
 It must not remove any other item, and no other code may do so while ``run:``
 is active.
 
-NAME return a value on the stack. If that value is not zero, ``each:``
-returns that value; otherwise it continues to the next item and returns
-zero once all items have been processed.
+XT's stack signature is ``( item -- flag )``, as far as ``each`` is
+concerned. If the value is not zero, ``each`` returns that value;
+otherwise it continues to the next item and returns zero once all items
+have been processed.
 
-each ( xt head -- )
--------------------
-
-Like ``each:`` but expects an explicit execute token on the stack.
+XT is free to do other stack manipulations (denoted by ``X*`` and ``Y*``,
+above).
 
 d-list-item
 +++++++++++

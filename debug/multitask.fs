@@ -88,8 +88,8 @@ forth definitions
     dup %cls next @ ..
     dup this .. =
   until drop
-  check-tasks each: nop0 drop \ just leave them on the stack
-  irq-tasks each: nop0 drop \ just leave them on the stack
+  ['] nop0 check-tasks each drop \ just leave them on the stack
+  ['] nop0 irq-tasks each drop \ just leave them on the stack
   r> if eint then
   ( 0 tasks… )
 

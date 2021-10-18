@@ -83,7 +83,7 @@ forth only definitions
 ;
 
 : (check) ( elapsed -- r2 r1 | 0 )
-  0  queue each: check1
+  0  ['] check1 queue each
   \ Three cases.
   ?dup if \ (c) we see r1 r2.
     swap

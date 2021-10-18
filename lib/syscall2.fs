@@ -23,7 +23,7 @@ sys epoll epcb definitions also
   dup __ teardown
   dup __ fd @  call close
 #if-flag multi
-  __ waiters each: (tear) drop
+  ['] (tear) swap __ waiters each drop
 #else
   drop
 #endif

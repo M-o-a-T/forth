@@ -51,7 +51,8 @@ forth definitions
 ;
 
 : each ( xt head -- res )
-\ run XT with each item. See EACH: for details.
+\ run XT with each item until one call returns nonzero. Return that,
+\ or zero if we ran through all elements.
   swap >r  ( head |R: xt )
   dup __ next @
   begin
@@ -69,12 +70,6 @@ forth definitions
   0
 ;
 
-: each: ( head "name" -- res )
-\ run NAME with each item until one call returns nonzero. Return that,
-\ or zero if we ran through all elements.
-  ' literal, postpone swap postpone each
-  immediate
-;
 
 forth definitions
 \voc \d-list class: d-list-item
