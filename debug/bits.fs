@@ -6,6 +6,7 @@ forth only
 bits also definitions
 
 #if defined u.n
+forth only definitions
 #end
 #endif
 

@@ -19,6 +19,8 @@
 \ resolves call entry points, literal pools and handles inline strings.
 \ Usage: Specify your target address in disasm-$ and give disasm-step some calls.
 
+forth definitions only
+
 #if token see find drop
 #end
 #endif

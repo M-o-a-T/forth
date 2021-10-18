@@ -1,4 +1,3 @@
-
 \ A convenient memory dump helper
 
 #if token forth find drop

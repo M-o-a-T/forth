@@ -1,11 +1,16 @@
 forth definitions only
+
 #require var> lib/vars.fs
 #require class: lib/class.fs
 
-forth definitions only
-
 \ doubly-linked list w/ list head.
 
+#if \voc defined \d-list
+forth definitions only
+#end
+#endif
+
+forth only
 \voc definitions
 var> also
 

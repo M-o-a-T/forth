@@ -1,9 +1,12 @@
-\ timeout handling.
+\ timeout handling. Multitask only.
 
 forth definitions only
 
+#if-flag !multi
+#end
+#endif
+
 #if defined time
-..
 #end
 #endif
 

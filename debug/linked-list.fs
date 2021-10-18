@@ -1,6 +1,13 @@
 \ Add `?` to linked lists
 
+forth definitions only
+
 #require .word-off debug/crash.fs
+
+#if \voc \d-list defined ?
+forth definitions only
+#end
+#endif
 
 \voc \d-list definitions also
 

@@ -1,14 +1,24 @@
 \ multitask-emit:
 \ smake sure output from multiple threads doesn't interleave
 
+forth only definitions
+
 #if-flag !multi
 #error Multitask only
 #endif
 
 #if defined syscall
-#if undefined poll
-#include  lib/syscall.fs
+#require poll lib/syscall.fs
 #endif
+
+#require rc80 lib/ring.fs
+#require bits lib/bits.fs
+#require gpio lib/gpio.fs
+
+bits also
+gpio also
+#endif
+
 #endif
 
 forth only definitions

@@ -1,20 +1,10 @@
 forth definitions only
 
-#if undefined abort" ( " )
-#include sys/abort.fs
-#endif
-
-#if undefined class:
-#include lib/class.fs
-#endif
-
-#if undefined var>
-#include lib/vars.fs
-#endif
-
-#if undefined voc-eval
-#include lib/util.fs
-#endif
+#require abort" sys/abort.fs
+\ " -- glitch in syntax highlighting
+#require var> lib/vars.fs
+#require class: lib/class.fs
+#require voc-eval lib/util.fs
 
 forth definitions only
 var> also
@@ -33,6 +23,7 @@ var> also
 
 #if defined {ring-name}
 \ already known
+forth only
 #end
 #endif
 

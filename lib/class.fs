@@ -1,14 +1,10 @@
 \ Classes. They go to a subvocabulary of \voc.
 
-#if undefined eval
-#include lib/util.fs
-#endif
-
-
 forth definitions only
 
-voc: \cls
+#require eval lib/util.fs
 
+voc: \cls
 \voc also
 
 

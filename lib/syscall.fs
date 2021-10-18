@@ -1,10 +1,12 @@
-#if defined syscall
+forth only definitions
+
+#if undefined syscall
+#end
+#endif
 
 #if defined sys
 #end
 #endif
-
-forth only definitions
 
 voc: sys
 
@@ -431,9 +433,6 @@ epcb object: poll
 #endif
 
 forth only
-
-#endif
-\ syscall
 
 \ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=

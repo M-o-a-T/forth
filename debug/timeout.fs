@@ -1,3 +1,11 @@
+forth definitions only
+
+#require time lib/timeout.fs
+
+#if defined *delay
+#end
+#endif
+
 : *delay ( n -- n*delay )
 \ measure n mainloop round-trip delays.
 \ Leave them all on the stack for display / postprocessing.
@@ -12,3 +20,5 @@
   drop
   ;    
 
+\ SPDX-License-Identifier: GPL-3.0-only
+#ok depth 0=

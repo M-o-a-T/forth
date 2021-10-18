@@ -1,5 +1,7 @@
 \ debug version of some word list scanners
 
+forth only
+
 \voc also
 
 #require .wtag debug/voc.fs

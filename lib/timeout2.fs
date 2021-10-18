@@ -1,20 +1,16 @@
 \ timeout handling, part 2.
 
 forth definitions only
-#if undefined time
-#include lib/timeout.fs
-forth definitions only
-#endif
+
+#require time lib/timeout.fs
 
 #if defined syscall
-#if undefined sys
-#include lib/syscall.fs
-forth definitions only
-#endif
+#require sys lib/syscall.fs
 #endif
 
 time definitions also
 task also
+
 
 #if defined syscall
 sys also
@@ -38,10 +34,15 @@ monotonic object: systime
 #endif
 
 #include soc/{arch}/tick.fs
-time also
-task also
-bits tick also definitions
 
+time definitions also
+task also
+
+#endif
+
+#if defined check1
+forth only definitions
+#end
 #endif
 
 :init

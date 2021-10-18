@@ -1,5 +1,7 @@
 \ Print word names (including their vocabulary paths), show voc state, etc
 
+forth only
+
 \voc also definitions
 
 #if defined .idd

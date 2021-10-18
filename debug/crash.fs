@@ -1,16 +1,20 @@
 
-\ -----------------------------------------------------------------------------
-\  Trace of the return stack entries
-\ -----------------------------------------------------------------------------
+\ -----------------------------------------
+\  Resolve addresses, dump the return stack
+\ -----------------------------------------
 
 forth definitions only
 
 \voc also
-
 #require .idd debug/voc.fs
 #require dump lib/dump.fs
 
 \voc definitions also
+
+#if defined closest-found
+forth definitions only
+#end
+#endif
 
 0 variable closest-found
 0 variable closest-d

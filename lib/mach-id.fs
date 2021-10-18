@@ -13,9 +13,13 @@ forth definitions only
 
 #if-flag real
 
+#if-flags arch=armcm3
 $1FFFF7E8 constant machid
 12 constant #machid
-\ accessible with any address mode, so can be used directly
+\ accessible with any addressing mode, so can be used directly
+#else
+#error Don't know where to find the CPU ID for your architecture
+#endif
 
 #else
 #if-flag !machid

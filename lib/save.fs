@@ -10,6 +10,14 @@
 
 forth only definitions
 
+#if undefined syscall
+#end
+#endif
+
+#if defined \file
+#end
+#endif
+
 voc: \file
 
 5 constant #open
