@@ -65,9 +65,6 @@ rr s@
 1 variable foo
 :init
   #2 foo ! ;
-\voc %init!
-#ok rr empty?
-#ok foo @ 2 =
 #endif
 
 \ now let's do another of these with half words
