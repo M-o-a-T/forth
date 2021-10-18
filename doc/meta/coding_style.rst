@@ -53,6 +53,13 @@ Words should be written to avoid busy-work for the programmer. For instance:
 * ``foo object: bar`` auto-calls ``bar setup`` because, again, that's what
   you *always* do anyway.
 
+We don't use special words to access things; we use specual vocabularies
+and normal words. Thus, instead of writing ``some-pin io@`` to read the
+state of a GPIO pin, ``some-pin`` switches to a vocabulary where ``@`` is
+defined to read a pin state, not a memory cell.
+
+To set or clear bits, we consistently use ``+!`` and ``-!``.
+
 ---------------
 Code separation
 ---------------
@@ -72,39 +79,44 @@ There's three kinds of words in most systems. OK, five.
 * Code that controls which other code to compile, commonly using words like ``#if``
   or ``[if]``.
 
-Each of the first four should be in separate files.
+Each of the first four should be in separate files, preferably in separate
+directories.
+
+We will not use words from the last category.
+
+------------
+System state
+------------
+
+Library include files should end with ``forth only definitions`` (or leave
+the system in that state). They should not call ``compiletoram`` or
+``compiletoflash``.
+
+The same thing holds for debug include files.
+
+All include files should protect themselves against re-inclusion.
 
 Conditionals / processing directives
 ====================================
 
-MoaT Forth comes with its own little terminal program. It's written in
-Python and doesn't understand Forth syntax.
+MoaT Forth comes with its own terminal program. It's written in
+Python and (almost) doesn't understand Forth syntax.
 
 This is intentional.
 
-As this is not always sufficient, the ``#if``, ``#[if]`` and ``#ok``
-directives know that they should send the rest of the line to the Forth
+Of course, the terminal still needs to have some Forth-specific knowledge,
+because it needs to support directives like ``#if``, ``#[if]`` and ``#ok``.
+These simply send the rest of the line to the Forth
 interpreter, add a ``.``, and check whether the result is a non-zero
-number. You can also tell it to wait for ``ok.`` before sending the next
-bit. That's all.
+number.
+
+That's all. (Well, there's ``#require`` as a convenient if undefined/include
+shorthand, but that doesn't really count.)
 
 Directives start at the beginning of a line. ``mf/term.py`` doesn't know
-how to find inline ``#else`` or ``[else]`` tokens certain other Forth
-systems like to use.
+how to find inline ``#else`` or ``[else]`` tokens.
 
-Also, it doesn't know how to interpret a request from the µC to load
-code for a missing word to it. It's not the Forth satellite's job to ask
-for code; it's strictly the terminal's job to discover whether some code is
-needed and then send it. Testing whether a word exists is easy and can be
-done entirely from the host, so we do that and don't send code for it to
-the µC.
-
-No, microcontrollers don't get to have interpret-mode conditionals. Not if
-they do Forth. Let's leave that to MicroPython. Same thing for file
-systems.
-
-Please see the `opinion file <doc/meta/opinion.rst>`_ if you happen to
-disagree.
+Please see the `opinion file <doc/meta/opinion.rst>`_ for our rationale.
 
 Structure
 +++++++++
