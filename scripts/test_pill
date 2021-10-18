@@ -2,10 +2,10 @@
 set -eu
 
 DEV="$1"
-ARCH=$2
-VENDOR=$3
-MCU=$4
-CLK=$5
+ARCH=armcm3
+VENDOR=STMicro
+MCU=STM32F103xx
+CLK=72000000
 
 F="" # no variants, for now
 
