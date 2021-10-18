@@ -76,8 +76,9 @@ task also
 #endif
 
 forth definitions
+task also
 
-#if defined check-tasks
+#if task defined check-tasks
 
 : nop0 0 ;
 : tasks ( -- ) \ Show tasks currently in round-robin list

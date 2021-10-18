@@ -36,8 +36,6 @@ forth definitions only
   then
 ;
 
-previous
-
 forth definitions only
 
 \ SPDX-License-Identifier: GPL-3.0-only
