@@ -1,7 +1,7 @@
-forth definitions only
+#include test/reset.fs
 
+compiletoflash
 #require d-list-item lib/linked-list.fs
-
 compiletoram
 
 d-list-head object: th

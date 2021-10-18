@@ -1,16 +1,9 @@
-#if token forth find drop
-forth definitions only
-#endif
+#include test/reset.fs
 
-#if token defined find drop 0=
-: defined   ( "token" -- flag ) token find drop 0<> ; 
-: undefined ( "token" -- flag ) defined not ;
-#endif
-
+compiletoflash
 #require \halt sys/basic.fs
-
 #require throw sys/abort.fs
-
+compiletoram
 
 : err1 ." throwing 123" cr 123 throw ." ??? 1" cr ;
 : ct1 ['] err1 catch 123 = ;

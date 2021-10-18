@@ -1,20 +1,9 @@
-forth only definitions
-decimal
+#include test/reset.fs
 
-#if undefined ring
-#include lib/ring.fs
-#endif
-
-#if undefined dump
-#include lib/dump.fs
-#endif
-#ok depth 0=
-
-#if-flag ram
-compiletoram
-#else
 compiletoflash
-#endif
+#require ring lib/ring.fs
+compiletoram
+#require dump lib/dump.fs
 
 ring class: r4
 3 constant elems

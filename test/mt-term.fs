@@ -2,7 +2,13 @@
 #end
 #endif
 
-forth definitions only
+#include test/reset.fs
+
+compiletoflash
+#require task sys/mult.fs
+#require term lib/mt-term.fs
+compiletoram
+
 term also
 task also
 

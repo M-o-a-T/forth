@@ -1,19 +1,12 @@
+#include test/reset.fs
 
-forth definitions only
-#if undefined bits
-#include lib/bits.fs
-#endif
-bits also
-#if undefined u.n
-#include debug/bits.fs
-#endif
-forth definitions only
-bits also
+compiletoflash
+#require bits
+compiletoram
 
-#include test/gen/bugtest.fs
-
-forth definitions only
 bits also
+#require u.n debug/bits.fs
+#require BFT test/gen/bugtest.fs
 
 #ok BFT .. $12343210 =
 \ need to override that

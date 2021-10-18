@@ -1,3 +1,12 @@
+#if-flag !multi
+#end
+#endif
+
+#include test/reset.fs
+
+compiletoflash
+#require task sys/mult.fs
+compiletoram
 
 \ --------------------------------------------------
 \  Examples

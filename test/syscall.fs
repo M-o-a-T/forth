@@ -2,7 +2,12 @@
 #end
 #endif
 
-forth only definitions
+#include test/reset.fs
+
+compiletoflash
+#require sys lib/syscall.fs
+compiletoram
+
 sys also
 epoll also
 

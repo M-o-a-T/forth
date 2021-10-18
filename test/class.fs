@@ -1,15 +1,10 @@
-forth definitions
+#include test/reset.fs
 
-#if undefined var>
 compiletoflash
-#include lib/vars.fs
-#endif
+#require var> lib/vars.fs
+compiletoram
 
-test-ram
-
-#if undefined .all
-#include debug/class.fs
-#endif
+#require .all debug/class.fs
 
 var> also
 

@@ -14,6 +14,7 @@
 #include debug/timeout.fs
 #endif
 
+forth definitions only
 time also
 
 :task: t1

@@ -1,6 +1,8 @@
-\ Test random ID things
+#include test/reset.fs
 
-#include lib/mach-id.fs
+compiletoflash
+#require machid lib/mach-id.fs
+compiletoram
 
 #ok #machid 4 >=
 #ok #machid 12 <=

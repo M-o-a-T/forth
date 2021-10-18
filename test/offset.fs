@@ -1,6 +1,8 @@
-#if undefined offset:
-#include lib/util.fs
-#endif
+#include test/reset.fs
+
+compiletoflash
+#require offset: lib/util.fs
+compiletoram
 
 #if undefined gpio
 voc: gpio
@@ -18,8 +20,6 @@ gpio also
 
 #ok p1 out $1232 =
 #ok p2 dir $2344 =
-
-forth only definitions
 
 \ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=
