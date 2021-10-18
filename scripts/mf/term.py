@@ -634,7 +634,11 @@ class Terminal:
             self.flags[flag] = (await self.chat(f"{expr} .", timeout=True)).strip()
             return
         if code == "set-flag":
-            flag,expr = line.split(None, 1)
+            try:
+                flag,expr = line.split(None, 1)
+            except ValueError:
+                flag=line
+                expr="1"
             if expr == "-":
                 del self.flags[flag]
             else:
