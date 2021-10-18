@@ -23,6 +23,25 @@ distributed one?
 Please don't complain that Forth is all but invisible on today's Internet,
 and *at the same time* refuse to publish it there.
 
+The host interface
+==================
+
+We have a reasonably strict separation between Forth code running on a
+microcontroller, and code which decides which Forth code should run there
+in the first place.
+
+In our opinion, microcontrollers don't get to have interpret-mode
+conditionals. Not if they do Forth. Let's leave that to MicroPython. Same
+thing for file systems.
+
+Our terminal doesn't know how to interpret a request from the µC to load
+code for a missing word to it, and our Forth support doesn't extend to
+interpreter-mode conditionals like ``[if]``.
+
+It's strictly the terminal's job to discover whether some code is
+needed and then send it. Testing whether a word exists is easy and can be
+done entirely from the host. The controller has better things to do.
+
 Testing
 =======
 
