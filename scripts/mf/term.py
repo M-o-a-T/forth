@@ -661,7 +661,7 @@ class Terminal:
             else:
                 if fn[-1] == '/':
                     fn += f"{word}.fs"
-            res = await self.chat(f"token {word} find drop 0= .", timeout=True)
+            res = await self.chat(f"undefined {word} .", timeout=True)
             if int(res.strip()):
                 await self.upsend_file(self.subst_flags(fn))
             return
