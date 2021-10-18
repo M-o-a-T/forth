@@ -620,6 +620,8 @@ class Terminal:
                 res = await self.chat(f"{line} .", timeout=True)
             except TimeoutError:
                 return
+            except ForthError:
+                return
             else:
                 raise ForthError("Did not fail")
         if code == "send":
