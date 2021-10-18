@@ -59,7 +59,10 @@ Make the startup INIT more verbose.
 
 Use this only if your startup code goes splat.
 
+debug-disasm
+++++++++++++
 
+Include the disassembly words (``see``, ``seec``) in your Flash.
 
 multi
 +++++

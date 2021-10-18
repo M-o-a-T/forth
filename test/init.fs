@@ -20,8 +20,10 @@ forth definitions only
 #endif
 
 \ word disassembly
+#if-flag debug-disasm
 #if undefined see
 #include lib/disasm.fs
+#endif
 #endif
 
 \ SPDX-License-Identifier: GPL-3.0-only
