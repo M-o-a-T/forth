@@ -89,15 +89,17 @@ Within your ``setup`` word, you may use ``voc-eval`` to access words from
 subclasses, e.g. to read constants for parameterization. If you need to
 remember their value for later, store them in one of your object's fields.
 
+You don't need to initialize any fields to zero, that's done for you.
+
 >setup ( object -- )
 ++++++++++++++++++++
 
-If you have a complex sub-field in your object, you need to initialize it.
+If you have a complex sub-field in your object, you may need to initialize it.
 
 To do this, call ``dup __ FIELD >setup`` from your object's ``setup`` word.
 
 You can also use this word to re-initialize a field or an object, if that
-should ever be necessary.
+should be necessary.
 
 \\offset
 ++++++++
@@ -109,7 +111,7 @@ the starting offset of the variable-sized part of the object.
 \__ ( -- )
 ++++++++++
 
-Only search the next word in the current class's context.
+Search the next word in the current class's context only.
 
 ;class ( -- )
 +++++++++++++
@@ -179,7 +181,7 @@ data, you need to reset the search context::
 
 (The last line is an assertion that's processed by our terminal program.)
 
-Single-value objects are of course boring, but you can combine them::
+While single-value objects are boring, you can combine them::
 
 	class: point
 	__data
@@ -214,9 +216,8 @@ You don't need them if your subclass doesn't contain any data of its own.
 Debugging
 +++++++++
 
-It's a food idea to add a ``?`` debug word to your classes. This word
-should print some detail about the object in question. If it prints more
-than one line, it should not start or end with a line feed.
+It's a good idea to add a ``?`` debug word to your classes. This word
+should print some detail about the object in question.
 
 .all' ( "name" -- )
 -------------------
@@ -229,7 +230,7 @@ vocabulary it's defined in, if any).
 .all ( lfa -- )
 ---------------
 
-As above, but use the base class you found with ``('``.
+As above, but use a base class whose address you looked up with ``('``.
 
 Thus::
 
@@ -308,9 +309,9 @@ subclassed with additional variable-sized elements, we could directly use
 Parameterizing objects
 ----------------------
 
-``ring`` demonstrates one way of declaring parameters for a class: you
-create a subclass with the requisite constant, then look up the value via
-``voc-eval`` from ``setup``.
+``ring`` demonstrates the preferred way of declaring parameters for a
+class: you create a subclass with the requisite constant, then look up the
+value via ``voc-eval`` from ``setup``.
 
 .. note
 
@@ -324,32 +325,12 @@ create a subclass with the requisite constant, then look up the value via
 	in one of the object's fields, so that any method that's called later
 	can access it.
 
-Another possibility is to pass additional arguments to the ``object:``
-constructor. They are visible from ``setup`` and should be consumed by it.
-Your ``size`` word may also use them.
-
-Objects modified using the latter method may not be used as part of other
-objects.
-
 ------------------------
 Objects in Flash storage
 ------------------------
 
-You must call every object's ``setup`` from your own ``init`` word::
-
-	: init init
-	  p1 setup
-	  p2 setup
-	;
-
-If your objects use the "additional arguments" method of parameterization,
-you're responsible for passing the required arguments to this setup
-method as well.
-
-.. note
-
-	It's best to use the exact same arguments. The object's size **must not**
-	increase.
+Easy. Our init word will discover all objects with ``setup`` methods and
+call them all. You should not do it manually.
 
 ---------
 Rationale
@@ -361,10 +342,7 @@ For one, it binds early. Way early. The only place where you can do late binding
 is during the object's construction (the ``setup`` word), and even that
 requires special handling (lookup via ``voc-eval``).
 
-For another, it is not yet possible to automate re-initializing objects in
-Flash storage (whose data still resides in RAM) after a reset.
-
-A third problem is that there's no checking whatsoever. If you access a
+The second problem is that there's no checking whatsoever. If you access a
 ``hint`` object without making sure that ``@`` or ``!`` are looked up from
 its vocabulary instead of FORTH, interesting bugs will happen.
 
