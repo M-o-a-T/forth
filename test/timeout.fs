@@ -78,6 +78,8 @@ task also
 ;
 
 #delay 5
+#ok now-hq now-hq -
+\ if those return the same thing, we're likely to have a problem
 yy
 #delay 0.5
 
