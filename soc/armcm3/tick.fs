@@ -3,6 +3,7 @@
 
 forth only
 #require bits lib/bits.fs
+#require gcd lib/math.fs
 
 bits definitions also
 
@@ -33,21 +34,6 @@ voc: tick
 tick also definitions
 #endif
 
-#if undefined gcd
-forth definitions
-: gcd ( a b -- gcd )
-  begin
-  ?dup while
-    tuck mod
-  repeat
-  2-foldable
-;
-
-: ratio ( a b -- a' b' )
-  2dup gcd tuck ( a gcd b gcd )
-  / -rot / swap
-  2-foldable
-;
 bits tick definitions
 
 \ #if-flag debug
