@@ -17,6 +17,8 @@
 forth definitions only
 time also
 
+compiletoram
+
 :task: t1
   ." T1 !" cr
   10 millis
