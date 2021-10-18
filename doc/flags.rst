@@ -59,21 +59,7 @@ Make the startup INIT more verbose.
 
 Use this only if your startup code goes splat.
 
-ram
-+++
 
-Compile test code into RAM. Typically used with the ``forget`` flag to flush
-test code after running it.
-
-Using this flag on real hardware tests without ``forget`` is unlikely to
-succeed, as RAM is limited.
-
-forget
-++++++
-
-Include a call to ``forgetram`` between tests. Using this flag without
-``ram`` should still make a difference, as ``forgetram`` will also
-re-initialize all objects.
 
 multi
 +++++

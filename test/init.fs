@@ -4,34 +4,6 @@ compiletoflash
 forth definitions only
 \ essential for testing, unfortunately
 
-#if undefined test-ram
-#if-flag ram
-: test-ram compiletoram ;
-#else
-: test-ram ;
-#endif
-#endif
-
-#if undefined test-drop
-#if-flag drop
-: test-drop forgetram ;
-#else
-: test-drop ;
-#endif
-#endif
-
-
-#if-flag debug
-compiletoflash
-#else
-#if-flag ram
-#end
-\ skip the rest if it's going to be flushed anyway
-#endif
-
-test-ram
-#endif
-
 \ VOC word analysis
 #if undefined ??
 #include debug/voc.fs

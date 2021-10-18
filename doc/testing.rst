@@ -13,14 +13,6 @@ Test script
 Automated testing is done by ``scripts/test_fs``. It calls the test suite
 in ``test/main.fs`` with every possible combination of these flags:
 
-* ram
-
-  The code exercising the modules shall live in RAM. 
-
-* forget
-
-  Exercising code will be dropped after most tests.
-
 * debug
 
   Extra debugging code will be included.
