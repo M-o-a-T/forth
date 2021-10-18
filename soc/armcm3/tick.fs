@@ -2,27 +2,19 @@
 \ system tick implementation
 
 forth only
-#if undefined bits
-#include lib/bits.fs
-forth only
-#endif
+#require bits lib/bits.fs
+
 bits definitions also
 
 #if-flag !clk
 #error CLK unknown
 #endif
 
-#if undefined systick
-#include svd/fs/core/{arch}/systick.fs
-bits definitions also
-#endif
+#require systick svd/fs/core/{arch}/systick.fs
+bits only definitions
 
-#if undefined nvic
-#include soc/armcm3/nvic.fs
-#endif
-
-forth only
-bits definitions also
+#require nvic soc/armcm3/nvic.fs
+bits only definitions
 
 \ Theory of operation:
 \
@@ -35,15 +27,10 @@ bits definitions also
 \ The tick update function receives the current and next
 \ counter values. If the current value is not 
 
-compiletoflash
-forth only
-bits also
-
-#if defined tick
-tick definitions also
-#else
-definitions
+#if undefined tick
 voc: tick
+#else
+tick also definitions
 #endif
 
 #if undefined gcd
@@ -62,13 +49,19 @@ forth definitions
   2-foldable
 ;
 bits tick definitions
-#endif
 
-\ compiletoflash \ not while testing
-compiletoram
-forth only
-bits also
-tick definitions also
+\ #if-flag debug
+\ compiletoram
+\ forth only
+\ bits also
+\ tick definitions also
+\ #endif
+
+#if defined clk_max
+\ compiletoflash
+forth only definitions
+#end
+#endif
 
 \ get bit width of the RELOAD register
 _systick _rvr reload .. 5 rshift
