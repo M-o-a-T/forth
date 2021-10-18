@@ -34,22 +34,23 @@ voc: ( "name" -- )
 
 Create a stand-alone vocabulary prefix; it extends the root vocabulary.
 
-‹voc› voc ( "name" -- )
-+++++++++++++++++++++++
+‹voc› voc: ( "name" -- )
+++++++++++++++++++++++++
 
 Create a vocabulary prefix that extends, i.e. inherits words from, the given voc.
 
 ‹voc› ?? ( -- )
 +++++++++++++++
 
-Show a list of all words in the current VOC search order.
+Show a list of all words in the current search context.
 
-This word stays in the current VOC's context. The intent is that, if you
+This word stays in the current search context. The intent is that, if you
 want to call word ``baz`` which is in vocabulary ``bar`` which is itself in
-vocabulary ``foo``, but don't remember its spelling, you can enter ``foo
+vocabulary ``foo``, but you don't remember its spelling, you can enter ``foo
 bar ??`` for lookup, then follow that directly with ``baz`` without having
 to re-type the ``foo bar`` part. This is particularly relevant when ``foo``
-or ``bar`` are *item* words (see below) instead of vocabularies.
+or ``bar`` are *item* words (see below) instead of vocabularies: they might
+have stack effects.
 
 ‹voc› ??? ( -- )
 +++++++++++++++
