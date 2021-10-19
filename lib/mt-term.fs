@@ -15,7 +15,7 @@ forth only definitions
 #require poll lib/syscall.fs
 #endif
 
-#require rc80 lib/ring.fs
+#require rc16 lib/ring.fs
 #require bits lib/bits.fs
 #if undefined syscall
 #require gpio lib/gpio.fs
