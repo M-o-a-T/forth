@@ -12,7 +12,7 @@ bits also
 \ need to override that
     
 12 buffer: \BFT
-\BFT _BFT port: BFT
+\BFT bits _BFT port: BFT
 
 
 \BFT 12 0 fill
