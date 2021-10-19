@@ -17,9 +17,12 @@ forth only definitions
 
 #require rc80 lib/ring.fs
 #require bits lib/bits.fs
+#if undefined syscall
 #require gpio lib/gpio.fs
+#endif
 
 bits also
+#if undefined syscall
 gpio also
 #endif
 
@@ -199,6 +202,11 @@ looped :task: inrecv
   
 
 \ 
+
+#if undefined syscall
+gpio also
+#endif
+
 
 \ ***************
 \      setup
