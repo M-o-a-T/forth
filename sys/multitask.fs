@@ -1088,7 +1088,10 @@ task \int definitions also
 #else
   \ the timer code will have arranged an interrupt
   bits tick update if  eint  exit then
-  \halt
+  \ if multitasking is currently off we can't halt
+  ?multi if
+    \halt
+  then
 #endif
   eint
 ;

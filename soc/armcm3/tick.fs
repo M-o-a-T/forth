@@ -159,20 +159,29 @@ bits tick definitions
   0  \ no need to loop quickly
 ;
 
-: update ( now next -- flg )
+: update ( next now | 0 -- flg )
 \ given the time until the next timeout, and the one after that,
-\ set up the clock and return whether the caller should not call WFI
-  dup -1 <> if µs>clk then clk_max umin
-  dup clk_min @ < if drop clk_max then
-  swap µs>clk ( next now )
-  dint
-  latest if
-    \ LATEST already updated clk_next
-    drop -1
+\ set up the clock. The flag is true iff the caller should not call WFI.
+\ Called with interrups disabled
+  ?dup if
+    ( next now )
+    µs>clk  clk_max umin
+    latest 
+    if
+      drop true exit
+    then
+    ( next )
+    ?dup if
+      µs>clk  clk_max umin
+    else
+      clk_max
+    then
   else
-    systick rvr ! 0
-  eint
-  then
+    ( - )
+    clk_max
+  then ( clocks )
+  systick rvr !
+  false
 ;
 
 :init
