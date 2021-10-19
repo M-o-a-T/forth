@@ -30,8 +30,9 @@ forth only
 #endif
 
 
+\voc also
 #if undefined ring-base
-\voc definitions also
+\voc definitions
 
 sized class: ring-base
 
@@ -100,10 +101,11 @@ __seal
 
 ;class
 
-previous 
-forth definitions
 
 #endif
+forth only definitions
+var> also
+
 \ ring-base
 
 #send \voc ring-base class: {ring-name}
