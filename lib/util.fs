@@ -283,7 +283,13 @@ forth definitions
 ;
 
 forth definitions
-: init init %init! ;
+: init
+#[if] token init find drop
+  init
+#endif
+  %init!
+;
+
 : forgetram forgetram %init! ;
 \voc ignore
 

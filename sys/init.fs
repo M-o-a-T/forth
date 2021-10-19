@@ -30,11 +30,6 @@ compiletoflash
 #include lib/util.fs
 #endif
 
-compiletoflash
-#if undefined init
-: init ;
-#endif
-
 #if-flag debug
 #include debug/voc.fs
 
