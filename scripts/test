@@ -9,9 +9,9 @@ while read FLG ; do
 
 echo TEST $FLG
 
-if ! env PYTHONPATH=. scripts/mf-cmd -x test/main.fs  $FLG  -b -q -g ok. ../mecrisp-stellaris/linux-ra/mecrisp-stellaris-linux
+if ! scripts/mf-term -x test/main.fs  $FLG  -F machid=123456789 -b -q -g ok. -c ../mecrisp-stellaris/linux-ra/mecrisp-stellaris-linux
 then
-	env PYTHONPATH=. scripts/mf-cmd -x test/main.fs  $FLG -D -g ok. ../mecrisp-stellaris/linux-ra/mecrisp-stellaris-linux </dev/tty >/dev/tty 2>&1
+	scripts/mf-term -x test/main.fs  $FLG -F machid=123456789 -D -g ok. -c ../mecrisp-stellaris/linux-ra/mecrisp-stellaris-linux </dev/tty >/dev/tty 2>&1
 	exit 1
 fi
 
