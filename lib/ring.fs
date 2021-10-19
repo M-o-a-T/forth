@@ -10,16 +10,18 @@ forth definitions only
 var> also
 
 \ Predefined flags:
-\ ring-var: the type to store in the ring. Must context-switch
-\ to correctly-sized '@' and '!' words.
+\ ring-var: the type to store in the ring.
+\ Must context-switch to correctly-sized '@' and '!' words.
 
 #if-flag !ring-var
-#set-flag ring-var cint
+#set-flag ring-var_ cint
 #set-flag ring-name ring
 #else
+#set-flag ring-var_ {ring-var}
 #set-flag ring-name ring-{ring-var}
+#set-flag ring-var -
 #endif
-#read-flag ring-esize {ring-var} u/i
+#read-flag ring-esize {ring-var_} u/i
 
 #if defined {ring-name}
 \ already known
@@ -161,7 +163,7 @@ forth definitions
   \ now compute where to store the next bit
   r@ __ start @ r@ __ num @ + r@ __ mask  __ *esize
   r@ __ \offset @ r@ + +
-#send {ring-var} !
+#send {ring-var_} !
 
 #if-flag multi
   r@ __ num @
@@ -201,7 +203,7 @@ forth definitions
 
   r@ __ start @ __ *esize
   r@ __ \offset @ r@ + +
-#send {ring-var} @
+#send {ring-var_} @
   r@ __ start @ 1+ r@ __ mask r@ __ start !
   -1 r@ __ num +!
 
@@ -217,7 +219,7 @@ forth definitions
 ;
 
 
-#if-flag ring-var=cint
+#if-flag ring-var_=cint
 
 \ TODO this should be (a) done with MOVE (b) extended to non-char
 
@@ -266,7 +268,8 @@ forth definitions
 
 ;class
 
-#if-flag ring-var=cint
+#if-flag ring-var_=cint
+#if undefined rc32
 ring class: rc32
 32 constant elems
 ;class
@@ -279,6 +282,7 @@ ring class: rc16
 16 constant elems
 ;class
 
+#endif
 #endif
 
 
