@@ -8,10 +8,8 @@
 \ 
 forth definitions only  decimal
 
-#if defined task
-\ repeated
-#end
-#endif
+#if undefined task
+\ skip ahead, there's a possibly-in-RAM part below
 
 #if defined throw
 #error conflicts with single-tasked catch/throw
@@ -402,6 +400,7 @@ task also
 
 #if-flag debug
 #include debug/multitask.fs
+#include debug/linked-list.fs
 #endif
 
 forth definitions only
@@ -1011,8 +1010,15 @@ task definitions
   ' literal,  postpone (irq)
 ;
 
+#endif
+\ part 1
+
 
 forth definitions only
+
+#if undefined time
+#include lib/timeout.fs
+#endif
 #if time undefined poll
 #include lib/timeout2.fs
 #endif
@@ -1023,6 +1029,8 @@ forth definitions only
 
 forth only
 task definitions also
+
+#if undefined !single
 
 : !single ( -- ) [ hook-pause @ literal, ]  hook-pause ! ;
 : !multi  ( -- ) task ['] yield hook-pause ! ;
@@ -1145,6 +1153,9 @@ task definitions also
 \ staying in singletask is temporary: we need to either
 \ get a serial IRQ with input buffer, or teach the terminal
 \ to wait for the echo.
+
+#endif
+\ part 2
 
 forth definitions only
 
