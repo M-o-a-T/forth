@@ -571,8 +571,10 @@ task also
 \        yield 
 \ ********************
 
+#if-flag yieldstack
 task \int definitions
 %var object: yield-task
+#endif
 
 task definitions
 
@@ -593,6 +595,7 @@ task definitions
   this ..
   ( oldtask )
   dup newstate @ if  \ state change? if so, do some work
+#if-flag yieldstack
     yield-task @ .. ?dup if
       dup >this
       %cls stackptr @ ( old spnew )
@@ -600,6 +603,7 @@ task definitions
       \ on the temp stack we now find ( rp old ). We must not modify rp.
       over rp!
     then ( old )
+#endif
     dup %cls next @ ..
     ( oldtask newtask )
     \ ." T:" dup .word   \ debug only, not when multitasking
@@ -841,6 +845,8 @@ subtask class: looped
 task \int definitions also
 task also
 
+#if-flag yieldstack
+
 inttask class: \ytc
 \ one-off class for SWT
 50 constant psize  \ unused
@@ -856,6 +862,7 @@ inttask class: \ytc
 \ started at all because the stack pointer is completely wrong
 \ytc object: yield-temp
 
+#endif
 
 task %cls definitions
 

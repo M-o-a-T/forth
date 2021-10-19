@@ -77,3 +77,13 @@ is unlikely to work.
 DONE:
 Without real hardware, multitasking will use ``epoll`` as a UART
 replacement. The same caveat applies.
+
+yieldstack
+++++++++++
+
+This mod for multitasking adds a separate stack to use when the task
+switcher needs to change a task's state.
+
+This may be beneficial on systems with a large number of tasks (provided
+they also use a separate interrupt stack) because that way you need to
+reserve fewer cells on your tasks' stacks for the task switcher.
