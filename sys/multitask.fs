@@ -584,10 +584,6 @@ task definitions
 \ running, and return early. However, that is folly because it can only
 \ happen if we're the idle task, which does this test itself.
 
-#if-flag debug
-  eint? not abort" yield while DINT"
-#endif
-
   dint
   \ save current state.
   ctx>r rp@ sp@ this stackptr !
