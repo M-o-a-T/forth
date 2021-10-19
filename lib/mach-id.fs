@@ -13,7 +13,7 @@ forth definitions only
 
 #if-flag real
 
-#if-flags arch=armcm3
+#if-flag arch=armcm3
 $1FFFF7E8 constant machid
 12 constant #machid
 \ accessible with any addressing mode, so can be used directly
