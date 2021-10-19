@@ -38,7 +38,7 @@ voc: term
 
 \ this is the send buffer. It gets filled by a single task until a
 \ linefeed or a timeout happens.
-rc80 object: outbuf
+rc16 object: outbuf
 
 \ this is the queue of tasks waiting to send things. A task adds itself to
 \ it when it wants to send something and OUTTHIS is not zero.
