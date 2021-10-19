@@ -2,7 +2,10 @@
 
 #delay 5
 #-ok .. forth reset
-#delay 0.5
+#delay 1
+#if-ok 1
+\ possible startup nonsense from some task
+#endif
 #ok 1
 
 compiletoram
