@@ -17,13 +17,6 @@ forth definitions only  decimal
 #error conflicts with single-tasked catch/throw
 #endif
 
-#if undefined eint
-\ happens when running on Linux …
-: eint inline ;
-: dint inline ;
-: eint? true 0-foldable ;
-#endif
-
 #if undefined .word
 #if-flag debug
 #include debug/crash.fs

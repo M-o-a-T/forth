@@ -23,6 +23,12 @@ sticky
 
 forth only definitions
 
+#if undefined eint
+\ stubs, when running on Linux
+: eint inline 0-foldable ;
+: dint inline 0-foldable ;
+: eint? true 0-foldable ;
+#endif
 
 #if undefined poisoned
 $deadbeef constant poisoned
