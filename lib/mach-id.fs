@@ -22,16 +22,14 @@ $1FFFF7E8 constant machid
 #endif
 
 #else
+\ !real
+
 #if-flag !machid
 #error You need to declare "-F machid=<possibly-random-32bit-nr>".
 #endif
 
-0 variable machid
+#send {machid} variable machid
 4 constant #machid
-:init
-#send {machid}
-  machid !
-;
 
 #endif
 \ !real
