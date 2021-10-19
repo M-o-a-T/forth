@@ -10,11 +10,14 @@ compiletoflash
 forth only
 root definitions
 
-sticky  \ deleted by "find"
-: defined   ( "token" -- flag ) token \voc ??-dictionary postpone .. 0<> ; 
+sticky
+: defined   ( "token" -- flag )
+  token  \voc ??-dictionary
+  postpone ..  \ undo the effects of the "sticky" flag
+; 
 
-sticky  \ deleted by "find" in "defined"
-: undefined ( "token" -- flag ) defined not ;
+sticky
+: undefined ( "token" -- flag ) defined 0= ;
 
 #endif
 
