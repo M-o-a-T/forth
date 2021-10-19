@@ -2,7 +2,8 @@
 
 compiletoflash
 #require \halt sys/basic.fs
-#require throw sys/abort.fs
+#require abort" sys/abort.fs
+\ ( " )
 compiletoram
 
 : err1 ." throwing 123" cr 123 throw ." ??? 1" cr ;
