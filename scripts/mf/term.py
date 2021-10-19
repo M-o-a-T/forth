@@ -246,7 +246,7 @@ class Terminal:
 
                 try:
                     if self.files:
-                        await self.tg.start(self.upload_file, self.files)
+                        await self.tg.start(self.upload_file, *self.files)
                     await anyio.sleep(0.1)
                     while True:
                         await anyio.sleep(99999)
