@@ -41,7 +41,12 @@ voc: term
 
 \ this is the send buffer. It gets filled by a single task until a
 \ linefeed or a timeout happens.
-rc16 object: outbuf
+#if defined syscall
+rc80
+#else
+rc16
+#endif
+object: outbuf
 
 \ this is the queue of tasks waiting to send things. A task adds itself to
 \ it when it wants to send something and OUTTHIS is not zero.
