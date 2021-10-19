@@ -8,18 +8,18 @@ async def _never_iter():
     if False:
         yield None
     while True:
-        trio.sleep(99999)
+        await trio.sleep(99999)
 
 class NoWindow:
     has_nl = True
 
-    def __init__(self, title):
+    def __init__(self):
         pass
 
     def __aiter__(self):
         return _never_iter().__aiter__()
 
-    async def send(self, data):
+    def send(self, data, lf=None):
         pass
 
     def set_error(self, e):
@@ -29,6 +29,12 @@ class NoWindow:
         print(f"--- info: {e} ---", file=sys.stderr)
 
     def set_fileinfo(self, name,num):
+        pass
+
+    def stopped_sending(self):
+        pass
+
+    def started_sending(self):
         pass
 
     def close(self):

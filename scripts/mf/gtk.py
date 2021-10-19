@@ -18,7 +18,7 @@ class Window(NoWindow):
     did_lf = True
 
     def __init__(self, title):
-        super().__init__(title)
+        super().__init__()
 
         self.history = []
         self.pos = 0
