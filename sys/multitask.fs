@@ -1053,6 +1053,25 @@ task \int definitions also
   this .. dup %cls next @ .. <>
 ;
 
+0 variable last-debug
+0 variable loop-debug
+0 variable loop-hook
+: dbg
+  loop-debug @ ?dup if
+    1- dup loop-debug !
+    0= if
+      loop-hook @ ?dup if execute then
+      ." DBG:" dup . cr
+    then
+  else
+    last-debug @ over <> if
+      dup last-debug !
+      \ dup $30 + emit
+    then
+  then
+  drop
+;
+
 : run-irqs ( this -- this )
 \ walks through the check- and irq-task list
 
@@ -1074,23 +1093,27 @@ task \int definitions also
   ['] i-check irq-tasks each drop ( n )
   \ exit if checkers present or work found
 
-  busy? if  if drop then  eint  exit then
+  busy? if  if drop then  eint  2 dbg  exit then
 
   \ if there are any task checks left, we cannot sleep
-  check-tasks empty? not if  if drop then  eint  exit then
+  check-tasks empty? not if  if drop then  eint  3 dbg  exit then
 
 #[if] defined syscall
   \ we don't need t2 for polling
   dup if  ( t2 t1 ) nip then ( t1 )
   \ if multitasking is currently off we can't sleep
-  ?multi 0= if drop 1  then
+  ?multi 0= if drop 1  5 dbg  then
+  dup dbg
   forth poll poll  drop
 #else
   \ the timer code will have arranged an interrupt
-  bits tick update if  eint  exit then
+  bits tick update if  eint  4 dbg  exit then
   \ if multitasking is currently off we can't halt
   ?multi if
+    6 dbg
     \halt
+  else
+    7 dbg 
   then
 #endif
   eint
