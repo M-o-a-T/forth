@@ -141,24 +141,46 @@ forth definitions
 ;
 #endif
 
+: w-e ( ring -- )
+#if-flag multi
+  eint? if
+    begin
+      dint
+      dup __ empty?
+    while
+      dup __ wait-empty
+    repeat drop
+  else
+    abort" Ring empty"
+  then
+#else
+  __ empty? abort" Ring empty"
+#endif
+;
+
+: w-f ( ring -- )
+#if-flag multi
+  eint? if
+    begin
+      dint
+      dup __ full?
+    while
+      dup __ wait-full
+    repeat drop
+  else
+    abort" Ring full"
+  then
+#else
+  __ full? abort" Ring full"
+#endif
+;
+
 \ ************************************************************
 : ! ( item* ring -- )
 \ store to the ring buffer.
+  eint? >r
   >r
-
-#if-flag multi
-  begin
-    r@ __ full?
-  while 
-    eint? if
-      r@ __ wait-full
-    else
-      r> abort" Ring full"
-    then
-  repeat
-#else
-  r@ __ full? if r> abort" Ring full" then
-#endif
+  r@ w-f
 
   \ now compute where to store the next bit
   r@ __ start @ r@ __ num @ + r@ __ mask  __ *esize
@@ -177,27 +199,12 @@ forth definitions
     r@ __ wake-empty
   then
 #endif
-
   rdrop
-;
-
-: w-e ( ring -- )
-#if-flag multi
-  begin
-    dup __ empty?
-  while
-    eint? if
-      dup __ wait-empty
-    else
-      abort" Ring empty"
-    then
-  repeat drop
-#else
-  __ empty? abort" Ring empty"
-#endif
+  r> if eint then
 ;
 
 : @ ( ring -- item* )
+  eint? >r
   >r
   r@ w-e
 
@@ -216,6 +223,7 @@ forth definitions
 #else
   rdrop
 #endif
+  r> if eint then
 ;
 
 
