@@ -57,6 +57,8 @@ rdr start
   10 time millis
   okr @ 1 <> abort" RES"
 ;
+task !multi
+
 wrt start
 
 0 okr !
