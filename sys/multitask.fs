@@ -638,7 +638,9 @@ task definitions
   eint
 
   \ check new task for pending abort
-  this abortcode @ ?dup if throw then
+  this abortcode @ ?dup if  0 this abortcode !  throw then
+  \ ABORT may print, which may yield, which would crash
+
 #if-flag debug
   yield-trace @ if
   ." >TASK:" this .. .word depth . rdepth . cr
