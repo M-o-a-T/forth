@@ -7,6 +7,10 @@ forth only definitions
 #error Multitask only
 #endif
 
+#if defined term
+#end
+#endif
+
 #if defined syscall
 #require poll lib/syscall.fs
 #endif
