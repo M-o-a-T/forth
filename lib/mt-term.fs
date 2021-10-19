@@ -26,6 +26,15 @@ bits also
 gpio also
 #endif
 
+#if undefined usart1
+#include svd/fs/soc/STMicro/stm32f103xx/usart.fs
+#endif
+#if undefined rcc
+#include svd/trim/soc/STMicro/stm32f103xx/rcc.fs
+#endif
+bits also
+#if undefined nvic
+#include soc/armcm3/nvic.fs
 #endif
 
 forth only definitions
@@ -71,13 +80,20 @@ task %queue object: outq
 
 0 variable npr
 
-looped :task: outsend
+task looped :task: outsend
   begin
     begin
       outbuf empty?
     not while
+#[if] defined syscall
       1 poll wait-write
       outbuf s@  1 -rot sys call write  outbuf skip
+#else
+      \ send the buffer. No need to loop on OEMIT?
+      \ as it does that internally anyway.
+      \ TODO use an interrupt instead.
+      outbuf @ oemit
+#endif
       2 outdly !
     repeat
 
@@ -99,11 +115,6 @@ looped :task: outsend
       then
     then
   again
-;
-
-:init
-  outsend start
-  yield
 ;
 
 : qemit? ( -- flag )
@@ -171,12 +182,11 @@ rc16 object: inq
 \ For operating under Linux, don't read a single byte at a time.
 256 constant insize
 insize buffer: inbuf
-#endif
+
 
 looped :task: inrecv
   begin
     \ wait until ready
-#[if] defined syscall
     \ Mecrisp-on-Linux hardcodes KEY? to return -1 and then blocks in KEY.
     \ Even if that wasn't multitask-unfriendly, reading a byte at a time is *slow*.
     0 poll wait-read
@@ -188,30 +198,51 @@ looped :task: inrecv
     then
     inbuf swap 0 do
       dup c@
-#else
-      begin okey? not while yield repeat
-      okey
-#endif
       dup ( buf ch ch ) hook-packet @ ?dup if execute else drop 0 then ( char flag )
       if
         drop
       else
         inq !
       then
-#[if] defined syscall
       1+
     loop drop
-#endif
   again
 ;
   
 
-\ 
+#else
+
+: uart-irq-handler ( -- )  \ handle the USART receive interrupt
+  begin
+    USART1 SR RXNE @
+  while
+    USART1 DR @
+    \ will drop input when there is no room left
+    dup ( ch ch ) hook-packet @ ?dup if execute else drop 0 then ( char flag )
+    if drop else
+      inq full? if drop else inq ! then
+    then
+  repeat
+;
+
+: uart-irq-init ( -- )
+\ initialise the USART1. Most is already done.
+  \ pa9 mode af pp fast !
+  \ pa10 mode float !
+  \ 17 bit RCC-APB1ENR bis!  \ set USART2EN
+  \ $138 USART1 BRR ! \ set baud rate divider for 115200 Baud at PCLK1=36MHz
+  \ USART1 CR1 <% TE +! RE +! UE +! %>!
+  ['] uart-irq-handler irq-usart1 !
+  37 NVIC enabled +!  \ enable USART1 interrupt 37
+  USART1 CR1 RXNEIE +!
+;
 
 #if undefined syscall
 gpio also
 #endif
 
+#endif
+\ !syscall
 
 \ ***************
 \      setup
@@ -219,26 +250,73 @@ gpio also
 
 \ :init
 
-: emit-init
+#if-flag debug
+#require tasks debug/multitask.fs
+
+forth only definitions
+task also
+bits also
+term also
+
+:task: dbg
+  begin
+    10 time seconds
+    cr inq ?
+    tasks
+    task \int main ?
+  again
+;
+
+: demit? usart1 sr txe @ ;
+: demit begin demit? until usart1 dr ! ;
+
+: emit-debug
+\ switch to debugging print words
+\ Warning: when multitasking this can get messy
+  ['] demit? hook-emit? !
+  ['] demit hook-emit !
+;
+
+#endif
+
+task definitions
+
+: !multi
+#if-flag debug
+  \ dbg start
+#endif
+  outsend start
   ['] qemit? hook-emit? !
   ['] qemit hook-emit !
   ['] qkey? hook-key? !
   ['] qkey hook-key !
   task !multi
+#[if] defined syscall
   inrecv start
-  yield
+#else
+  uart-irq-init
+#endif
 ;
-: emit-exit
+
+: !single
+#if-flag debug
+  \ 1 dbg signal
+#endif
+#[if] defined syscall
+  1 inrecv signal
+#else
+  USART1 CR1 RXNEIE -!
+#endif
+  1 outsend signal
+
+  task !single
   ['] oemit? hook-emit? !
   ['] oemit hook-emit !
   ['] okey? hook-key? !
   ['] okey hook-key !
 ;
 
-#if defined syscall
-\ TODO doesn't yet work on real hardware
-:init emit-init ;
-#endif
+:init task !multi ;
 
 forth only definitions
 
