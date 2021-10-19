@@ -16,7 +16,7 @@ ct2
 #ok ( )
 
 : check-abort ( -- flag )
-  aborthandler ." Handler at " dup hex. ." has " @ hex. cr
+  \voc aborthandler ." Handler at " dup hex. ." has " @ hex. cr
   ct1
   ct2 and
 ;
