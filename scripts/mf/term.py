@@ -374,7 +374,7 @@ class Terminal:
                 if data == b"":
                     raise anyio.EndOfStream()
                 await self.raw_in_w.send(data)
-        except anyio.EndOfStream:
+        except (anyio.ClosedResourceError,anyio.EndOfStream):
             await self.raw_in_w.send(WithEnd)
 
     async def reader(self, *, task_status):
