@@ -1023,10 +1023,6 @@ forth definitions only
 #include lib/timeout2.fs
 #endif
 
-\ *****************
-\     idle task
-\ *****************
-
 forth only
 task definitions also
 
@@ -1056,7 +1052,11 @@ task \int definitions also
   0
 ;
 
-: busy? ( this -- flag )
+\ *****************
+\     idle task
+\ *****************
+
+: busy? ( -- flag )
 \ Check if any other task is on our queue
   this .. dup %cls next @ .. <>
 ;
@@ -1133,6 +1133,7 @@ looped :task: idle
   begin
     run-irqs
     busy? if
+      \ do not yield if there's no other task anyway
       yield
     then
   again

@@ -1,11 +1,12 @@
 \ System initialization.
 \ 
 \ This file contains the basic minimum to get the rest of all of this up
-\ and running.
+\ and running (and debuggable, if that flag is on).
 
-\ We need to load the "vis" extension first, (a) because it doesn't upcall
+\ We need to load the "voc" extension first, (a) because it doesn't upcall
 \ 'init', second because currently (2021-09) there's a bug in Mecrisp(?)
 \ that prevents it from working when it's not loaded first.
+
 #if-flag erase
 #delay 3
 #-ok eraseflash

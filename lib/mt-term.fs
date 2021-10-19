@@ -138,7 +138,7 @@ task looped :task: outsend
     then
   repeat
 #if-flag debug
-  dup
+  dup  \ for the debug block below
 #endif
   outbuf !
 #if-flag debug
@@ -147,7 +147,10 @@ task looped :task: outsend
 
 #if-flag debug
   10 =  outnum @ 200 > or
-  if \ linefeed. Let someone else get a go.
+  if
+    \ linefeed. Let someone else get a go.
+    \ This is debug only because we'll use the same code to send
+    \ data packets and they mustn't be broken just because they contain \x0A.
     0 outdly !
     outq wait
   then
@@ -188,7 +191,8 @@ looped :task: inrecv
   begin
     \ wait until ready
     \ Mecrisp-on-Linux hardcodes KEY? to return -1 and then blocks in KEY.
-    \ Even if that wasn't multitask-unfriendly, reading a byte at a time is *slow*.
+    \ Even if that wasn't multitask-unfriendly, reading a byte at a time
+    \ is slow and wastes CPU.
     0 poll wait-read
     0 inbuf insize sys call read
     \ zero is EOF. Ugh.
@@ -198,7 +202,7 @@ looped :task: inrecv
     then
     inbuf swap 0 do
       dup c@
-      dup ( buf ch ch ) hook-packet @ ?dup if execute else drop 0 then ( char flag )
+      dup ( buf ch ch ) hook-packet @ ?dup if execute else drop 0 then ( buf char flag )
       if
         drop
       else
@@ -208,7 +212,6 @@ looped :task: inrecv
     loop drop
   again
 ;
-  
 
 #else
 
