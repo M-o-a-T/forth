@@ -34,8 +34,6 @@ voc: tick
 tick also definitions
 #endif
 
-bits tick definitions
-
 \ #if-flag debug
 \ compiletoram
 \ forth only
@@ -195,6 +193,9 @@ bits tick definitions
   systick csr tickint +!
 ;
 
+\ #if-flag debug
+\ compiletoflash
+\ #endif
 forth definitions only
 
 \ SPDX-License-Identifier: GPL-3.0-only
