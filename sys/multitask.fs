@@ -45,6 +45,10 @@ voc: \int
 : yield-dummy -29 abort ;
 ' yield-dummy variable yield-hook
 
+#if-flag debug
+0 variable yield-trace
+#endif
+
 voc: sub
 task definitions
 sub ignore
@@ -514,7 +518,15 @@ task also
   ( state task )
   \ the above compares state effects, not states. States may still be
   \ different. But the additional tests are not worth the effort.
+#if-flag debug
+  tuck
+#endif
   __ state !
+#if-flag debug
+  yield-trace @ if
+    ." StC:" __ ?
+  else drop then
+#endif
 ;
 
 
@@ -628,7 +640,9 @@ task definitions
   \ check new task for pending abort
   this abortcode @ ?dup if throw then
 #if-flag debug
-  \ ." >TASK:" this .. .word depth . rdepth . cr
+  yield-trace @ if
+  ." >TASK:" this .. .word depth . rdepth . cr
+  then
   this pstack @ ?dup if  depth  5 + < if
     ." >TASK:" this .. .word
     ." Param stack tight" -3 abort then then
