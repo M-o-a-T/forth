@@ -114,7 +114,7 @@ dup constant \link-off
   var> int field: checkarg
   2swap
   2dup
-  var> uint field: timeout \ for waitq
+  var> uint field: timeout
   2swap
   \int waitq-link field: waitq
 #ok 2over d= 
@@ -882,6 +882,7 @@ task %cls definitions
 #if-flag debug
     dup __ pstack @ 0= abort" Maintask dead??"
 #endif
+    \ save the argument, to pass a param to the task
     dup r@  \cls (>setup)
     =new over __ state !
   then
@@ -889,7 +890,7 @@ task %cls definitions
   =sched swap __ >state.i
 ;
 
-: start
+: start ( task -- )
 \ Start a task. If the task is dead we need to re-animate it
 \ which is why we save the voc context here.
   \voc voc-context @
