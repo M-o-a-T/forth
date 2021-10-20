@@ -86,20 +86,26 @@ each ( "name" X* xt head -- Y* )
 
 Execute XT (the result of ``'`` or ``[']``) for each list member.
 
-This word must take the address of each element from the list. It can
-freely access the rest of the stack; ``head`` has already been removed.
+This word must take the address of each element on the list.
 
-XT may remove the current item. It can freely add items to the list.
-It must not remove any other item, and no other code may do so while ``run:``
-is active.
+XT must not remove the current item from the list, and neither may any
+other code while ``each`` is running. It is free to do anything else it
+chooses to do.
 
 XT's stack signature is ``( item -- flag )``, as far as ``each`` is
-concerned. If the value is not zero, ``each`` returns that value;
-otherwise it continues to the next item and returns zero once all items
-have been processed.
+concerned. If the flag is not zero, ``each`` returns that value; otherwise
+it continues to the next item and returns zero once all items have been
+processed.
 
 XT is free to do other stack manipulations (denoted by ``X*`` and ``Y*``,
 above).
+
+each.x ( "name" X* xt head -- Y* )
+----------------------------------
+
+Like ``each``, except that this time XT may remove the current element.
+However, this time the *next* element must stay on the list.
+
 
 d-list-item
 +++++++++++

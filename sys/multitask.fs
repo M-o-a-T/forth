@@ -385,7 +385,7 @@ task also
 : each ( xt queue -- flag )
 \ call xt with every job
   ['] (adj) swap
-  __ each
+  __ each.x
   ( xt flag )
   nip
 ;

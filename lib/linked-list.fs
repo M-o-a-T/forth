@@ -25,21 +25,37 @@ __seal
 #endif
 \voc \d-list definitions also
 
-
-: insert ( new this -- )
-\ add new item before me
 #if-flag debug
-  over __ prev @ poisoned <> if
+: _free?
+  __ prev @ poisoned <> if
     ." item not free: "
     over hex. over __ prev @ hex. over __ next @ hex. ct
     -22 abort
   then
-#endif
-  tuck __ prev @ ( this new prev )
-  2dup __ next ! over __ prev ! ( this new )
-  2dup __ next ! swap __ prev ! ( new )
 ;
 
+#endif
+: insert ( new this -- )
+\ add new item before me
+#if-flag debug
+   over _free?
+#endif
+   dup >r __ prev @ .. over __ prev !   \ old's prev is now new's prev
+   dup r@ __ prev !                     \ new is now old's prev
+   r> over __ next !                    \ old is now new's next
+   dup __ prev @ __ next !              \ new is now new's next's next
+;
+
+: append ( new this -- )
+\ add new item after me
+#if-flag debug
+   over _free?
+#endif
+   dup >r __ next @ .. over __ next !   \ old's next is now new's next
+   dup r@ __ next !                     \ new is now old's next
+   r> over __ prev !                    \ old is now new's prev
+   dup __ next @ __ prev !              \ new is now new's next's prev
+;
 
 forth definitions
 \voc \d-list class: d-list-head
@@ -53,6 +69,30 @@ forth definitions
 : each ( xt head -- res )
 \ run XT with each item until one call returns nonzero. Return that,
 \ or zero if we ran through all elements.
+\ XT must keep the current element but may otherwise do whatever else.
+  swap >r  ( head |R: xt )
+  dup __ next @
+  begin
+    2dup <>
+  while ( head this )
+    r@ rot >r ( this xt |R> xt head )
+    over >r ( this xt |R: xt head this )
+    execute ( flag )
+    ?dup if
+      rdrop 2rdrop exit
+    then
+    r> r> swap ( head this )
+    __ next @ ( head next )
+  repeat ( head head )
+  rdrop 2drop
+  0
+;
+
+
+: each.x ( xt head -- res )
+\ run XT with each item until one call returns nonzero. Return that,
+\ or zero if we ran through all elements.
+\ XT may remove the current element but must not remove any others.
   swap >r  ( head |R: xt )
   dup __ next @
   begin
@@ -84,12 +124,16 @@ forth definitions
 : remove ( this -- )
 \ remove from the list, kill the pointers if debugging.
 \ You can't remove a list head, so this is here.
-  dup __ prev @ over __ next @ ( this prev next )
-  2dup __ prev ! swap __ next ! ( this )
+  dup __ prev @ over __ next @ __ prev !
+  dup __ next @
+#if-flag debug
+                over
+#else
+                swap
+#endif
+                     __ prev @ __ next !
 #if-flag debug
   poisoned over __ prev ! poisoned swap __ next !
-#else
-  drop
 #endif
 ;
 
