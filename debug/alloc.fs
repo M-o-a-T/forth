@@ -24,7 +24,7 @@ forth definitions
   hdr ?
 ;
 
-mem definitions
+pool definitions
 
 : ?
   dup __ ?
