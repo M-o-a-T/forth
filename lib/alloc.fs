@@ -152,8 +152,10 @@ d-list-head class: pool
 ;
 
 : ?free ( pool -- maxblk )
+  eint? swap dint
   0 ['] \?free rot __ each
   drop
+  swap if eint then
 ;
 
 #if-flag alloc-fit
@@ -198,7 +200,7 @@ d-list-head class: pool
     + r> over hdr sz ! ( best )
   then
   swap if eint then
-hdr *used* over hdr flag !
+  hdr *used* over hdr flag !
   hdr hdr-link \off +
 ;
 
