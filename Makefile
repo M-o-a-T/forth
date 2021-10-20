@@ -1,11 +1,20 @@
-all: prep test
+all: images prep test
 
 ARCH ?= armcm3
 VENDOR ?= STMicro
 MCU ?= STM32F103xx
 CLK ?= 72000000
+MECRISP ?= ../mecrisp-stellaris/linux-ra/mecrisp-stellaris-linux
 
 prep:: .done
+
+prep:: img
+
+img:
+	mkdir img
+
+images: img
+	scripts/mf-term -b -x snips/img-debug.fs -c $(MECRISP)
 
 .done:
 	mkdir -p .done
