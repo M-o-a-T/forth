@@ -143,8 +143,47 @@ voc: err
 131 constant ENOTRECOVERABLE \ State not recoverable
 132 constant ERFKILL         \ Operation not possible due to RF-kill
 133 constant EHWPOISON       \ Memory page has hardware error
+;voc
 
-previous definitions
+voc: ippproto
+0 constant ip
+1 constant icmp
+6 constant tcp
+17 constant udp
+41 constant ipv6 \ header
+47 constant gre
+98 constant encap
+143 constant ethernet
+255 constant raw
+;voc
+
+voc: pf
+0 constant unspec
+1 constant unix
+1 constant local
+1 constant file
+2 constant inet
+4 constant ipx
+10 constant inet6
+16 constant netlink
+16 constant route
+17 constant packet
+29 constant can
+31 constant bluetooth
+;voc
+
+: af postpone pf immediate ;
+
+voc: sock
+1 constant stream
+2 constant dgram
+3 constant raw
+5 constant seqpacket
+10 constant packet
+$800 constant nonblock
+$80000 constant cloexec
+;voc
+
 
 : ?err ( result -- result )
 \ raises an exception if the result is an error
@@ -168,6 +207,13 @@ previous definitions
 : call0 0 swap call1 ;
 
 voc: call
+: >fn0 ( adr len -- )
+\ zero terminate a filename. Stored at @here.
+  compiletoram? 0= abort" no flash"
+  tuck here swap move ( len )
+  here + 0 swap c!
+;
+
 : exit ( code -- does-not-return )
   1 call1 ?-err ;
 
@@ -177,14 +223,20 @@ voc: call
 : write ( fd ptr len -- result )
   4 call3 ?err ;
 
+: open ( ptr len flags mode -- result )
+  2>r >fn0 2r>
+  here -rot 5 call3 ?err ;
+
 : close ( fd -- )
   6 call1 ?-err ;
 
 : creat ( ptr len mode -- result )
-  8 call3 ?err ;
+  -rot >fn0
+  here swap 8 call2 ?err ;
 : create creat inline ;
 
-: dup ( fd -- fd2 )
+: dupfd ( fd -- fd2 )
+\ don't call it "dup"!
   41 call1 ?err ;
 
 : fcntl ( fd cmd arg -- result )
@@ -193,9 +245,19 @@ voc: call
 : pipe ( -- fd1 fd2 )
   0 0 sp@  42 call1  ?-err ;
 
-previous definitions
+: socket ( dom typ prot -- fd )
+  281 call3 ?err ;
+
+: bind ( fd addr len -- )
+  282 call3 ?-err ;
+
+: connect ( fd adr len -- )
+  283 call3 ?-err ;
+
+;voc
 
 voc: F_
+decimal
 0 constant DUPFD
 1 constant GETFD
 2 constant SETFD
@@ -215,10 +277,17 @@ voc: F_
 16 constant GETOWN_EX
 17 constant GETOWNER_UIDS
 
-previous definitions
+;voc
+
+8 base !
+
+voc: S_
+00444 constant IRUSR
+00222 constant IWUSR
+00111 constant IXUSR
+;voc
 
 voc: O_
-8 base !
 00000003 constant ACCMODE
 00000000 constant RDONLY
 00000001 constant WRONLY
@@ -241,7 +310,7 @@ voc: O_
 NONBLOCK constant NDELAY
 decimal
 
-previous definitions
+;voc
 
 : nonblock ( fd -- )
   dup F_ GETFL 0 call fcntl
