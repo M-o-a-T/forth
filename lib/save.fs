@@ -14,43 +14,18 @@ forth only definitions
 #end
 #endif
 
+#if undefined sys
+compiletoflash
+#require lib/syscall.fs
+#endif
+
 #if defined \file
 #end
 #endif
 
+compiletoram
 voc: \file
-
-5 constant #open
-
-8 base ! 
-00444 constant S_IRUSR
-00222 constant S_IWUSR
-00111 constant S_IXUSR
-decimal
-
-8 base !
-00000 constant O_RDONLY \ open for reading only
-00001 constant O_WRONLY \ open for writing only
-00002 constant O_RDWR   \ open for reading and writing
-02000 constant O_APPEND \ set append mode
-00100 constant O_CREAT  \ create if nonexistent
-01000 constant O_TRUNC  \ truncate to zero length
-00200 constant O_EXCL   \ error if already exists
-decimal
-
-: 0terminate ( addr len -- ) + 0 swap c! ;
-
-: syscall-creat ( addr len mode -- fd )
-  >r  dup >r here swap move  here r> 0terminate 
-  here O_WRONLY O_CREAT or O_TRUNC or r> 0 0 0 0 #open syscall ;
-
-\ ssize_t write(int fd, const void *buf, size_t count);
-4 constant #write
-: syscall-write ( fd addr len -- len' ) 0 0 0 0 #write syscall ; 
-
-\ int close(int fd)
-6 constant #close
-: syscall-close ( fd -- ior ) 0 0 0 0 0 0 #close syscall ;
+sys also
 
 \ -----------------------------------------------------------------------------
 \ reading and writing ELF headers
@@ -107,9 +82,11 @@ decimal
   compiletoram? compiletoflash >r
 
   adjustelf
-  S_IRUSR S_IWUSR S_IXUSR or or syscall-creat \ open new program image
-  dup incipit here incipit - syscall-write drop
-  syscall-close drop
+  compiletoram
+  S_ IRUSR S_ IWUSR S_ IXUSR or or call creat \ open new program image
+  compiletoflash
+  dup incipit here incipit - call write drop
+  call close
 
   r> if compiletoram then
 ;
