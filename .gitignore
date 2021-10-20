@@ -3,3 +3,4 @@ test/gen/bugtest.fs
 /svd/fs/
 /.done/
 *~
+\#*.glade#
