@@ -149,13 +149,23 @@ but you'd run out of RAM, and they'd block each other anyway), much less
 every incoming byte (tasks can finish out of order, so that would be bad),
 so we give you a `ring buffer </doc/ring.rst>`_ to handle them.
 
+Memory
+++++++
+
+Three messages arrive. Now you need to find space for them, and
+pre-allocating the max number of messages (and buffer space for them!) may
+not be the best strategy if 95% of them are 5% of their possible size.
+
+So you need some `memory management </doc/alloc.rst>`_.
+
 Error handling
 ++++++++++++++
 
 Programs fail. You want code that fails (say, your 1wire bus has a short in it)
 not to take out the rest of the system (the 1wire handler loops / crashes
 the system and you can't talk to it to figure out what's wrong / doesn't
-free the buffer you need to do that).
+free the buffer you need to do that). Also, even when there's a failure you
+should probably free the memory you allocated in the previous step.
 
 Thus we include a couple of words that help with `non-local error handling
 </doc/errors.rst>`_. Yes, they work when you're multitasking.
