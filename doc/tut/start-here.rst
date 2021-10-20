@@ -122,6 +122,13 @@ multitasking: just switch to a different pair of stacks.
 The devil is in the detail, but Forth is also very good at abstracting
 details. See `Multitasking </doc/multitask.rst>`_ for, well, the details.
 
+Input and output
+----------------
+
+Multitasked Forth systems still need to send and receive text. See our
+`interpreter documentation </doc/interpret.rst>`_ for an overview on how
+that works.
+
 Waiting and Interrupts
 ----------------------
 
