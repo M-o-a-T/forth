@@ -8,6 +8,7 @@
 #include test/linked-list.fs
 #include test/io.fs
 #include test/syscall.fs
+#include test/crc.fs
 
 #if-flag multi
 #if undefined \multi

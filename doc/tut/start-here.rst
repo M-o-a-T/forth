@@ -156,6 +156,12 @@ but you'd run out of RAM, and they'd block each other anyway), much less
 every incoming byte (tasks can finish out of order, so that would be bad),
 so we give you a `ring buffer </doc/ring.rst>`_ to handle them.
 
+Error checking
+--------------
+
+Error checking is typically done with CRCs. We include some code to handle
+them, `described here </doc/crc.rst>`_.
+
 Memory
 ++++++
 
