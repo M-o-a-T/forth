@@ -66,6 +66,10 @@ forth definitions
   dup     __ next !
 ;
 
+: empty?  ( q -- flag )
+  dup __ next @ .. swap =
+;
+
 : each ( xt head -- res )
 \ run XT with each item until one call returns nonzero. Return that,
 \ or zero if we ran through all elements.
