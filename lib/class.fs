@@ -66,9 +66,13 @@ voc: root-cls
 
 \ Assign the actual class context to the next created word and return the
 \ instance size of the class on the stack.
+: mem-sz
+  u/i@ size@ +
+;
+
 : class-item ( -- u/i )
   \ get the instance size
-  u/i@ size@ + item  \ compile the next word as vocabulary setter
+  mem-sz item  \ compile the next word as vocabulary setter
 ;
 
 
