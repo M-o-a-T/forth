@@ -685,9 +685,13 @@ class Terminal:
 
     async def send_file(self, filename):
         """Send a file. Runs in upload_file task."""
-        file_rel = str(Path(filename).resolve().relative_to(Path.cwd()))
-        if len(filename) > len(file_rel):
-            filename = file_rel
+        try:
+            file_rel = str(Path(filename).resolve().relative_to(Path.cwd()))
+        except ValueError:
+            pass
+        else:
+            if len(filename) > len(file_rel):
+                filename = file_rel
 
         async with await anyio.open_file(filename, 'r') as f:
             await self._file_send(filename, f.__aiter__())
