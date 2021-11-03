@@ -294,7 +294,9 @@ task definitions
 #if-flag debug
   \ dbg start
 #endif
+  outsend state @  task =idle >= if exit then
   outsend start
+  yield
   ['] qemit? hook-emit? !
   ['] qemit hook-emit !
   ['] qkey? hook-key? !
