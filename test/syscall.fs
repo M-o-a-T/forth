@@ -41,6 +41,8 @@ rfd nonblock
 ' ?rchk catch
 #ok err EAGAIN =
 
+epoll ignore
+
 0 variable okr
 :task: rdr
   rfd poll wait-read
