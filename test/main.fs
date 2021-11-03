@@ -10,6 +10,10 @@
 #include test/syscall.fs
 #include test/crc.fs
 
+#if-flag moatbus
+#include ../moat-bus/tests/message.fs
+#endif
+
 #if-flag multi
 #if undefined \multi
 compiletoflash
