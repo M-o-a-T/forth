@@ -270,8 +270,14 @@ term also
   again
 ;
 
+#if-flag real
 : demit? usart1 sr txe @ ;
 : demit begin demit? until usart1 dr ! ;
+#else
+: \p ;
+: demit? 1 ;
+: demit hook-pause @ ['] \p hook-pause ! swap oemit hook-pause ! ;
+#endif
 
 : emit-debug
 \ switch to debugging print words
