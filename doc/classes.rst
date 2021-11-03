@@ -57,6 +57,14 @@ Declare a member variable of type ``type``.
 Basic variables are declared in ``lib/vars.fs``. Classes as members also
 work.
 
+here: ( "name" size -- size+x )
++++++++++++++++++++++++++++++++
+
+Declare an untyped member variable without allocating any space. In other
+words, this marks a position in your structure.
+
+Use this for advanced data manipulation. Or not.
+
 __seal ( ivsys size -- )
 ++++++++++++++++++++++++
 

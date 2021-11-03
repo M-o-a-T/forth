@@ -38,6 +38,13 @@ voc: root-cls
 : size@ s" size" voc-eval ;
 : setup@ s" setup" voc-eval ;
 
+: here: ( n1 "name" -- n1 ) \ Exec: a1 -- a2=a1+n1
+\ Mark a position in a structure.
+\ n1 = size of the structure before creating  the field
+\
+  <builds dup ,
+  does> @ +
+;
 
 \ Return an object's data address.
 : _addr_ ( oid -- addr )
