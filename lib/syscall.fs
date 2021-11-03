@@ -188,7 +188,7 @@ $80000 constant cloexec
 : ?err ( result -- result )
 \ raises an exception if the result is an error
   dup 0 < over -1024 > and if \ error
-    not 1+ abort" syscall" \ use positive errno in abort
+    negate abort" syscall"
   then
 ;
 
