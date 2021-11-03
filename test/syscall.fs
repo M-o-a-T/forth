@@ -8,6 +8,11 @@ compiletoflash
 #require sys lib/syscall.fs
 compiletoram
 
+#if-flag multi
+#include test/mt-term.fs
+\ output is not stable without this
+#endif
+
 sys also
 epoll also
 
