@@ -2,102 +2,21 @@
 
 forth definitions only
 
-#require time lib/timeout.fs
-
-#if defined syscall
-#require sys lib/syscall.fs
+#if time undefined now
+#include lib/time.fs
 #endif
 
-time definitions also
-task also
-
-
-#if defined syscall
-sys also
-
-monotonic object: systime
-
-: now
-  systime get
-  systime @  ( float.seconds )
-  1000000, f* nip
-;
-
-: now-hq now ;
-
-#else
-
-\ include the real MCU's tick configuration here
-
-#if-flag !real
-#error On virtual hardware but no syscall? doesn't work
-#endif
-
-#include soc/{arch}/tick.fs
-
-time definitions also
-task also
-
-#endif
-
-#if defined check1
+#if time defined hourtask
 forth only definitions
 #end
 #endif
 
+time also definitions
+
+0 variable last-check
+
 :init
-  time now-hq  last-check !
-;
-
-\ Theory of operation:
-\ 
-\ For "real" hardware we want two return values from our time check:
-\ how much time shall pass until the next task is ready, plus the delay
-\ required after that. Why? we don't want to update the actual tick
-\ counter if we can possibly help it, because that introduces an
-\ inaccurracy. Instead, we want to update the value the counter is
-\ reloaded with.
-\ 
-\ Thus initially we pass in "delta 0". check1 compares that to the
-\ current task's remaining time; if the latter is smaller/equal (case A),
-\ it is \ executed immediately and "delta" is decremented. Otherwise we leave
-\ the initial delay on the stack (no zero).
-\ The following task(s) may have a zero (incremental) timeout. They are skipped (case B).
-\ The timeout of the task after that then stays on the stack and the scan ends (case C).
-
-: check1 ( time1 0? task  -- time2 time 0|1 )
-  >r
-  ?dup if  ( r1 )
-    r> %cls timeout @ ( r1 r2|0 )  \ case c|b
-  else ( t1 )
-    r@ %cls timeout @ 2dup u< if \ task needs more time. Bow out.
-      swap - ( t1-r1 )
-      dup r> %cls timeout !  \ case b
-    else
-      - ( r1-t1 )
-      r> %cls continue
-      0 \ case a, continue
-    then
-    0
-  then
-;
-
-: (check) ( elapsed -- r2 r1 | 0 )
-  0  ['] check1 queue each
-  \ Three cases.
-  ?dup if \ (c) we see r1 r2.
-    swap
-  else
-    \ the scan ran out of elements.
-    \ The stack is now either "t1 0" (case a) or "t1" (case b)
-    ?dup if \ case b: first wait for t1, then infinite
-      0 swap
-    else \ case a: no more timeouts, wait infinite
-      drop 0 queue empty? 0= if 1 then
-      \ except that if the queue isn't empty after all,
-      \ we need to repeat this dance. Better safe than sorry.
-    then
-  then
+  now-hq last-check !
 ;
 
 : check ( -- delay2 delay1 )
@@ -111,8 +30,10 @@ forth only definitions
 \ long-term delays
 \ ****************
 
+#if-flag multi
+
 0 variable next-hour
-%queue object: hourq
+task %queue object: hourq
 
 :task: hourtask
   now next-hour !
@@ -122,6 +43,7 @@ forth only definitions
     hourq all
   again
 ;
+
 :init hourtask start ; 
     
 time definitions
@@ -161,14 +83,16 @@ time definitions
   0 \yield !
 ;
 : ?nyield ( n -- )
-\ maybe yield. Call every time through your loop.
+\ maybe yield. Call in your loop to yield after N passes.
   \yield @ ?dup if
     1- \yield ! drop
   else
-    yield
+    task yield
     \yield ! 
   then
 ;
+
+#endif
 
 
 forth definitions only

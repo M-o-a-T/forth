@@ -71,6 +71,7 @@ hdr item
 forth definitions
 hdr item
 : >alloc  ( adr -- dbuf )
+\ given an address returned by "alloc" returns the block header
   hdr hdr-link @ .. ( dbuf )
   dup hdr flag @ case
     hdr *used* of  endof
@@ -113,6 +114,9 @@ d-list-head class: pool
 : link-free  ( dbuf pool -- )
   swap  ( pool dbuf )
   hdr *free*  over  hdr flag !  \ Set node status to "free"
+#if-flag debug
+  dup hdr link >setup
+#endif
   hdr link ..                   \ get address of link block
   swap __ append                \ insert in list after head node
 ;
@@ -158,6 +162,15 @@ d-list-head class: pool
   swap if eint then
 ;
 
+: add-if ( len free pool )
+\ add len bytes if not at least free bytes
+  tuck __ ?free < if
+    2drop
+  else
+    __ add
+  then
+;
+
 #if-flag alloc-fit
 #error implement me
 
@@ -173,9 +186,7 @@ d-list-head class: pool
 
 : _scan ( len pool -- len block )
   ['] \scan swap __ each
-  dup 0= if
-    1 abort" pool full"
-  then
+  dup 0= abort" pool full"
 ;
 
 #endif

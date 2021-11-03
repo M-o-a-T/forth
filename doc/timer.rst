@@ -53,15 +53,61 @@ for the caller to print / average / maximize / agonize about.
 Timers
 ++++++
 
-This system does not support explicit timers. Instead, time is tied to
-the task that's waiting for the time in question to pass.
+This system supports explicit timers.
+
+With multitasking, the idle loop checks the timers on each pass.
+
+Explicit timers
+===============
+
+The class ``time %timer`` has one publicly accessible fields:
+
+code
+++++
+
+This field holds the XT of the word to execute when the timer expires.
+
+Timeouts are queued to the system using this word:
+
+callback ( timer -- )
+---------------------
+
+The word called when the timer expires. It receives the timer on the stack.
+
+There is no way to pass additional parameters; if you need space to store
+them, simply extend the class.
+
+
+add ( timeout timer -- )
+++++++++++++++++++++++++
+
+This word adds the timer to the timeout queue. Its runtime depends on the
+number of timers with shorter timeout.
+
+``timeout`` is unsigned and in microsecond units.
+
+
+remove ( timer -- )
++++++++++++++++++++
+
+Unqueue the timer. The runtime is linear.
+
+The remaining timeout is not returned. Use ``now`` to calculate it
+yourself if required.
+
+
+Tasks
+=====
+
+An implicit timer control block is embedded in each task; thus you can
+delay a task by simply calling ``N millis`` or another delay word.
 
 If you want to wait for a timer *or* some event, get an interrupt to
-trigger on the event; its code should set a flag and then simply wake up
+trigger on the event; its code could set a flag and then simply wake up
 your task prematurely, with ``your-task continue``. This is interrupt safe.
 
 time micros ( n -- )
-====================
+++++++++++++++++++++
 
 Wait for this number of microseconds to pass. In the interest of forward
 compatibility, please pretend that it can't do more than 50000 µs (50 ms).
@@ -76,7 +122,7 @@ its lines, for the actual accurracy of ``micros``.
 This is equivalent to ``task sleep``.
 
 time millis ( n -- )
-====================
+++++++++++++++++++++
 
 Same, but milliseconds. In the interest of forward compatibility, please
 pretend that it's no good for delays of more than a minute (60000).
@@ -85,20 +131,20 @@ Don't confuse this word with Arduino; there, the function with this name
 would simply return a millisecond counter. We don't do that.
 
 time seconds ( n -- )
-=====================
++++++++++++++++++++++
 
 Same, but seconds. Don't use this for delays (much) longer than 60 seconds.
 The real upper bound is likely to be higher, but the details vary depending
 on the implementation.
 
 time minutes ( n -- )
-=====================
++++++++++++++++++++++
 
 Same, but minutes. Don't use this for delays (much) longer than 60 minutes.
 Again, the actual limit may be higher.
 
 time hours ( n -- )
-===================
++++++++++++++++++++
 
 Same, but hours.
 
@@ -107,9 +153,9 @@ converted to seconds, and your system will not run continuously for 136
 years.
 
 time days ( n -- )
-==================
+++++++++++++++++++
 
-Not implemented. Let's be real – I *told* you there's no upper limit for
+Not implemented. I *told* you there's no upper limit for
 ``hours``, didn't I? Thus, you can write ``24 * time hours`` yourself,
 should you need it.
 

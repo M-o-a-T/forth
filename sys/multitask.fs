@@ -30,6 +30,8 @@ forth definitions only  decimal
 #require .word debug/crash.fs
 #endif
 
+#include lib/timeout.fs
+
 voc: task
 voc: \int
 
@@ -51,7 +53,7 @@ sub ignore
 4 constant =check \ checking (in IRQ list)
 5 constant =irq \ checking, IRQ on (in IRQ list)
 6 constant =wait \ in some other queue
-7 constant =timer \ in some other queue
+7 constant =timer \ in the timer queue
 \ there might be more later
 8 constant #states
 
@@ -66,9 +68,6 @@ task definitions
 
 d-list-head class: %queue
 \ Some task queue
-: empty?  ( q -- flag )
-  dup __ next @ .. swap =
-;
 ;class
 
 task \int definitions
@@ -92,7 +91,7 @@ __data
 
 \ Intermission: get from the link field back to the task.
 
-d-list-item class: task-link
+time %timer class: task-link
 dup constant \link-off
 %cls item
 : @ ( d-list-adr -- task )
@@ -104,25 +103,22 @@ dup constant \link-off
 \ back to our class variables
   %cls definitions
 
-  task-link field: link
+  task-link field: q
   var> int field: stackptr
   var> int field: abortptr
   var> int field: abortcode
-  var> int field: checkfn
-
-  2dup
+  var> int field: checkfn \ redundant?
   var> int field: checkarg
-  2swap
-  2dup
-  var> uint field: timeout
-  2swap
-  \int waitq-link field: waitq
-#ok 2over d= 
-#ok 2over d= 
   var> cint field: state
   var> cint field: newstate
   aligned
 __seal
+
+\ var> int item
+\ : checkfn __ q code .. ;
+
+\int waitq-link item
+: waitq __ checkarg .. ;
 
 \ xx constant psize  \ parameter stack size
 \ xx constant rsize  \ return stack size
@@ -151,12 +147,12 @@ __seal
 \ We don't auto-convert this to a taskptr because if the task is not
 \ scheduled it may point to a d-list-head instead.
 task-link item
-: prev __ link prev @ .. ;
+: prev __ q link prev @ .. ;
 task-link item
-: next __ link next @ .. ;
+: next __ q link next @ .. ;
 
 : setup ( object -- )
-  dup __ link >setup
+  dup __ q >setup
   __ psize@ over __ pstack !
   __ rsize@ over __ rstack !
   =new swap __ state !
@@ -192,7 +188,7 @@ task \int definitions
 
 : setup
   \ this is the initial+running task, so link to itself
-  dup __ link .. d-list-head >setup
+  dup __ q link .. d-list-head >setup
 
   =sched swap __ state !
 ;
@@ -362,7 +358,7 @@ task also
 
 : insert ( task q -- )
 \ insert a task.
-  swap %cls link .. swap  \ address of the link
+  swap %cls q link .. swap  \ address of the link
   __ insert
 ;
 
@@ -455,16 +451,19 @@ task also
         endof
       ( state task new_q )
       _ent of
-        over time remove
+        over __ q remove
+#if-flag debug
+        over 0 swap __ q timeout !
+#endif
         endof
-      drop over __ link remove  \ task is queued, so dequeue
+      drop over __ q link remove  \ task is queued, so dequeue
       0
     endcase
 ;
 : \new  ( state task new_q -- state task )
     case
       _run of
-        dup __ link .. this link insert
+        dup __ q link ..  this q link insert
         endof
       _irq of
         dup irq-tasks insert
@@ -473,7 +472,12 @@ task also
         dup check-tasks insert
         endof
       _ent of
-        dup time insert
+        dup __ q timeout @
+#if-flag debug
+        dup 0= abort" Timer zero"
+        over __ q link >setup
+#endif
+        over __ q add
         endof
       _enq of
 #if-flag debug
@@ -901,14 +905,20 @@ task %cls definitions
   then
 immediate ;
 
-: sleep ( µs task -- )
-  tuck __ timeout !
-  =timer swap __ >state.i
-;
-
 : continue ( task -- )
   dup __ state @ =dead <= abort" Task not running"
   =sched swap __ >state.i
+;
+
+: (wake) ( timer -- )
+  %cls task-link @
+  continue
+;
+  
+: sleep ( µs task -- )
+  tuck __ q timeout !
+  ['] (wake) over __ q code !
+  =timer swap __ >state.i
 ;
 
 

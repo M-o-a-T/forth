@@ -60,10 +60,13 @@ task also
   then
   space
   dup __ state @ =idle > if
-    ." Link:" dup __ link ?
+    ." Link:" dup __ q link ?
   then
-  dup __ state @ =timer = if
-    dup __ timeout @ ." Timer:" u.
+  dup __ state @ =timer =
+  over __ newstate @ =timer = 
+  or if
+    dup __ q timeout @ ." Timeout:" u.
+    dup __ q code @ ." Code: " .word
   else
   \ dup __ abortptr @ ?dup if ." Abort:" hex. then
     dup __ abortcode @ ?dup if ." Sig:" . then
@@ -71,6 +74,7 @@ task also
   then
   \ 'checkarg' may also be a queue
   drop
+  cr
 ;
 
 #endif
