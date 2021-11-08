@@ -689,6 +689,11 @@ task definitions
   =sched swap __ >state.i
 ;
 
+: end ( task -- )
+  -56 swap signal
+;
+
+
 : stop ( task -- )
 \ Stop this task (can be woken up later)
   =idle swap __ >state.i
