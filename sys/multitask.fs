@@ -694,8 +694,10 @@ task definitions
 task definitions
 
 : stop ( -- )
-\ Stop the current task (can be woken up later)
-  =idle this >state.i
+\ Stop the current task (if it is marked as running)
+  this newstate @  =sched <= if
+    =idle this >state.i
+  then
   yield
 ;
 
