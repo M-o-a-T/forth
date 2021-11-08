@@ -606,8 +606,22 @@ task definitions
   \ We must not modify the existing stack after this point,
   \ so pretend that there's nothing on it.
 
-  this ..
-  ( oldtask )
+  this ..  ( oldtask )
+#if-flag debug
+  dup %cls abortcode @ 0= if
+    dup %cls pstack @ ?dup if  depth 10 + < if
+      ." >TASK:" dup .word
+      ." Param stack " depth .
+      -3 over %cls abortcode ! then then
+  then
+  dup %cls abortcode @ 0= if
+    dup %cls rstack @ ?dup if rdepth 10 + < if
+      ." >TASK:" dup .word
+      ." Return stack " rdepth .
+      -5 over %cls abortcode ! then then
+  then
+#endif
+
   dup newstate @ if  \ state change? if so, do some work
 #if-flag yieldstack
     yield-task @ .. ?dup if
@@ -647,12 +661,6 @@ task definitions
   yield-trace @ if
   ." >TASK:" this .. .word depth . rdepth . cr
   then
-  this pstack @ ?dup if  depth  5 + < if
-    ." >TASK:" this .. .word
-    ." Param stack tight" -3 abort then then
-  this rstack @ ?dup if rdepth 10 + < if
-    ." >TASK:" this .. .word
-    ." Return stack tight" -5 abort then then
 #endif
   \ The abort handler is responsible for clearing this, if warranted
   \ otherwise the abort will be re-thrown next time
