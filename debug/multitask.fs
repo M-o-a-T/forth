@@ -27,14 +27,15 @@ task also
 
 : .state ( state -- )
   case
-    =new   of ." new"  endof
-    =dead  of ." dead" endof
-    =idle  of ." idle" endof
-    =sched of ." run"  endof
-    =check of ." chk"  endof
-    =irq   of ." irq"  endof
-    =wait  of ." wait" endof
-    =timer of ." time" endof
+    =new    of ." new"  endof
+    =dead   of ." dead" endof
+    =idle   of ." idle" endof
+    =sched  of ." run"  endof
+    =nsched of ." irun"  endof
+    =check  of ." chk"  endof
+    =irq    of ." irq"  endof
+    =wait   of ." wait" endof
+    =timer  of ." time" endof
     ." ?" . 0
   endcase
 ;

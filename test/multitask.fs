@@ -40,7 +40,39 @@ tasks
 
 #endif
 
-#end
+0 variable kicked
+:task: kick
+  begin
+    1 kicked +!
+    task yield
+  again
+;
+
+task also
+kick start
+kick end
+yield
+#ok 0 kicked @ =
+
+kick start
+yield
+kick end
+yield
+#ok 1 kicked @ =
+
+kick start
+kick end
+yield
+yield
+#ok 1 kicked @ =
+
+kick start
+yield
+yield
+kick end
+yield
+yield
+#ok 3 kicked @ =
 
 task !multi
 

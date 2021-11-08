@@ -49,13 +49,14 @@ sub ignore
 0 constant =new  \ new (not linked)
 1 constant =dead  \ dead (not linked)
 2 constant =idle  \ wait (not linked)
-3 constant =sched \ scheduled (in task list)
-4 constant =check \ checking (in IRQ list)
-5 constant =irq \ checking, IRQ on (in IRQ list)
-6 constant =wait \ in some other queue
-7 constant =timer \ in the timer queue
+3 constant =nsched \ newly scheduled (do not abort)
+4 constant =sched \ scheduled (in task list)
+5 constant =check \ checking (in IRQ list)
+6 constant =irq \ checking, IRQ on (in IRQ list)
+7 constant =wait \ in some other queue
+8 constant =timer \ in the timer queue
 \ there might be more later
-8 constant #states
+\ if more than 9, adapt the "state>q" table below
 
 \ ********************
 \         task
@@ -433,6 +434,7 @@ _enq swap 3 lshift or \ =wait
 _irq swap 3 lshift or \ =irq
 _chk swap 3 lshift or \ =check
 _run swap 3 lshift or \ =sched
+_run swap 3 lshift or \ =nsched
 _no  swap 3 lshift or \ =idle
 _err swap 3 lshift or \ =dead
 _no  swap 3 lshift or \ =new
@@ -684,6 +686,10 @@ task definitions
 ;
 
 : signal ( num task -- )
+  dup __ state @ =nsched = if
+    dup __ q remove
+    =dead over state !
+  then  \ no abort handler yet
   dup __ state @ =dead = if 2drop exit then   \ already killed
   tuck __ abortcode !
   =sched swap __ >state.i
@@ -771,6 +777,7 @@ task definitions
 
 #if-flag debug
 : (go) ( xt -- does-not-return )
+  =sched this state !
   begin
     dup
     cr ." RUN: " dup hex. dup .word  cr this ?
@@ -788,6 +795,7 @@ task definitions
 ;
 #else
 : (go) ( xt -- does-not-return )
+  =sched this state !
   begin
     dup catch
     0 this abortcode !
@@ -841,7 +849,8 @@ task definitions
 
   \ and finally save SP to the task
   \ ." save " dup hex. ." to " r> hex. cr
-  swap __ stackptr !
+  over __ stackptr !
+  =new swap __ state !
 ;
 
 : setup ( object -- )
@@ -852,6 +861,7 @@ task definitions
 
 subtask class: looped 
 : (go) ( xt -- does-not-return )
+  =sched this state !
   begin
     dup catch 
     ?dup if
@@ -905,7 +915,7 @@ task %cls definitions
     =new over __ state !
   then
   rdrop
-  =sched swap __ >state.i
+  =nsched swap __ >state.i
 ;
 
 : start ( task -- )
