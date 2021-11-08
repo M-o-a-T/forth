@@ -69,13 +69,20 @@ voc: root-cls
   ;voc
 ;
 
-\cls definitions
+root-cls definitions
 
-\ Assign the actual class context to the next created word and return the
-\ instance size of the class on the stack.
+\ return the instance size of the current class
 : mem-sz
   u/i@ size@ +
 ;
+: [mem-sz]
+  mem-sz
+  forth state @ if \ compile
+    literal, 
+  then
+immediate ;
+
+\cls definitions
 
 : class-item ( -- u/i )
   \ get the instance size
