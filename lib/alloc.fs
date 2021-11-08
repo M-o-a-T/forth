@@ -28,7 +28,6 @@ __data
     __ \off - inline
   ;
   ;class
-  ??
 
   \ free blocks only
   hdr-link field: link
