@@ -496,9 +496,15 @@ task also
 \ may be postponed until YIELD
 
   dup __ running? if
+#if-flag debug
+\ yield-trace @ if 2dup __ newstate ! ." StQ:" dup __ ? then
+#endif
     __ newstate !
     exit
   then
+#if-flag debug
+\ yield-trace @ if 2dup __ newstate ! ." StO:" dup __ ? then
+#endif
   over state>q  ( state task new_q )
   over __ state @ state>q
   \ Special case: the task is in a queue and the state change sends it to 
@@ -520,7 +526,7 @@ task also
   __ state !
 #if-flag debug
   yield-trace @ if
-    ." StC:" __ ?
+    ." StN:" __ ?
   else drop then
 #endif
 ;
@@ -808,6 +814,9 @@ task definitions
 \ - the code to "return" to
 \ Initially (task) is called, so the param stack also has initial args.
 \ This is executed from setup.
+#if-flag debug
+  ." TASK SETUP " dup .word over ." > " .word cr
+#endif
 
   dup __ task-ps ( xt task SP )
 
