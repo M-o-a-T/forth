@@ -34,6 +34,7 @@ __seal
 : @ ( a -- n ) c@ inline ;
 : ! ( n a -- ) c! inline ;
 : ? ( a -- )  c@ base @ swap hex  0 <# # # #> type space  base ! ;
+: +! ( n a -- ) dup c@ rot + swap c! ;
 
 ;class
 
