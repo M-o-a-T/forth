@@ -782,12 +782,12 @@ task definitions
     dup
     cr ." RUN: " dup hex. dup .word  cr this ?
     catch
-    0 this abortcode !
     cr ." END:"
     ?dup if dup . else -1 then
     this .. .word cr
     dup \voc abortcode !
     .abort
+
     this abortcode !
     =dead this newstate !
     yield
@@ -802,6 +802,7 @@ task definitions
     dup 0= if drop -1 then
     dup \voc abortcode !
     .abort
+
     this abortcode !
     =dead this newstate !
     yield
