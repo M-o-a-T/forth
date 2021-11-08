@@ -1,3 +1,11 @@
+forth definitions only
+
+#if defined crc
+#end
+#endif
+
+voc: crc
+
 \ a bunch of CRC algorithms
 
 \ Theory of operation.
@@ -16,7 +24,7 @@
 \ Usage for "crc": start with a CRC of zero. For each value: you XOR it
 \ into the previous crc and run "crc" / "_crc" on it.
 
-: crc ( val poly depth -- crcval )
+: calc ( val poly depth -- crcval )
 \ bit-wise CRC calculation primitive
   -rot swap rot 0 do
     dup 1 and if
@@ -109,3 +117,7 @@
 ;
 
 
+forth definitions only
+
+\ SPDX-License-Identifier: GPL-3.0-only
+#ok depth 0=
