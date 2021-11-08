@@ -68,7 +68,7 @@ forth definitions
 #if undefined voc-eval  defined \voc  and
 \voc also
 : voc-lfa ( addr n )
-\ given a word in the current vocabulary, find it.
+\ given a word in the current vocabulary, find it and return its LFA.
   2dup \ remember for possible error message
   voc-context ??-vocs
   ?dup if
@@ -77,6 +77,11 @@ forth definitions
     space type ."  not found"
     -3 abort
   then
+;
+
+: voc-xt  ( addr n -- )
+\ given a word in the current vocabulary, find it and return its XT.
+  voc-lfa lfa>xt
 ;
 
 : voc-eval  ( addr n -- )
