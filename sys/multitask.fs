@@ -674,11 +674,6 @@ task definitions
   ['] yield  task \int yield-hook !
 ;
 
-: caught ( -- )
-\ clear the current task's abort code
-  0 this abortcode !
-;
-
 %cls definitions
 
 : >state.i ( state task -- )
@@ -686,11 +681,6 @@ task definitions
   eint? dint -rot  ( iflag state task )
   %cls >state
   if eint then
-;
-
-: \kill ( task -- )
-  =sched swap __ >state.i
-  inline
 ;
 
 : signal ( num task -- )
@@ -1005,10 +995,6 @@ task definitions
 
   \ subtasks always have a CATCH running
   -56 throw
-;
-
-:init
-  task ['] quit hook-quit !
 ;
 
 \ *****************
