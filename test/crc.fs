@@ -5,6 +5,8 @@ compiletoflash
 #require crc
 compiletoram
 
+crc also
+
 4 $583 _t16: t11_583_4
 
 : crc11_583_4 ( crc byte -- byte )
