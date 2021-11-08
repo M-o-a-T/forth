@@ -81,7 +81,11 @@ forth definitions
 ;
 
 : .word ( address -- )
-  addr>woff ?dup if \voc .idd space drop then
+  dup addr>woff ?dup if
+    \voc .idd space 2drop
+  else
+    ." ?:" hex.
+  then
 ; 
 
 \ Call trace on return stack.
