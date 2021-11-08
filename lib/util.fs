@@ -98,6 +98,15 @@ forth definitions
 ;
 #endif
 
+#if undefined exp
+: exp ( x y -- x^y )
+  over swap 1 ?do
+    over *
+  loop nip
+;
+#endif
+
+
 \ mecrisp-without-RA doesn't have these
 
 #if-flag roll
