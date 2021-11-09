@@ -705,8 +705,13 @@ class Terminal:
                 yield line
         await self._file_send("‹pastebuf›", sdr().__aiter__())
 
+    async def send_file_ind(self, line):
+        self.console.send(f'⮞ {line}', lf=True)
+        if self.log is not None:
+            await self.log_w.send(f"⮞ {line}\n")
+
     async def _file_send(self, filename, lines):
-        self.console.send(f'⮞ {filename} : start', lf=True)
+        await self.send_file_ind(f'{filename} : start')
         layer,self.layer_ = self.layer_,0
         num = 0
         self.file_ended = False
@@ -719,14 +724,14 @@ class Terminal:
                         break
                     line = await self.preprocess(line,filename,num)
                     if self.file_ended:
-                        self.console.send(f'⮞ {filename} : {num}', lf=True)
+                        await self.send_file_ind(f'{filename} : {num}')
                         self.file_ended = False
                 except AllEOFError as err:
-                    self.console.send(f'⮞ {filename} : {num} (stop)', lf=True)
+                    await self.send_file_ind(f'{filename} : {num} (stop)')
                     self.layer = self.layer_ = 0
                     raise
                 except EarlyEOFError as err:
-                    self.console.send(f'⮞ {filename} : {num} (exit)', lf=True)
+                    await self.send_file_ind(f'{filename} : {num} (exit)')
                     self.layer, self.layer_ = 0,layer
                     return
                 except (StopAsyncIteration,EOFError):
@@ -741,16 +746,16 @@ class Terminal:
             # already printed above
             raise
         except Exception as exc:
-            self.console.send(f'⮞ {filename} : {num} error', lf=True)
+            await self.send_file_ind(f'{filename} : {num} error')
             raise
 
         self.file_ended = True
         if self.layer_:
             self.layer = self.layer_ = 0
-            self.console.send(f'⮞ {filename} : end error', lf=True)
+            await self.send_file_ind(f'{filename} : end error')
             raise ScriptError(f"{filename} : {num} '#if…' without corresponding '#endif'")
         self.layer_ = layer
-        self.console.send(f'⮞ {filename} : end', lf=True)
+        await self.send_file_ind(f'{filename} : end')
 
     async def upsend_file(self, path):
         if self.file_sender is None:
