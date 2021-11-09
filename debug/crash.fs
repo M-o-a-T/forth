@@ -113,25 +113,5 @@ forth definitions
   again
 ;
 
-#if defined unhandled
-
-: ct-irq ( -- ) \ Try your very best to help tracing unhandled interrupt causes...
-  cr cr
-  unhandled
-  cr
-  \ h.s \ not if we're somewhere random
-  rp@ ." RP=" hex.
-  sp@ ." SP=" hex. cr
-  sp@ $40 dump
-  cr cr
-  ." Calltrace:" ct
-  cr cr
-  reset \ Trap execution
-;
-
-:init ['] ct-irq irq-fault ! ;
-
-#endif
-
 \ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=

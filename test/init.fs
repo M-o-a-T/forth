@@ -17,6 +17,7 @@ forth definitions only
 \ call tracing, system abort exceptions
 #if undefined ct
 #include debug/crash.fs
+#include debug/crash2.fs
 #endif
 
 \ word disassembly
