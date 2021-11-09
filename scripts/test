@@ -1,6 +1,7 @@
 #!/bin/bash
 set -eu
 
+MECRISP="${MECRISP:-../mecrisp-stellaris/linux-ra/mecrisp-stellaris-linux}"
 F="debug multi"
 
 trap 'echo "ERROR $FLG"; exit 1' ERR
@@ -9,9 +10,9 @@ while read FLG ; do
 
 echo TEST $FLG
 
-if ! scripts/mf-term -x test/main.fs  $FLG  -F machid=123456789 -b -q -g ok. -c ../mecrisp-stellaris/linux-ra/mecrisp-stellaris-linux
+if ! scripts/mf-term -x test/main.fs  $FLG  -F machid=123456789 -b -q -g ok. -c "$MECRISP"
 then
-	scripts/mf-term -x test/main.fs  $FLG -F machid=123456789 -D -g ok. -c ../mecrisp-stellaris/linux-ra/mecrisp-stellaris-linux </dev/tty >/dev/tty 2>&1
+	scripts/mf-term -x test/main.fs  $FLG -F machid=123456789 -b -t /dev/tty -g ok. -c "$MECRISP"
 	exit 1
 fi
 
