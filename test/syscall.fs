@@ -57,11 +57,11 @@ epoll ignore
 
 rdr start
 :task: wrt
-  5 time millis
+  100 time millis
   okr @ abort" early"
   wfd poll wait-write
   wfd bla call write 4 <> abort" WRT"
-  10 time millis
+  200 time millis
   okr @ 1 <> abort" RES"
 ;
 task !multi
@@ -69,7 +69,9 @@ task !multi
 wrt start
 
 0 okr !
-20 time millis
+#delay 0.5
+300 time millis
+#delay 0.2
 #ok okr @
 #else
 
@@ -115,6 +117,7 @@ compiletoram
 create \sigstack
 64 allot
 \sigstack 60 + sigpsp !
+
 : \int ." INTERRUPT" cr 1 intcount +! ;
 : -int sigenter \int sigexit ;
 ' -int sys sig int sys signal
