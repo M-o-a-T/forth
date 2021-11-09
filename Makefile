@@ -14,6 +14,7 @@ img:
 	mkdir img
 
 images: img
+	scripts/mf-term -b -x snips/img-debug-base.fs -c $(MECRISP)
 	scripts/mf-term -b -x snips/img-debug.fs -c $(MECRISP)
 	scripts/mf-term -b -x snips/img.fs -c $(MECRISP)
 
