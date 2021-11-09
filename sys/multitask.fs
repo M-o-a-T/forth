@@ -780,17 +780,16 @@ task definitions
 #if-flag debug
 : (go) ( xt -- does-not-return )
   =sched this state !
-  begin
-    dup
-    cr ." RUN: " dup hex. dup .word  cr this ?
-    catch
-    cr ." END:"
-    ?dup if dup . else -1 then
-    this .. .word cr
-    dup \voc abortcode !
-    .abort
+  dup
+  cr ." RUN: " dup hex. dup .word  cr this ?
+  catch
+  cr ." END:"
+  ?dup if dup . else -1 then
+  this .. .word cr
+  .abort
 
-    this abortcode !
+  begin
+    0 this abortcode !
     =dead this newstate !
     yield
   again
@@ -798,14 +797,12 @@ task definitions
 #else
 : (go) ( xt -- does-not-return )
   =sched this state !
-  begin
-    dup catch
-    0 this abortcode !
-    dup 0= if drop -1 then
-    dup \voc abortcode !
-    .abort
+  dup catch
+  dup 0= if drop -1 then
+  .abort
 
-    this abortcode !
+  begin
+    0 this abortcode !
     =dead this newstate !
     yield
   again
@@ -868,7 +865,6 @@ subtask class: looped
   begin
     dup catch 
     ?dup if
-      this abortcode !
       .abort
     then
     yield
