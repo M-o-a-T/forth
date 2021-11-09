@@ -98,11 +98,11 @@ async def main(**kw):
             raise click.UsageError("You can't reset a command.")
         if not len(port):
             raise click.UsageError("Which port (and baud rate, if not 115200)?")
-        if len(port) > 2:
-            raise click.UsageError("Too many arguments.")
     else:
         if not len(port):
             raise click.UsageError("Which command (and arguments) should I run?")
+        elif len(port) > 2:
+            raise click.UsageError("Too many arguments.")
 
     if batch and develop:
         raise click.UsageError("Batch and development mode don't like each other.")

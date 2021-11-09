@@ -8,6 +8,8 @@ forth only definitions
 #end
 #endif
 
+#require class: lib/class.fs
+
 voc: sys
 
 voc: err
@@ -172,6 +174,123 @@ voc: pf
 31 constant bluetooth
 ;voc
 
+voc: sig
+64 constant _nsig
+1 constant HUP
+2 constant INT
+3 constant QUIT
+4 constant ILL
+5 constant TRAP
+6 constant ABRT
+6 constant IOT
+7 constant BUS
+8 constant FPE
+9 constant KILL
+10 constant USR1
+11 constant SEGV
+12 constant USR2
+13 constant PIPE
+14 constant ALRM
+15 constant TERM
+16 constant STKFLT
+17 constant CHLD
+18 constant CONT
+19 constant STOP
+20 constant TSTP
+21 constant TTIN
+22 constant TTOU
+23 constant URG
+24 constant XCPU
+25 constant XFSZ
+26 constant VTALRM
+27 constant PROF
+28 constant WINCH
+29 constant IO
+IO constant POLL
+29 constant LOST
+30 constant PWR
+31 constant SYS
+31 constant UNUSED
+32 constant RTMIN
+_NSIG constant RTMAX
+
+voc: ~bus
+1 constant ADRALN
+2 constant ADRERR
+3 constant OBJERR
+4 constant MCEERR_AR
+5 constant MCEERR_AO
+;voc
+
+voc: ~ill
+1 constant OPC
+2 constant OPN
+3 constant ADR
+4 constant TRP
+5 constant PRVOPC
+6 constant PRVREG
+7 constant COPROC
+8 constant BADSTK
+9 constant BADIADDR
+10 constant BREAK
+11 constant BNDMOD
+;voc
+
+voc: ~segv
+1 constant MAPERR
+2 constant ACCERR
+3 constant BNDERR
+4 constant PKUERR
+5 constant ACCADI
+6 constant ADIDERR
+7 constant ADIPERR
+8 constant MTEAERR
+9 constant MTESERR
+;voc
+
+voc: ~sa
+$00000001 constant NOCLDSTOP
+$00000002 constant NOCLDWAIT
+$00000004 constant SIGINFO
+$08000000 constant ONSTACK
+$10000000 constant RESTART
+$40000000 constant NODEFER
+$80000000 constant RESETHAND
+NODEFER constant NOMASK
+RESETHAND constant ONESHOT
+;voc
+
+class: info
+__data
+  var> int field: signo
+  var> int field: errno
+  var> int field: code
+  var> int field: addr \ bus/segv: addr; 
+  var> int field: uid \ kill
+__seal
+
+var> int item
+: pid __ addr .. inline ;
+;class
+
+class: action
+__data
+  var> int field: handler
+  var> int field: flags
+  var> int field: mask
+__seal
+;class
+
+class: altstack
+__data
+  var> int field: sp
+  var> int field: flags
+  var> int field: size
+__seal
+;class
+
+;voc \ sig
+
 : af postpone pf immediate ;
 
 voc: sock
@@ -257,6 +376,22 @@ voc: call
 
 : connect ( fd adr len -- )
   283 call3 ?-err ;
+
+: getpid ( -- pid )
+  20 call0 ?err ;
+
+: kill ( pid sig -- )
+  67 call2 ?-err ;
+
+: signal ( xt signum -- )
+\ XT must be "sigenter foo sigexit"
+\ we ignore the old state
+  0 rot ( signum 0 xt )
+  ramhere sig action >setup
+  ramhere sig action handler !
+
+  ramhere ( signum 0 sigaction )
+  rot 67 call3 ?-err ;
 
 ;voc
 

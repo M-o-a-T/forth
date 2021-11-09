@@ -108,6 +108,20 @@ wfd sys call close
 ep teardown
 #endif
 
+#if defined sigpsp
+\ signal handling
+0 variable intcount
+compiletoram
+create \sigstack
+64 allot
+\sigstack 60 + sigpsp !
+: \int ." INTERRUPT" cr 1 intcount +! ;
+: -int sigenter \int sigexit ;
+' -int sys sig int sys signal
+sys getpid sys sig int kill
+#ok intcount @ 1 =
+#endif
+
 
 \ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=
