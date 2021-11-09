@@ -763,8 +763,8 @@ task also
 task definitions
 \stk class: subtask
 
-100 constant psize  \ this is a "safe" default
-100 constant rsize  \ feel free to reduce this *after* testing.
+200 constant psize  \ this is a "safe" default
+200 constant rsize  \ feel free to reduce this *after* testing.
 : main@ s" \main" voc-lfa \voc lfa>xt ;
 
 
@@ -884,8 +884,8 @@ task also
 
 inttask class: \ytc
 \ one-off class for SWT
-50 constant psize  \ unused
-50 constant rsize \ TODO check actual usage
+100 constant psize
+100 constant rsize \ TODO check actual usage
 : setup ( ptr -- )
   yield-task !
 ;
