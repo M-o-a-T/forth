@@ -611,16 +611,18 @@ task definitions
   this ..  ( oldtask )
 #if-flag debug
   dup %cls abortcode @ 0= if
+   dup %cls newstate @ 0= if
     dup %cls pstack @ ?dup if  depth 10 + < if
       ." >TASK:" dup .word
       ." Param stack " depth .
-      -3 over %cls abortcode ! then then
+      -3 over %cls abortcode ! then then then
   then
   dup %cls abortcode @ 0= if
+   dup %cls newstate @ 0= if
     dup %cls rstack @ ?dup if rdepth 10 + < if
       ." >TASK:" dup .word
       ." Return stack " rdepth .
-      -5 over %cls abortcode ! then then
+      -5 over %cls abortcode ! then then then
   then
 #endif
 
