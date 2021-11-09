@@ -78,20 +78,15 @@ wrt start
 epcb object: ep
 
 rfd ep wait-read
-#ok depth 0=
 #delay 1
 500 ep poll
 #ok -1 =
-#ok depth 0=
 #delay 0.2
 
 wfd ep wait-write
-#ok depth 0=
 
 50 ep poll
-.s
 #ok wfd =
-#ok depth 0=
 wfd bla call write
 #ok 4 =
 500 ep poll
