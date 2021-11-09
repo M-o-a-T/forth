@@ -392,6 +392,7 @@ voc: call
 \ we ignore the old state
   swap 
   ramhere sig action >setup
+  dup 1 > if 1 or then \ thumb bit
   ramhere sig action handler !
 
   ramhere 0 ( sig new old )
