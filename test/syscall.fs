@@ -109,14 +109,13 @@ ep teardown
 \ signal handling
 0 variable intcount
 compiletoram
-create \sigstack
-64 allot
+64 buffer: \sigstack
 \sigstack 60 + sigpsp !
 
-: \int ." INTERRUPT" cr 1 intcount +! ;
-: -int sigenter \int sigexit ;
-' -int sys sig int sys signal
-sys getpid sys sig int kill
+: \irq ." INTERRUPT" cr 1 intcount +! ;
+: -irq sigenter \irq sigexit ;
+' -irq  sys sig int  sys call signal
+sys call getpid  sys sig int  sys call kill
 #ok intcount @ 1 =
 #endif
 
