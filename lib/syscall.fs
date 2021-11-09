@@ -175,6 +175,10 @@ voc: pf
 ;voc
 
 voc: sig
+1 constant ign
+0 constant dfl
+-1 constant err
+
 64 constant _nsig
 1 constant HUP
 2 constant INT
