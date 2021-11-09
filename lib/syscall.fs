@@ -197,6 +197,11 @@ $80000 constant cloexec
   ?err drop
 ;
 
+: ramhere
+  compiletoram? 0= abort" no flash"
+  here
+;
+
 : call7 syscall ;
 : call6 0 swap call7 ;
 : call5 0 swap call6 ;
@@ -209,9 +214,8 @@ $80000 constant cloexec
 voc: call
 : >fn0 ( adr len -- )
 \ zero terminate a filename. Stored at @here.
-  compiletoram? 0= abort" no flash"
-  tuck here swap move ( len )
-  here + 0 swap c!
+  tuck ramhere swap move ( len )
+  ramhere + 0 swap c!
 ;
 
 : exit ( code -- does-not-return )
@@ -225,14 +229,14 @@ voc: call
 
 : open ( ptr len flags mode -- result )
   2>r >fn0 2r>
-  here -rot 5 call3 ?err ;
+  ramhere -rot 5 call3 ?err ;
 
 : close ( fd -- )
   6 call1 ?-err ;
 
 : creat ( ptr len mode -- result )
   -rot >fn0
-  here swap 8 call2 ?err ;
+  ramhere swap 8 call2 ?err ;
 : create creat inline ;
 
 : dupfd ( fd -- fd2 )
