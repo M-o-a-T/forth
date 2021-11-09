@@ -385,7 +385,7 @@ voc: call
   20 call0 ?err ;
 
 : kill ( pid sig -- )
-  67 call2 ?-err ;
+  37 call2 ?-err ;
 
 : signal ( xt signum -- )
 \ XT must be "sigenter foo sigexit"
