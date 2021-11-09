@@ -24,7 +24,6 @@ forth only definitions
 bits also
 #if undefined syscall
 gpio also
-#endif
 
 #if undefined usart1
 #include svd/fs/soc/STMicro/stm32f103xx/usart.fs
@@ -35,6 +34,8 @@ gpio also
 bits also
 #if undefined nvic
 #include soc/armcm3/nvic.fs
+#endif
+
 #endif
 
 forth only definitions
