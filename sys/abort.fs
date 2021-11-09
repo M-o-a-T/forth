@@ -5,8 +5,11 @@ compiletoflash
 #endif
 
 #if token abort find drop 0=
+0 variable abortcode
+
 : abort ( -- )
   cr
+  -1 abortcode !
   quit
 ;
 #endif
@@ -39,9 +42,8 @@ compiletoflash
 \ otherwise somebody else, e.g. multitask, has defined it
 #endif
 
-\ storage for error message and code
+\ storage for error message
 0 variable abortmsg
-0 variable abortcode
 
 #require r>ctx sys/base.fs
 #if-flag debug
@@ -86,10 +88,9 @@ forth only definitions
   0
 ;
 
-: .abort
-  0
-  abortcode @ ?dup if
-    0 abortcode !
+: .abort ( code -- )
+  0 swap
+  ?dup if
     ." Abort: " hex.
     drop 1
   then
@@ -114,6 +115,8 @@ forth only definitions
   then
 
   \ spit out any errors
+  abortcode @
+  0 abortcode !
   .abort
   \ and then call the original QUIT
   [ hook-quit @ call, ]
