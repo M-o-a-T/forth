@@ -390,12 +390,12 @@ voc: call
 : signal ( xt signum -- )
 \ XT must be "sigenter foo sigexit"
 \ we ignore the old state
-  0 rot ( signum 0 xt )
+  swap 
   ramhere sig action >setup
   ramhere sig action handler !
 
-  ramhere ( signum 0 sigaction )
-  rot 67 call3 ?-err ;
+  ramhere 0 ( sig new old )
+  67 call3 ?-err ;
 
 ;voc
 
