@@ -200,6 +200,11 @@ should probably free the memory you allocated in the previous step.
 Thus we include a couple of words that help with `non-local error handling
 </doc/errors.rst>`_. Yes, they work when you're multitasking.
 
+When (not "if", unfortunately) your system crashes due to bugs that violate
+your basic assumptions (access nonexistent memory, forgot to pop data off
+the return stack, etc.), you might want to read up on `handling crashes
+<doc/crash.rst>`_.
+
 Hardware Access
 +++++++++++++++
 
