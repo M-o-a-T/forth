@@ -9,22 +9,28 @@ forth definitions only
 
 \voc also
 
-: ct-irq ( -- ) \ Try your very best to help tracing unhandled interrupt causes...
+: -cti ( rp sp -- >reset )
+  cr
+  over ." Interrupt! RP=" hex.
+  dup ." SP=" hex. cr
+  $40 dump
+  cr
+  ." Calltrace:" -ct
   cr cr
+  reset \ no, we can't continue
+;
+
+: ct-irq ( -- >reset ) \ Try your very best to help tracing unhandled interrupt causes...
+  cr
+#if-flag multi
+  task !single
+#endif
 #[if] defined unhandled
   unhandled
 #endif
   cr
-  \ h.s \ not if we're somewhere random
-  rp@ ." RP=" hex.
-  sp@ ." SP=" hex. cr
-  sp@ $40 dump
-  cr cr
-  ." Calltrace:" ct
-  cr cr
-  reset \ Trap execution
+  rp@ sp@ -cti
 ;
-
 
 #if defined irq-fault
 :init ['] ct-irq irq-fault ! ;
