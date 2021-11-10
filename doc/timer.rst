@@ -6,11 +6,15 @@ Tasks need to be able to suspend themselves for some time. For instance,
 you might want to hold an output low for more-or-less-exactly one second,
 or raise an error when an input doesn't get released after some time.
 
+++++++++++++++++
+Low-level access
+++++++++++++++++
+
 Words
 =====
 
 now-hq ( -- u )
----------------
++++++++++++++++
 
 Return the current system timer, in microseconds.
 
@@ -21,7 +25,7 @@ The value returned by ``now-hq`` is as accurate as possible given the
 system tick's frequency.
 
 now ( -- u )
-------------
+++++++++++++
 
 Like ``now-hq`` but with lower overhead and accuracy.
 
@@ -32,7 +36,7 @@ using ``now-hq``, but it will never go entirely out of sync.
 It is guaranteed to be updated during ``yield``.
 
 setclk ( freq -- )
-------------------
+++++++++++++++++++
 
 Tell the timing system that ``freq`` is the (new) frequency of the system's 
 input to the ``SysTick`` counter.
@@ -42,7 +46,7 @@ external input(s), if any, this timer module does not even pretend to try
 infering the actual clock from the system's registers.
 
 \*delay ( n -- n*delay )
-------------------------
+++++++++++++++++++++++++
 
 Measure the round-trip through ``yield`` N times.
 
@@ -70,7 +74,7 @@ This field holds the XT of the word to execute when the timer expires.
 Timeouts are queued to the system using this word:
 
 callback ( timer -- )
----------------------
++++++++++++++++++++++
 
 The word called when the timer expires. It receives the timer on the stack.
 
@@ -164,7 +168,7 @@ Suspending another task
 +++++++++++++++++++++++
 
 TASK sleep ( µs task -- )
--------------------------
+=========================
 
 Suspends another task for the given time.
 
