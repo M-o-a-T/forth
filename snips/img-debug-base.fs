@@ -4,6 +4,7 @@
 
 #include sys/init.fs
 #include lib/alloc.fs
+#include lib/syscall.fs
 #include debug/voc.fs
 #include debug/alloc.fs
 #include debug/class.fs
