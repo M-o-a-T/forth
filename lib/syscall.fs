@@ -392,8 +392,9 @@ voc: call
 \ we ignore the old state
   swap 
   ramhere sig action >setup
-  dup 1 > if 1 or then \ thumb bit
+  dup 1 > if 1 or then \ thumb bit, dammit
   ramhere sig action handler !
+  sig ~sa siginfo  ramhere sig action flags !
 
   ramhere 0 ( sig new old )
   67 call3 ?-err ;
