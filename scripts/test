@@ -12,7 +12,7 @@ echo TEST $FLG
 
 if ! scripts/mf-term -x test/main.fs  $FLG  -F machid=123456789 -b -q -g ok. -c "$MECRISP"
 then
-	scripts/mf-term -x test/main.fs  $FLG -F machid=123456789 -b -t /dev/tty -g ok. -c "$MECRISP"
+	scripts/mf-term -x test/main.fs  $FLG -F machid=123456789 -b -l /dev/tty -g ok. -c "$MECRISP"
 	exit 1
 fi
 
