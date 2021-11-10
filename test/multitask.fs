@@ -48,6 +48,8 @@ tasks
   again
 ;
 
+\st
+
 task also
 kick start
 kick end
@@ -74,17 +76,7 @@ yield
 yield
 #ok 3 kicked @ =
 
-task !multi
-
-#if defined irq-systick
-#delay 13
-stop \ Idle the boot task
-#delay 1
-\st
-0 $E000E010 ! \ Disable systick
- 
-#endif
-\ multitask
+\mt
 
 \ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=
