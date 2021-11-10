@@ -387,6 +387,7 @@ voc: call
 : kill ( pid sig -- )
   37 call2 ?-err ;
 
+#if defined sigpsp
 : signal ( xt signum -- )
 \ XT must be "sigenter foo sigexit"
 \ we ignore the old state
@@ -398,6 +399,7 @@ voc: call
 
   ramhere 0 ( sig new old )
   67 call3 ?-err ;
+#endif
 
 ;voc
 
