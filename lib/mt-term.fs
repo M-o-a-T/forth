@@ -118,6 +118,17 @@ task looped :task: outsend
   again
 ;
 
+: drain ( -- )
+\ wait until all ouput has been sent
+  outbuf empty? outq empty? and if exit then
+
+  begin
+    yield
+    begin outbuf empty? 0= while yield repeat
+    outq empty?
+  until
+;
+
 : qemit? ( -- flag )
   -1 ;
 : qemit ( char -- )
@@ -310,10 +321,8 @@ task definitions
 #endif
 ;
 
-: !single
-#if-flag debug
-  \ 1 dbg signal
-#endif
+: !!single
+\ force single-tasking. Can possibly be called from interrupt.
 #[if] defined syscall
   1 inrecv signal
 #else
@@ -326,6 +335,11 @@ task definitions
   ['] oemit hook-emit !
   ['] okey? hook-key? !
   ['] okey hook-key !
+;
+
+: !single
+  task ?multi if drain then
+  !!single
 ;
 
 :init task !multi ;
