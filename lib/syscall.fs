@@ -280,8 +280,8 @@ var> int item
 class: action
 __data
   var> int field: handler
-  var> int field: flags
   var> int field: mask
+  var> int field: flags
 __seal
 ;class
 
