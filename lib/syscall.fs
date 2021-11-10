@@ -623,8 +623,8 @@ __seal
   ?dup if 1000 / else -1 then \ -1 for "forever"
   ( timeout |R: epcb )
   begin
-    r@ __ fd @  r@ evt ..  rot 1 swap ( epfd evt 1 timeout )
-    252 sys call4 \ epoll_wait
+    r@ __ fd @  r@ evt ..  rot ( epfd evt 1 timeout )
+    epoll wait
     dup  err EINTR +
   until  \ loop if EINTR
   ?err
