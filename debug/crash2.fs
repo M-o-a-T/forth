@@ -39,7 +39,21 @@ forth definitions only
 #if defined syscall
 #require sys lib/syscall.fs
 
-: \dead sigenter ct-irq ;  \ no need to call sigexit
+: ct-sig ( ctx info signo -- >reset )
+  rot >r
+  \ The top values of the stacks are in registers.
+  \ Write them to the stacks.
+  r@ $54 + @  2 cells -    \ Return stack pointer
+  r@ $58 + @ over cell+ !  \ link register
+  r@ $5C + @ over !        \ PC of crash address
+
+  r@ $3C + @  1 cells -    \ Param stack pointer
+  r@ $38 + @ over !        \ TOS register
+
+  rdrop
+  -cti
+;
+
 
 :init
   compiletoram
