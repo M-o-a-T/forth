@@ -5,7 +5,7 @@
 #include test/reset.fs
 
 compiletoflash
-#require task sys/mult.fs
+#require task sys/multitask.fs
 compiletoram
 
 \ --------------------------------------------------
