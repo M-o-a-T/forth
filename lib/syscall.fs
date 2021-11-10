@@ -218,7 +218,7 @@ IO constant POLL
 32 constant RTMIN
 _NSIG constant RTMAX
 
-voc: ~bus
+voc: bus_
 1 constant ADRALN
 2 constant ADRERR
 3 constant OBJERR
@@ -226,7 +226,7 @@ voc: ~bus
 5 constant MCEERR_AO
 ;voc
 
-voc: ~ill
+voc: ill_
 1 constant OPC
 2 constant OPN
 3 constant ADR
@@ -240,7 +240,7 @@ voc: ~ill
 11 constant BNDMOD
 ;voc
 
-voc: ~segv
+voc: segv_
 1 constant MAPERR
 2 constant ACCERR
 3 constant BNDERR
@@ -252,7 +252,7 @@ voc: ~segv
 9 constant MTESERR
 ;voc
 
-voc: ~sa
+voc: sa_
 $00000001 constant NOCLDSTOP
 $00000002 constant NOCLDWAIT
 $00000004 constant SIGINFO
@@ -394,7 +394,7 @@ voc: call
   ramhere sig action >setup
   dup 1 > if 1 or then \ thumb bit, dammit
   ramhere sig action handler !
-  sig ~sa siginfo  ramhere sig action flags !
+  sig sa_ siginfo  ramhere sig action flags !
 
   ramhere 0 ( sig new old )
   67 call3 ?-err ;
@@ -516,32 +516,36 @@ voc: epoll
 : create ( -- result )
   1 250 call1 ;
 : wait ( fd evt ts -- result )
-  1 swap 0 call5 ;
+  1 swap 252 call4 ;
 : ctl ( fd op fd evt -- result )
   251 call4 ;
 
 \ epoll_ctl_*
-1 constant _ADD
-2 constant _DEL
-3 constant _MOD
+voc: ctl
+1 constant ADD
+2 constant DEL
+3 constant MOD
+;voc
 
 \ Epoll event masks
-1  0 lshift constant =IN
-1  1 lshift constant =PRI
-1  2 lshift constant =OUT
-1  3 lshift constant =ERR
-1  4 lshift constant =HUP
-1  5 lshift constant =NVAL
-1  6 lshift constant =RDNORM
-1  7 lshift constant =RDBAND
-1  8 lshift constant =WRNORM
-1  9 lshift constant =WRBAND
-1 10 lshift constant =MSG
-1 13 lshift constant =RDHUP
-1 28 lshift constant =EXCLUSIVE
-1 29 lshift constant =WAKEUP
-1 30 lshift constant =ONESHOT
-1 31 lshift constant =ET
+voc: event
+1  0 lshift constant IN
+1  1 lshift constant PRI
+1  2 lshift constant OUT
+1  3 lshift constant ERR
+1  4 lshift constant HUP
+1  5 lshift constant NVAL
+1  6 lshift constant RDNORM
+1  7 lshift constant RDBAND
+1  8 lshift constant WRNORM
+1  9 lshift constant WRBAND
+1 10 lshift constant MSG
+1 13 lshift constant RDHUP
+1 28 lshift constant EXCLUSIVE
+1 29 lshift constant WAKEUP
+1 30 lshift constant ONESHOT
+1 31 lshift constant ET
+;voc
 
 class: epcb
 __data
@@ -564,25 +568,25 @@ __seal
 : (wait) ( fd mode epcb -- )
 \ wait for this event
   >r
-  =ONESHOT or  r@ __ evt events !
+  event ONESHOT or  r@ evt events !
   ( fd |R: epcb )
 #if-flag multi
   task this ..
 #else
   dup
 #endif
-  r@ __ evt u32 !
+  r@ evt u32 !
 
   dup ( fd fd )
-  r@ __ fd @ _MOD rot ( fd  epfd MOD fd )
-  r@ __ evt ..
+  r@ __ fd @ ctl MOD rot ( fd  epfd MOD fd )
+  r@ evt ..
   251 call4 ( fd result |R: epcb )
   dup err ENOENT + if \ not that
     nip ?-err
   else
     drop
-    r@ __ fd @ _ADD rot ( fd  epfd MOD fd )
-    r@ __ evt ..
+    r@ __ fd @ ctl ADD rot ( fd  epfd MOD fd )
+    r@ evt ..
     251 call4 ?-err
   then
 #if-flag multi
@@ -599,13 +603,13 @@ __seal
 \ if we're not built for multitasking, these functions don't wait.
 \ Instead, "poll" returns the FD when it's read- or writeable.
 
-: wait-read ( fd epcb -- flag )
+: wait-read ( fd epcb -- )
 \ wait for fd to be readable
-  =IN swap __ (wait) ;
+  event IN swap __ (wait) ;
 
-: wait-write ( fd epcb -- flag )
+: wait-write ( fd epcb -- )
 \ wait for fd to be writeable
-  =OUT swap __ (wait) ;
+  event OUT swap __ (wait) ;
 
 : poll  ( µs|0 epcb -- work? )
 \ Wait until the timeout runs out or a registered epoll succeeds.
