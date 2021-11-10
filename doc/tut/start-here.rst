@@ -13,6 +13,17 @@ yourself.
 
 Install the ``qemu-user-static`` package.
 
+Also install ``python3-click`` and ``python3-docutils`` (for the terminal
+emulator).
+
+Also install ``python3-gi``, ``gir1.2-gtk-3.0``, and ``gir1.2-vte-2.91``
+(for the terminal's GUI). You might need newer versions if your Linux
+distribution is newer. You should also install a font that contains symbol
+characters.
+
+Also install ``xauth`` if you want to use the terminal remotely.
+Alternately, you can talk to a remote Mecrisp task using ``ssh``.
+
 Run ``scripts/mf-term -x test/main.fs -F multi -F debug  -D -g ok. -c
 ../mecrisp-stellaris/linux-ra/mecrisp-stellaris-linux``. This starts a
 Linux version of Mecrisp Stellaris, force-feeds it a lot fo additional
@@ -128,6 +139,12 @@ Input and output
 Multitasked Forth systems still need to send and receive text. See our
 `interpreter documentation </doc/interpret.rst>`_ for an overview on how
 that works.
+
+Files, sockets, system calls
+----------------------------
+
+Yes, you can run Mecrisp on Linux. The details are `described here
+<doc/syscall.rst>`_.
 
 Waiting and Interrupts
 ----------------------
