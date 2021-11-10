@@ -55,9 +55,15 @@ forth definitions only
 ;
 
 
+: \dead sigenter ct-sig ;  \ no need to call sigexit
+
+\ signal handling
+
+64 buffer: \sigstack
 :init
   compiletoram
 
+  \sigstack 60 + sigpsp !
   ['] \dead  sys sig bus   sys call signal
   ['] \dead  sys sig ill   sys call signal
   ['] \dead  sys sig segv  sys call signal
