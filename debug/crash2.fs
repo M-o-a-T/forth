@@ -5,7 +5,7 @@
 
 forth definitions only
 
-#require ct debug/crask.fs
+#require ct debug/crash.fs
 
 \voc also
 
