@@ -23,7 +23,11 @@ forth definitions only
 : ct-irq ( -- >reset ) \ Try your very best to help tracing unhandled interrupt causes...
   cr
 #if-flag multi
+#[if] defined term
+  task !!single
+#else
   task !single
+#endif
 #endif
 #[if] defined unhandled
   unhandled
