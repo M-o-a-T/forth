@@ -94,24 +94,27 @@ forth definitions
 \         and may give random results for values that aren't return addresses.
 \         I assume that users can decide from context which ones are correct.
 
-: ct ( -- )
+: -ct ( rp -- )
   cr
   0
   begin ( i )
     dup 0 <# # # #> type space
-    dup rpick dup hex. dup .word-off-n
+    2dup cells + @ dup hex. dup .word-off-n
     ( i addr )
     addr>woff ?dup if
       nip lfa>nfa
       ( i name )
-      dup count s" quit" compare if cr 2drop exit then
-      dup count s" (go)" compare if cr drop exit then
-      count s" (task)" compare if cr drop exit then
+      dup count s" quit" compare if cr 2drop drop exit then
+      dup count s" (go)" compare if cr 2drop exit then
+      count s" (task)" compare if cr 2drop exit then
     then ( i )
     cr 1+
     dup 99 > if drop exit then
   again
+  drop
 ;
+
+: ct rp@ -ct ;
 
 \ SPDX-License-Identifier: GPL-3.0-only
 #ok depth 0=
