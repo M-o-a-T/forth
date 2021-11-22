@@ -781,11 +781,11 @@ task definitions
 : (go) ( xt -- does-not-return )
   =sched this state !
   dup
-  cr ." RUN: " dup hex. dup .word  cr this ?
+\ cr ." RUN:: " dup hex. dup .word  cr this ?
   catch
-  cr ." END:"
-  ?dup if dup . else -1 then
+  cr ." END::"
   this .. .word cr
+  ?dup if dup . else -1 then
   .abort
 
   begin
@@ -902,6 +902,7 @@ inttask class: \ytc
 task %cls definitions
 
 : (start) ( task ctx -- )
+\ ." TS:" dup hex. dup .word over hex. over .word over __ state @ . cr
   >r
   dup __ state @ =dead > abort" Task running"
   dup __ state @ =dead = if
