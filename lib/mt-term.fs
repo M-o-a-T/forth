@@ -149,9 +149,6 @@ task looped :task: outsend
       outsend continue
     then
   repeat
-#if-flag debug
-  dup  \ for the debug block below
-#endif
   outbuf !
 #if-flag debug
   1 outnum +!
