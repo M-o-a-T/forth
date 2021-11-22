@@ -185,7 +185,7 @@ d-list-head class: pool
 
 : _scan ( len pool -- len block )
   ['] \scan swap __ each
-  dup 0= abort" pool full"
+  dup 0= if .s over abort" pool full" then
 ;
 
 #endif
