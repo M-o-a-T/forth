@@ -131,7 +131,7 @@ task looped :task: outsend
 
 : qemit? ( -- flag )
   -1 ;
-: qemit ( char -- )
+: _qemit ( char -- )
   1 npr +!
   begin
     outthis @ task this ..
@@ -156,17 +156,21 @@ task looped :task: outsend
 #if-flag debug
   1 outnum +!
 #endif
+;
 
-#if-flag debug
+: _qend ( -- )
+\ end a message. You MUST call this after using _qemit directly.
+  0 outdly !
+  outq wait
+;
+
+: qemit ( char -- )
+  dup _qemit
   10 =  outnum @ 200 > or
   if
-    \ linefeed. Let someone else get a go.
-    \ This is debug only because we'll use the same code to send
-    \ data packets and they mustn't be broken just because they contain \x0A.
-    0 outdly !
-    outq wait
+    \ linefeed / text spew. Let someone else get a go.
+    _qend
   then
-#endif
 ;
 
 \ ***************
@@ -267,6 +271,8 @@ gpio also
 
 #if-flag debug
 #require tasks debug/multitask.fs
+
+;voc
 
 forth only definitions
 task also
