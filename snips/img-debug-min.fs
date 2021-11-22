@@ -8,7 +8,7 @@
 #include debug/alloc.fs
 #include debug/class.fs
 #include debug/crash.fs
-\ #include debug/crash2.fs
+#include debug/crash2.fs
 #include debug/linked-list.fs
 #include lib/disasm.fs
 #include lib/dump.fs
