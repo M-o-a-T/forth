@@ -9,6 +9,8 @@ import trio
 
 from mf.term import Terminal, Errors
 
+from distmqtt.client import open_mqttclient
+from distmqtt.codecs import MsgPackCodec
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # default args can be used to override when calling main() from an other script
@@ -32,6 +34,10 @@ from mf.term import Terminal, Errors
 @click.option("-a", "--ack", type=int, help="ASCII code for OK (default 4: ^D)", default=4)
 @click.option("-A", "--nak", type=int, help="ASCII code for error (default 3: ^C)", default=3)
 @click.option("-t", "--timeout", type=float, help="timeout for go-ahead and ack", default=0.2)
+@click.option("-u","--uri", type=str, default=None, help="URI of MQTT server")
+@click.option("-i","--topic-in", default='test/moat/in', help="Topic to send incoming messages to")
+@click.option("-o","--topic-out", default='test/moat/out', help="Topic to read outgoing messages from")
+
 @click.argument("port", nargs=-1)
 def cmd(**kw):
     """Command line tool, entry point"""
@@ -92,6 +98,9 @@ async def main(**kw):
     quiet = kw.pop("quiet",0)
     verbose = 1+verbose-quiet
     kw["verbose"] = verbose
+    uri = kw.pop("uri", None)
+    topic_in = kw.pop("topic_in", None)
+    topic_out = kw.pop("topic_out", None)
 
     if command:
         if kw.get("reset") or kw.get("inv_reset"):
@@ -123,7 +132,23 @@ async def main(**kw):
 
     try:
         term = Terminal(**kw)
-        await term.run()
+        if uri:
+            async with open_mqttclient() as C:
+                await C.connect(uri=uri)
+                async with C.subscription(topic_in, codec=MsgPackCodec()) as CH, \
+                        trio.open_nursery() as tg:
+
+                    async def msend(msg):
+                        logger.debug("IN: %r", msg)
+                        await CH.publish(topic=topic_out, message=dict(
+                            src=msg.src, dst=msg.dst, code=msg.code, data=msg.data,
+                            ))
+                    tg.start_soon(term.run, msend)
+                    async for msg in CH:
+                        logger.debug("OUT: %r", msg.data)
+                        await term.pkt_send(**msg.data)
+        else:
+            await term.run()
     except BaseException as exc:
         show_error(exc, verbose)
 

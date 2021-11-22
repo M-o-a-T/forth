@@ -27,6 +27,10 @@ from anyio_serial import Serial
 from click.exceptions import UsageError
 from .dummy import SendFile, StopSendFile, Data, SendBuffer
 from pathlib import Path
+try:
+    from moatbus.serial import SerBus
+except ImportError:
+    SerBus = None
 
 from serial.tools import hexlify_codec
 
@@ -185,6 +189,8 @@ class Terminal:
         self.reset = reset,inv_reset
         self.batch = batch
         self.files = exec
+        self.pkt_send = None
+        self.ser_bus = SerBus() if SerBus is not None else None
 
         if batch is None:
             batch = not sys.stdin.isatty()
@@ -219,8 +225,13 @@ class Terminal:
         else:
             return AsyncDummy(self.stream)
 
-    async def run(self):
+    async def pkt_send(self, msg):
+        data = self.ser_bus(msg)
+        await self.stream.send(data)
+
+    async def run(self, pkt_send=None):
         proc = None
+        self.pkt_send = pkt_send
         async with anyio.create_task_group() as tg:
             self.tg = tg
             if self.logfile is not None:
@@ -373,7 +384,18 @@ class Terminal:
                 data = await self.stream.receive(4096)
                 if data == b"":
                     raise anyio.EndOfStream()
-                await self.raw_in_w.send(data)
+                d = bytearray()
+                if self.ser_bus is not None:
+                    for c in data:
+                        if self.ser_bus.char_in(c):
+                            d.append(c)
+                        else:
+                            m = self.ser_bus.recv()
+                            if m is not None and self.pkt_send is not None:
+                                await self.pkt_send(m)
+                else:
+                    d = data
+                await self.raw_in_w.send(d)
         except (anyio.ClosedResourceError,anyio.EndOfStream):
             await self.raw_in_w.send(WithEnd)
 
