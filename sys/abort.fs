@@ -109,6 +109,9 @@ forth only definitions
 
 : abort-quit ( * -- does-not-return )
 \ hook for QUIT
+#if-flag debug
+  ct
+#endif
   aborthandler @ if
     \ if there's a handler, go to that instead
     -56 throw

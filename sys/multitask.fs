@@ -1014,6 +1014,7 @@ task definitions
   then
 #if-flag debug
   cr ." S END:" this .. .word
+  ct
 #endif
 
   \ subtasks always have a CATCH running
