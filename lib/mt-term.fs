@@ -163,7 +163,10 @@ task looped :task: outsend
 
 : qemit ( char -- )
   dup _qemit
-  10 =  outnum @ 200 > or
+  10 = 
+#if-flag debug
+  outnum @ 200 > or
+#endif
   if
     \ linefeed / text spew. Let someone else get a go.
     _qend
