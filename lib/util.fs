@@ -196,15 +196,21 @@ forth definitions
 \ #endif
 
 \ #require .idd debug/crash.fs
+#if-flag debug
+#include debug/voc.fs
+#endif
+
 \voc definitions also
 
 : !setup ( cvoc obj -- )
 \ given an object, run all SETUP methods in its class dirs, in order.
   over voc-context !
 
+\ #if-flag debug
+\ ." >SET:" dup hex. cr
+\ #endif
   >r 0 swap ( 0 cvoc )
   begin
-    \ dup .idd space
     dup vocnext
   ?dup 0= until
   ( 0 voc super … |R: obj )
@@ -213,11 +219,12 @@ forth definitions
   while
     s" setup" rot ??-wl
     ?dup if
-      \ dup .idd cr
+\ #if-flag debug
+\ r@ hex. dup .idd cr
+\ #endif
       lfa>xt r@ swap execute
     then
   repeat
-  \ cr
   rdrop
 ;
 
