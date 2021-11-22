@@ -4,3 +4,6 @@
 [submodule "svd/core"]
 	path = svd/core
 	url = git@github.com:ARM-software/CMSIS.git
+[submodule "scripts/mf/util"]
+	path = scripts/mf/util
+	url = git@github.com:smurfix/util-py

@@ -928,6 +928,15 @@ task %cls definitions
   then
 immediate ;
 
+: un-idle ( task -- )
+\ like continue but only if idle
+  dup __ state @ =idle = if
+    drop
+  else
+    =sched swap __ >state.i
+  then
+;
+
 : continue ( task -- )
   dup __ state @ =dead <= abort" Task not running"
   =sched swap __ >state.i
