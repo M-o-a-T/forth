@@ -483,6 +483,7 @@ root definitions
 #endif
 
 : seec ( addr -- ) \ Disassemble starting at this address
+  1 bic \ clip possible Thumb bit
   disasm-$ !
   base @ hex cr
 
