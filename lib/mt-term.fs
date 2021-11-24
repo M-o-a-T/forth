@@ -218,10 +218,8 @@ looped :task: inrecv
     then
     inbuf swap 0 do
       dup c@
-      dup ( buf ch ch ) hook-packet @ ?dup if execute else drop 0 then ( buf char flag )
+      ( buf byte ) hook-packet @ ?dup if execute else 1 then ( buf byte 1 | buf 0 )
       if
-        drop
-      else
         inq !
       then
       1+
@@ -237,8 +235,8 @@ looped :task: inrecv
   while
     USART1 DR @
     \ will drop input when there is no room left
-    dup ( ch ch ) hook-packet @ ?dup if execute else drop 0 then ( char flag )
-    if drop else
+    ( byte ) hook-packet @ ?dup if execute else 1 then ( byte flag )
+    if
       inq full? if drop else inq ! then
     then
   repeat

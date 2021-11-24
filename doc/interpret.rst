@@ -26,8 +26,9 @@ sends incoming characters to the queue.
 On Linux, the ``inrecv`` task reads from standard input.
 
 The input handler is responsible for passing the input stream through
-``hook-packet``, if that is set. The hook returns a flag that indicates to
-skip a byte instead of adding it to ``inq``.
+``hook-packet``, if that is set. The hook is called with the byte to be
+received and returns either the char plus ``True``, or ``False`` (with the
+byte eaten).
 
 Output
 ++++++
