@@ -783,27 +783,14 @@ task definitions
 
 : (cont) r> ;
 
-#if-flag debug
 : (go) ( xt -- does-not-return )
   =sched this state !
-  dup
 \ cr ." RUN:: " dup hex. dup .word  cr this ?
   catch
+#if-flag debug
   cr ." END::"
   this .. .word cr
-  ?dup if dup . else -1 then
-  .abort
-
-  begin
-    0 this abortcode !
-    =dead this newstate !
-    yield
-  again
-;
-#else
-: (go) ( xt -- does-not-return )
-  =sched this state !
-  dup catch
+#endif
   dup 0= if drop -1 then
   .abort
 
@@ -813,7 +800,6 @@ task definitions
     yield
   again
 ;
-#endif
 
 : (task)  ( -- go-continue )
 \ Main code for tasks
