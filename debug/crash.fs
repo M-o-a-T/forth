@@ -49,7 +49,7 @@ forth definitions only
   until
   drop rdrop
 
-  closest-d @ dup $1000 u> if drop 0 exit then
+  closest-d @ dup $100 u> if drop 0 exit then
   closest-found @ 
 ;
 
