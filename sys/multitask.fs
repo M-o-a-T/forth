@@ -657,15 +657,21 @@ task definitions
   this stackptr @ sp! rp! r>ctx \ restore pointers and registers
   eint
 
-  \ check new task for pending abort
-  this abortcode @ ?dup if  0 this abortcode !  throw then
-  \ ABORT may print, which may yield, which would crash
-
 #if-flag debug
   yield-trace @ if
-  ." >TASK:" this .. .word depth . rdepth . cr
+    ." >TASK:" this .. .word depth . rdepth . cr
   then
 #endif
+
+  \ check new task for pending abort
+  this abortcode @ ?dup if
+#if-flag debug
+    ." aborted" dup . cr
+#endif
+    0 this abortcode !  throw
+  then
+  \ ABORT may print, which may yield, which would crash
+
   \ The abort handler is responsible for clearing this, if warranted
   \ otherwise the abort will be re-thrown next time
 
